@@ -1,0 +1,18 @@
+{
+  "status": "fail",
+  "tests": [
+    {
+      "name": "FakeTest.Add_should_add_numbers",
+      "status": "pass"
+    },
+    {
+      "name": "FakeTest.Sub_should_subtract_numbers",
+      "status": "pass"
+    },
+    {
+      "name": "FakeTest.Mul_should_multiply_numbers",
+      "status": "fail",
+      "message": "Assert.Equal() Failure\nExpected: 5\nActual:   6"
+    }
+  ]
+}

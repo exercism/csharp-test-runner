@@ -1,0 +1,17 @@
+{
+  "status": "pass",
+  "tests": [
+    {
+      "name": "FakeTest.Add_should_add_numbers",
+      "status": "pass"
+    },
+    {
+      "name": "FakeTest.Sub_should_subtract_numbers",
+      "status": "pass"
+    },
+    {
+      "name": "FakeTest.Mul_should_multiply_numbers",
+      "status": "pass"
+    }
+  ]
+}

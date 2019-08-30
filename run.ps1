@@ -5,27 +5,143 @@
     Run a solution's tests.
 .PARAMETER Exercise
     The slug of the exercise which tests to run.
-.PARAMETER Directory
+.PARAMETER InputDirectory
     The directory in which the solution can be found.
+.PARAMETER OutputDirectory
+    The directory to which the results will be written.
 .EXAMPLE
     The example below will run the tests of the two-fer solution in the "~/exercism/two-fer" directory
-    PS C:\> ./run.ps1 two-fer ~/exercism/two-fer
+    and write the results to the "~/exercism/results/" directory
+    PS C:\> ./run.ps1 two-fer ~/exercism/two-fer ~/exercism/results/
 #>
 
 param (
     [Parameter(Position = 0, Mandatory = $true)]
-    [string]$Exercise, 
+    [string]$Exercise,
     
     [Parameter(Position = 1, Mandatory = $true)]
-    [string]$Directory
+    [string]$InputDirectory,
+    
+    [Parameter(Position = 2, Mandatory = $true)]
+    [string]$OutputDirectory
 )
 
 $ErrorActionPreference = 'Stop'
 
-Get-ChildItem -Path $Directory -Include "*Test.cs" -Recurse | ForEach-Object {
-    (Get-Content $_.FullName) -replace "Skip = ""Remove to run test""", "" | Set-Content $_.FullName
+function Get-Exercise-Name {
+    (Get-Culture).TextInfo.ToTitleCase($Exercise).Replace("-", "")
 }
 
-dotnet test $Directory
+$exerciseName = Get-Exercise-Name
+
+$testFile = Join-Path $InputDirectory "${exerciseName}Test.cs"
+$resultsTrxFile = Join-Path $InputDirectory "TestResults" "results.trx"
+$resultsJsonFile = Join-Path $OutputDirectory "results.json"
+
+filter Unskip-All-Tests {
+    $_ -Replace "Skip = ""Remove to run test""", ""
+}
+
+function Enable-All-Tests {
+    Get-Content $testFile | Unskip-All-Tests | Set-Content $testFile
+}
+
+filter Sanitize-Test-Output {
+    ($_ -Replace "\[$InputDirectory.*?\]", "").Trim()
+}
+
+function Run-All-Tests {
+    Remove-Item $resultsTrxFile -ErrorAction Ignore
+
+    $logger = "trx;LogFileName=results.trx"
+    dotnet test $InputDirectory --logger:$logger | Out-String | Sanitize-Test-Output
+}
+
+function Get-Tests-Ordered-By-Line-Number {
+    $testFileContents = Get-Content $testFile
+    $testMethodRegex = "public.*?([\w_]+)\("
+    $testMethodMatches = [regex]::Matches($testFileContents, $testMethodRegex)
+
+    $orderedTestMethods = @()
+
+    foreach ($captures in $testMethodMatches.Captures) {
+        $testMethodName = $captures.Groups[1].Value
+        $fullMethodName = "${exerciseName}Test.${testMethodName}";
+        $orderedTestMethods += $fullMethodName
+    }
+
+    $orderedTestMethods
+}
+
+function Sort-Unit-Test-Results-By-Line-Number ($UnitTestResults) {
+    $orderedTestMethods = Get-Tests-Ordered-By-Line-Number
+    $UnitTestResults | Sort-Object { $orderedTestMethods.IndexOf($_.testName) }
+}
+
+function Get-Unit-Test-Results {
+    [xml]$resultsTrxFileXml = Get-Content $resultsTrxFile
+    $unitTestResults = $resultsTrxFileXml.TestRun.Results.UnitTestResult
+    Sort-Unit-Test-Results-By-Line-Number $unitTestResults
+}
+
+function Create-Test-Result-For-Passed-Test ($UnitTestResult) {
+    [pscustomobject]@{
+        name   = $UnitTestResult.testName;
+        status = "pass";
+    }
+}
+
+function Create-Test-Result-For-Failed-Test ($UnitTestResult) {
+    [pscustomobject]@{
+        name    = $UnitTestResult.testName;
+        status  = "fail";
+        message = $UnitTestResult.Output.ErrorInfo.Message;
+    }
+}
+
+function Create-Test-Results-For-Successful-Build {
+    $status = "pass"
+    $tests = @()
+
+    foreach ($unitTestResult in Get-Unit-Test-Results) {
+        if ($unitTestResult.outcome -eq "Passed") {
+            $tests += Create-Test-Result-For-Passed-Test $unitTestResult
+        }
+        elseif ($unitTestResult.outcome -eq "Failed") {
+            $status = "fail"
+            $tests += Create-Test-Result-For-Failed-Test $unitTestResult
+        }
+    }
+
+    [pscustomobject]@{
+        status = $status;
+        tests  = $tests;
+    }
+}
+
+function Create-Test-Results-For-Failed-Build ([string]$TestOutput) {
+    [pscustomobject]@{
+        status  = "error";
+        message = $TestOutput
+        tests   = @();
+    }
+}
+
+function Create-Test-Results ([string]$TestOutput) {
+    if (Test-Path $resultsTrxFile) {
+        Create-Test-Results-For-Successful-Build
+    }
+    else {
+        Create-Test-Results-For-Failed-Build $TestOutput
+    }
+}
+
+function Write-Test-Results-To-File ([string]$TestOutput) {
+    Create-Test-Results $TestOutput | ConvertTo-Json | Set-Content -Path $resultsJsonFile
+}
+
+Enable-All-Tests
+$testOutput = Run-All-Tests
+Write-Test-Results-To-File $testOutput
 
 exit $LastExitCode
