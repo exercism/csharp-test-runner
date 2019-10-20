@@ -43,7 +43,8 @@ filter Unskip-All-Tests {
 }
 
 function Enable-All-Tests {
-    Get-Content $testFile | Unskip-All-Tests | Set-Content $testFile
+    $content = Get-Content $testFile | Unskip-All-Tests
+    $content | Set-Content $testFile
 }
 
 filter Sanitize-Test-Output {
