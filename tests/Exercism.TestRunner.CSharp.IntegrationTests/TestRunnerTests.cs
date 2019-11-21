@@ -29,6 +29,18 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         public void SolutionWithSingleTestThatFails() =>
             AssertSolutionHasExpectedResults("SingleTestThatFails");
 
+        [Fact]
+        public void NetCoreApp2_1() =>
+            AssertSolutionHasExpectedResults("NetCoreApp2.1");
+
+        [Fact]
+        public void NetCoreApp2_2() =>
+            AssertSolutionHasExpectedResults("NetCoreApp2.2");
+
+        [Fact]
+        public void NetCoreApp3_0() =>
+            AssertSolutionHasExpectedResults("NetCoreApp3.0");
+
         private static void AssertSolutionHasExpectedResults(string directory)
         {
             var testSolution = CreateTestSolutionFromDirectory(directory);
