@@ -6,27 +6,31 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
     public class TestRunnerTests
     {
         [Fact]
-        public void SolutionWithCompileError() =>
-            AssertSolutionHasExpectedResults("CompileError");
+        public void SingleCompileError() =>
+            AssertSolutionHasExpectedResults("SingleCompileError");
 
         [Fact]
-        public void SolutionWithMultipleTestsThatPass() =>
+        public void MultipleCompileErrors() =>
+            AssertSolutionHasExpectedResults("MultipleCompileErrors");
+
+        [Fact]
+        public void MultipleTestsThatPass() =>
             AssertSolutionHasExpectedResults("MultipleTestsWithAllPasses");
 
         [Fact]
-        public void SolutionWithMultipleTestsAndSingleFail() =>
+        public void MultipleTestsAndSingleFail() =>
             AssertSolutionHasExpectedResults("MultipleTestsWithSingleFail");
 
         [Fact]
-        public void SolutionWithMultipleTestsAndMultipleFails() =>
+        public void MultipleTestsAndMultipleFails() =>
             AssertSolutionHasExpectedResults("MultipleTestsWithMultipleFails");
 
         [Fact]
-        public void SolutionWithSingleTestThatPasses() =>
+        public void SingleTestThatPasses() =>
             AssertSolutionHasExpectedResults("SingleTestThatPasses");
 
         [Fact]
-        public void SolutionWithSingleTestThatFails() =>
+        public void SingleTestThatFails() =>
             AssertSolutionHasExpectedResults("SingleTestThatFails");
 
         [Fact]

@@ -1,5 +1,0 @@
-{
-  "status": "error",
-  "message": "FakeTest.cs(7,30): error CS0117: 'Fake' does not contain a definition for 'Add'",
-  "tests": []
-}

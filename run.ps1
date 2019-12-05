@@ -48,7 +48,10 @@ function Enable-All-Tests {
 }
 
 filter Sanitize-Test-Output {
-    ($_ -Replace "\[$InputDirectory.*?\]", "").Trim()
+    $sanitized = $_ -Replace "\s*\[$InputDirectory.*?\]", ""
+    $sanitized = $sanitized -Replace "^.+?\.cs\(\d+,\d+\):\s*", ""
+    $sanitized = $sanitized -Replace "\r?\n.+?\.cs\(\d+,\d+\):\s*", "`n"
+    $sanitized.Trim()
 }
 
 function Run-All-Tests {
