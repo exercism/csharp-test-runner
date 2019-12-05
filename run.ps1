@@ -95,11 +95,15 @@ function Create-Test-Result-For-Passed-Test ($UnitTestResult) {
     }
 }
 
+filter Sanitize-Error-Message {
+    $_ -Replace "System.NotImplementedException\s*:\s*", ""
+}
+
 function Create-Test-Result-For-Failed-Test ($UnitTestResult) {
     [pscustomobject]@{
         name    = $UnitTestResult.testName;
         status  = "fail";
-        message = $UnitTestResult.Output.ErrorInfo.Message;
+        message = $UnitTestResult.Output.ErrorInfo.Message | Sanitize-Error-Message;
     }
 }
 
