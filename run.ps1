@@ -35,7 +35,7 @@ function Get-Exercise-Name {
 $exerciseName = Get-Exercise-Name
 
 $testFile = Join-Path $InputDirectory "${exerciseName}Test.cs"
-$resultsTrxFile = Join-Path $InputDirectory "TestResults" "results.trx"
+$resultsTrxFile = Join-Path $OutputDirectory "results.trx"
 $resultsJsonFile = Join-Path $OutputDirectory "results.json"
 
 filter Unskip-All-Tests {
@@ -57,7 +57,7 @@ filter Sanitize-Test-Output {
 function Run-All-Tests {
     Remove-Item $resultsTrxFile -ErrorAction Ignore
 
-    $logger = "trx;LogFileName=results.trx"
+    $logger = "trx;LogFileName=${resultsTrxFile}"
     dotnet test $InputDirectory --logger:$logger | Out-String | Sanitize-Test-Output
 }
 
