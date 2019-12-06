@@ -1,4 +1,9 @@
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 using CommandLine;
+using Humanizer;
 using Serilog;
 
 namespace Exercism.TestRunner.CSharp
@@ -10,19 +15,56 @@ namespace Exercism.TestRunner.CSharp
             Logging.Configure();
 
             Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(CreateRepresentation);
+                .WithParsed(CreateTestResults);
         }
 
-        private static void CreateRepresentation(Options options)
+        private static void CreateTestResults(Options options)
         {
-            Log.Information("Creating representation for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
+            Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
-//            var solution = SolutionParser.Parse(options);
-//            var (representation, mapping) = SolutionRepresenter.Represent(solution);
+            var logResultsFilePath = Path.Join(options.OutputDirectory, "results.trx");
+            var resultsFilePath = Path.Join(options.OutputDirectory, "results.json");
+            
+            
 
-            MappingWriter.WriteToFile(options);
+//            var processStartInfo = new ProcessStartInfo("dotnet", $"test {options.InputDirectory} --logger:\"trx;LogFileName={logResultsFilePath}\"");
+//            processStartInfo.RedirectStandardOutput = true;
+//            var process = Process.Start(processStartInfo);
+//            process.WaitForExit();
 
-            Log.Information("Created representation for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
+            
+            
+//            var xDocument = XDocument.Load(File.OpenRead(logResultsFilePath));
+
+//
+//            var xmlSerializer = new XmlSerializer(typeof(XmlTestRun));
+//            var testRun = (XmlTestRun)xmlSerializer.Deserialize(File.OpenRead(logResultsFilePath));
+//
+//            var testResults = testRun.Results.UnitTestResult.Select(x => new TestResult { Status = ParseStatus(x.Outcome), Name = x.TestName, Message = x.Output.ErrorInfo.Message }).ToArray();
+//            var status = testResults.All(t => t.Status == TestStatus.Pass)
+//                ? TestStatus.Pass
+//                : testResults.Any(t => t.Status == TestStatus.Fail)
+//                    ? TestStatus.Fail
+//                    : TestStatus.Error;
+//            var testsResult = new TestRun { Tests = testResults, Status = status };
+//
+//            var jsonSerializerOptions = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+//            jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+//            var serialize = JsonSerializer.Serialize(testResults, jsonSerializerOptions);
+//            
+//            File.WriteAllText(resultsFilePath, serialize);
+
+            var name = options.Slug.Dehumanize().Pascalize();
+
+            Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
         }
+
+        private static TestStatus ParseStatus(string argOutcome) =>
+            argOutcome switch
+            {
+                "Failed" => TestStatus.Fail,
+                "Passed" => TestStatus.Pass,
+                _ => TestStatus.Error
+            };
     }
 }

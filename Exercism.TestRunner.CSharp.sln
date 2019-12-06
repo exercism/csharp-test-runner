@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exercism.TestRunner.CSharp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exercism.TestRunner.CSharp", "src\Exercism.TestRunner.CSharp\Exercism.TestRunner.CSharp.csproj", "{76037C86-908F-4C18-BDBE-1C1CAFF0CB65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exercism.TestRunner.CSharp.Logger", "src\Exercism.TestRunner.CSharp.Logger\Exercism.TestRunner.CSharp.Logger.csproj", "{6A38C19F-2AD0-4E31-9F54-B300651B06AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{76037C86-908F-4C18-BDBE-1C1CAFF0CB65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76037C86-908F-4C18-BDBE-1C1CAFF0CB65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76037C86-908F-4C18-BDBE-1C1CAFF0CB65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A38C19F-2AD0-4E31-9F54-B300651B06AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A38C19F-2AD0-4E31-9F54-B300651B06AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A38C19F-2AD0-4E31-9F54-B300651B06AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A38C19F-2AD0-4E31-9F54-B300651B06AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

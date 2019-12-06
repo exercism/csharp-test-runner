@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AssemblyName>Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger</AssemblyName>
+        <RootNamespace>Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" />
+        <PackageReference Include="Humanizer.Core" Version="2.7.9" />
+        <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    </ItemGroup>
+
+</Project>
