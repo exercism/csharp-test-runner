@@ -5,7 +5,7 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class ProcessRunner
     {
-        public static string Run(string fileName, string arguments)
+        public static (string output, int exitCode) Run(string fileName, string arguments)
         {
             var processStartInfo = new ProcessStartInfo(fileName, arguments) { RedirectStandardOutput = true };
             var process = Process.Start(processStartInfo);
@@ -14,7 +14,7 @@ namespace Exercism.TestRunner.CSharp
             
             process.WaitForExit();
 
-            return process.StandardOutput.ReadToEnd();
+            return (output: process.StandardOutput.ReadToEnd(), exitCode: process.ExitCode);
         }
     }
 }

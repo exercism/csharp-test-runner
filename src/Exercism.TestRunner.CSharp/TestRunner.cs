@@ -9,17 +9,20 @@ namespace Exercism.TestRunner.CSharp
         public static void Run(Options options)
         {
             var testRunnerOutput = RunDotnetTestWithExercismLogger(options);
-
-            var resultsFilePath = GetResultsFilePath(options);
-            if (File.Exists(resultsFilePath))
+            if (testRunnerOutput.Success)
                 return;
 
             var testRun = new TestRun(testRunnerOutput.Normalized, TestStatus.Error, Array.Empty<TestResult>());
+
+            var resultsFilePath = GetResultsFilePath(options);
             TestRunWriter.WriteToFile(resultsFilePath, testRun);
         }
 
-        private static TestRunnerOutput RunDotnetTestWithExercismLogger(Options options) =>
-            new TestRunnerOutput(ProcessRunner.Run("dotnet", GetDotnetTestArguments(options)));
+        private static TestRunnerOutput RunDotnetTestWithExercismLogger(Options options)
+        {
+            var (output, exitCode) = ProcessRunner.Run("dotnet", GetDotnetTestArguments(options));
+            return new TestRunnerOutput(output, exitCode == 0);
+        }
 
         private static string GetDotnetTestArguments(Options options) =>
             $"test {options.InputDirectory} --logger:exercism;ResultsDirectoryName={options.OutputDirectory} --test-adapter-path:.";
