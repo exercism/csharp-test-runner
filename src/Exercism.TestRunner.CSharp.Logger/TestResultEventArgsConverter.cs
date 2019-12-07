@@ -7,13 +7,8 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
 {
     internal static class TestResultEventArgsConverter
     {
-        public static TestRun ToTestRun(IReadOnlyCollection<TestResultEventArgs> testResultEvents)
-        {
-            var testResults = ToTestResults(testResultEvents);
-            var testStatus = ToTestStatus(testResultEvents);
-            
-            return new TestRun(message: null, testStatus, testResults);
-        }
+        public static TestRun ToTestRun(IReadOnlyCollection<TestResultEventArgs> testResultEvents) =>
+            new TestRun(message: null, ToTestStatus(testResultEvents), ToTestResults(testResultEvents));
 
         private static TestResult[] ToTestResults(IEnumerable<TestResultEventArgs> testResultEvents) =>
             testResultEvents.Select(ToTestResult).ToArray();

@@ -5,7 +5,12 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
-{   
+{
+    /// <summary>
+    /// This logger can be called using:
+    /// 
+    /// dotnet test --logger:exercism;ResultsDirectoryName=[results-directory] --test-adapter-path:[adapter-directory]
+    /// </summary>
     [FriendlyName(FriendlyName)]
     [ExtensionUri(ExtensionUri)]
     public class ExercismTestLogger : ITestLoggerWithParameters
@@ -24,9 +29,12 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
             if (parameters.Count == 0)
                 throw new ArgumentException("No default parameters added", nameof(parameters));
             
-            var testRunDirectory = parameters.GetValueOrDefault("ResultsDirectoryName", parameters[DefaultLoggerParameterNames.TestRunDirectory]);
+            var testRunDirectory = GetTestResultsDirectory(parameters);
             Initialize(events, testRunDirectory);
         }
+
+        private static string GetTestResultsDirectory(IReadOnlyDictionary<string, string> parameters) =>
+            parameters.GetValueOrDefault("ResultsDirectoryName", parameters[DefaultLoggerParameterNames.TestRunDirectory]);
 
         public void Initialize(TestLoggerEvents events, string testRunDirectory)
         {
@@ -48,8 +56,6 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
 
         private void TestRunCompleteHandler(object sender, TestRunCompleteEventArgs e)
         {
-            // dotnet test --logger:exercism;ResultsDirectoryName=D:\Users\Erik\Downloads\SingleTestThatPasses --test-adapter-path:C:\Programmeren\exercism\csharp-test-runner\src\Exercism.TestRunner.CSharp.Logger\bin\Debug\netstandard2.0
-
             var testRun = TestResultEventArgsConverter.ToTestRun(_testResultEvents);
             TestRunWriter.WriteToFile(_options, testRun);
         }
