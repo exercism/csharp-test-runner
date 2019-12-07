@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -25,8 +24,8 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
             if (parameters.Count == 0)
                 throw new ArgumentException("No default parameters added", nameof(parameters));
             
-            // TODO: check results directory name for nul
-            Initialize(events, parameters["ResultsDirectoryName"]);
+            var testRunDirectory = parameters.GetValueOrDefault("ResultsDirectoryName", parameters[DefaultLoggerParameterNames.TestRunDirectory]);
+            Initialize(events, testRunDirectory);
         }
 
         public void Initialize(TestLoggerEvents events, string testRunDirectory)
@@ -49,7 +48,7 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
 
         private void TestRunCompleteHandler(object sender, TestRunCompleteEventArgs e)
         {
-            // dotnet test --logger:exercism --test-adapter-path:C:\Programmeren\exercism\ExercismLogger\src\Exercism.TestRunner.CSharp.Logger\bin\Debug\netstandard1.5
+            // dotnet test --logger:exercism;ResultsDirectoryName=D:\Users\Erik\Downloads\SingleTestThatPasses --test-adapter-path:C:\Programmeren\exercism\csharp-test-runner\src\Exercism.TestRunner.CSharp.Logger\bin\Debug\netstandard2.0
 
             var testRun = TestResultEventArgsConverter.ToTestRun(_testResultEvents);
             TestRunWriter.WriteToFile(_options, testRun);

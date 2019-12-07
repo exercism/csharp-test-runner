@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text.Json;
-using Humanizer;
 
 namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
 {
@@ -8,15 +7,20 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
     {
         public static void WriteToFile(Options options, TestRun solutionAnalysis)
         {
-            using (var fileStream = File.Create(GetAnalysisFilePath(options)))
-            using (var jsonTextWriter = new Utf8JsonWriter(fileStream))
-            {
-                jsonTextWriter.WriteStartObject();
-                jsonTextWriter.WriteStatus(solutionAnalysis.Status);
-                jsonTextWriter.WriteMessage(solutionAnalysis.Message);
-                jsonTextWriter.WriteTests(solutionAnalysis.Tests);
-                jsonTextWriter.WriteEndObject();
-            }
+            var analysisFilePath = GetAnalysisFilePath(options);
+            var analysisFileDirectory = Path.GetDirectoryName(analysisFilePath);
+
+            if (!Directory.Exists(analysisFileDirectory))
+                Directory.CreateDirectory(analysisFileDirectory);
+
+            using var fileStream = File.Create(analysisFilePath);
+            using var jsonTextWriter = new Utf8JsonWriter(fileStream, new JsonWriterOptions { Indented = true });
+            jsonTextWriter.WriteStartObject();
+            jsonTextWriter.WriteStatus(solutionAnalysis.Status);
+            jsonTextWriter.WriteMessage(solutionAnalysis.Message);
+            jsonTextWriter.WriteTests(solutionAnalysis.Tests);
+            jsonTextWriter.WriteEndObject();
+            jsonTextWriter.Flush();
         }
 
         private static string GetAnalysisFilePath(Options options) =>
@@ -26,7 +30,7 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
             jsonTextWriter.WriteString("message", message);
 
         private static void WriteStatus(this Utf8JsonWriter jsonTextWriter, TestStatus status) =>
-            jsonTextWriter.WriteString("status", status.ToString().Underscore());
+            jsonTextWriter.WriteString("status", status.ToString().ToLower());
 
         private static void WriteTests(this Utf8JsonWriter jsonTextWriter, TestResult[] tests)
         {

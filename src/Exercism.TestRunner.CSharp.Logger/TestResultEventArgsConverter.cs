@@ -21,18 +21,13 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
         private static TestResult ToTestResult(TestResultEventArgs testResultEvent) =>
             new TestResult(testResultEvent.Result.DisplayName, testResultEvent.Result.ErrorMessage, ToTestStatus(testResultEvent.Result.Outcome));
 
-        private static TestStatus ToTestStatus(TestOutcome testOutcome)
-        {
-            switch (testOutcome)
+        private static TestStatus ToTestStatus(TestOutcome testOutcome) =>
+            testOutcome switch
             {
-                case TestOutcome.Passed:
-                    return TestStatus.Pass;
-                case TestOutcome.Failed:
-                    return TestStatus.Fail;
-                default:
-                    return TestStatus.Error;
-            }
-        }
+                TestOutcome.Passed => TestStatus.Pass,
+                TestOutcome.Failed => TestStatus.Fail,
+                _ => TestStatus.Error
+            };
 
         private static TestStatus ToTestStatus(IReadOnlyCollection<TestResultEventArgs> testResultEvents)
         {

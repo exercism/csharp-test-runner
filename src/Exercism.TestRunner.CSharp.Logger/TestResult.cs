@@ -6,12 +6,7 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
         public string Message { get; }
         public TestStatus Status { get; }
 
-        public TestResult(string name, string message, TestStatus status)
-        {
-            Name = name;
-            Message = message;
-            Status = status;
-//            (Name, Message, Status) = (name, message, status);
-        }
+        public TestResult(string name, string message, TestStatus status) =>
+            (Name, Message, Status) = (name, message, status);
     }
 }
