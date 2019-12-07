@@ -1,17 +1,15 @@
-using System.Diagnostics;
-
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
     internal static class TestSolutionRunner
     {
         public static TestRun Run(TestSolution testSolution)
         {
-            RunSolutionTestScript(testSolution);
+            RunTestRunner(testSolution);
             return CreateTestRun(testSolution);
         }
 
-        private static void RunSolutionTestScript(TestSolution testSolution) =>
-            Process.Start("pwsh", $"{DirectoryHelper.FindFileInTree("run.ps1")} {testSolution.Slug} {testSolution.Directory} {testSolution.Directory}")?.WaitForExit();
+        private static void RunTestRunner(TestSolution testSolution) =>
+            Program.Main(new[] { testSolution.Slug, testSolution.Directory, testSolution.Directory });
 
         private static TestRun CreateTestRun(TestSolution solution)
         {

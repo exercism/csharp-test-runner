@@ -3,17 +3,16 @@ using System.Text.Json;
 
 namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
 {
-    internal static class TestRunWriter
+    public static class TestRunWriter
     {
-        public static void WriteToFile(Options options, TestRun solutionAnalysis)
+        public static void WriteToFile(string filePath, TestRun solutionAnalysis)
         {
-            var analysisFilePath = GetAnalysisFilePath(options);
-            var analysisFileDirectory = Path.GetDirectoryName(analysisFilePath);
+            var directoryPath = Path.GetDirectoryName(filePath);
 
-            if (!Directory.Exists(analysisFileDirectory))
-                Directory.CreateDirectory(analysisFileDirectory);
+            if (!Directory.Exists(directoryPath))
+                Directory.CreateDirectory(directoryPath);
 
-            using var fileStream = File.Create(analysisFilePath);
+            using var fileStream = File.Create(filePath);
             using var jsonTextWriter = new Utf8JsonWriter(fileStream, new JsonWriterOptions { Indented = true });
             jsonTextWriter.WriteStartObject();
             jsonTextWriter.WriteStatus(solutionAnalysis.Status);
@@ -23,11 +22,13 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
             jsonTextWriter.Flush();
         }
 
-        private static string GetAnalysisFilePath(Options options) =>
-            Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
+        private static void WriteMessage(this Utf8JsonWriter jsonTextWriter, string message)
+        {
+            if (message == null)
+                return;
 
-        private static void WriteMessage(this Utf8JsonWriter jsonTextWriter, string message) =>
             jsonTextWriter.WriteString("message", message);
+        }
 
         private static void WriteStatus(this Utf8JsonWriter jsonTextWriter, TestStatus status) =>
             jsonTextWriter.WriteString("status", status.ToString().ToLower());
@@ -52,7 +53,12 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
             jsonTextWriter.WriteEndObject();
         }
 
-        private static void WriteName(this Utf8JsonWriter jsonTextWriter, string name) =>
+        private static void WriteName(this Utf8JsonWriter jsonTextWriter, string name)
+        {
+            if (name == null)
+                return;
+
             jsonTextWriter.WriteString("name", name);
+        }
     }
 }
