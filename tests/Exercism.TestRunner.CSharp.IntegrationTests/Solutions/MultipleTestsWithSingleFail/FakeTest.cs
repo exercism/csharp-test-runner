@@ -1,11 +1,8 @@
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.Sdk;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit.Abstractions;
 
-//[TestCaseOrderer("SequentialTestCollectionOrderer", "Exercism.TestRunner.CSharp")]
 public class FakeTest
 {
     [Fact]
@@ -19,10 +16,4 @@ public class FakeTest
     [Fact]
     public void Mul_should_multiply_numbers() =>
         Assert.Equal(5, Fake.Mul(2, 3));
-}
-
-public class SequentialTestsOrderer : ITestCaseOrderer
-{
-    public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases) where TTestCase : ITestCase =>
-        testCases.ToList();
 }

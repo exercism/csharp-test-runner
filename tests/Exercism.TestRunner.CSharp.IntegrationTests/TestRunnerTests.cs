@@ -1,12 +1,11 @@
 using System;
 using System.IO;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
     public class TestRunnerTests
-    {   
+    {
         [Fact]
         public void SingleCompileError() =>
             AssertSolutionHasExpectedResults("SingleCompileError");
