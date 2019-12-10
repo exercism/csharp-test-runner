@@ -9,7 +9,7 @@ namespace Exercism.TestRunner.CSharp
     {
         public static bool HasErrors(this Compilation compilation) =>
             compilation.GetDiagnostics().Any(IsError);
-        
+
         public static Diagnostic[] GetErrors(this Compilation compilation) =>
             compilation.GetDiagnostics().Where(IsError).ToArray();
 

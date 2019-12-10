@@ -26,7 +26,7 @@ namespace Exercism.TestRunner.CSharp
 
             ExecutionMessageSink.Execution.TestFailedEvent += args =>
                 unorderedTestResults.Add(TestResult.FromFailed(args.Message));
-            
+
             ExecutionMessageSink.Execution.TestPassedEvent += args =>
                 unorderedTestResults.Add(TestResult.FromPassed(args.Message));
 
@@ -70,7 +70,7 @@ namespace Exercism.TestRunner.CSharp
         private static Compilation UnskipTests(this Compilation compilation)
         {
             var enableTestsRewriter = new UnskipTestsRewriter();
-            
+
             foreach (var syntaxTree in compilation.SyntaxTrees)
                 compilation = compilation.ReplaceSyntaxTree(
                     syntaxTree,
@@ -85,7 +85,7 @@ namespace Exercism.TestRunner.CSharp
             {
                 if (IsSkipAttributeArgument(node))
                     return null;
-            
+
                 return base.VisitAttributeArgument(node);
             }
 

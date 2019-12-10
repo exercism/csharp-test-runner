@@ -15,7 +15,7 @@ namespace Exercism.TestRunner.CSharp
 
         public static TestRun FromErrors(string errors) =>
             new TestRun(errors, TestStatus.Error, Array.Empty<TestResult>());
-        
+
         public static TestRun FromTests(TestResult[] tests) =>
             new TestRun(null, ToTestStatus(tests), tests);
 

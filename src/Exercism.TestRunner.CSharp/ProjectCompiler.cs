@@ -16,7 +16,7 @@ namespace Exercism.TestRunner.CSharp
 
             using var workspace = new AdhocWorkspace();
             var project = analyzer.AddToWorkspace(workspace);
-            
+
             // TODO: report issue with Buildalyzer on Mac not detecting DLL output type
             project = project.WithCompilationOptions(
                 project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
