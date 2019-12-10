@@ -1,4 +1,5 @@
 using Xunit;
+using Xunit.Abstractions;
 
 public static class Fake
 {

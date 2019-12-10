@@ -22,13 +22,8 @@ namespace Exercism.TestRunner.CSharp
         private static string GetResultsFilePath(Options options) =>
             Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
 
-        private static void WriteMessage(this Utf8JsonWriter jsonTextWriter, string message)
-        {
-            if (message == null)
-                return;
-
-            jsonTextWriter.WriteString("message", message);
-        }
+        private static void WriteMessage(this Utf8JsonWriter jsonTextWriter, string message) =>
+            jsonTextWriter.WriteOptionalString("message", message);
 
         private static void WriteStatus(this Utf8JsonWriter jsonTextWriter, TestStatus status) =>
             jsonTextWriter.WriteString("status", status.ToString().ToLower());
@@ -50,15 +45,22 @@ namespace Exercism.TestRunner.CSharp
             jsonTextWriter.WriteName(test.Name);
             jsonTextWriter.WriteStatus(test.Status);
             jsonTextWriter.WriteMessage(test.Message);
+            jsonTextWriter.WriteOutput(test.Output);
             jsonTextWriter.WriteEndObject();
         }
 
-        private static void WriteName(this Utf8JsonWriter jsonTextWriter, string name)
+        private static void WriteName(this Utf8JsonWriter jsonTextWriter, string name) =>
+            jsonTextWriter.WriteOptionalString("name", name);
+
+        private static void WriteOutput(this Utf8JsonWriter jsonTextWriter, string output) =>
+            jsonTextWriter.WriteOptionalString("output", output);
+
+        private static void WriteOptionalString(this Utf8JsonWriter jsonTextWriter, string propertyName, string value)
         {
-            if (name == null)
+            if (string.IsNullOrWhiteSpace(value))
                 return;
 
-            jsonTextWriter.WriteString("name", name);
+            jsonTextWriter.WriteString(propertyName, StringExtensions.Normalize(value));
         }
     }
 }

@@ -1,0 +1,20 @@
+{
+  "status": "fail",
+  "tests": [
+    {
+      "name": "FakeTest.Add_should_add_numbers",
+      "status": "pass",
+      "output": "String without params output"
+    },
+    {
+      "name": "FakeTest.Sub_should_subtract_numbers",
+      "status": "pass"
+    },
+    {
+      "name": "FakeTest.Mul_should_multiply_numbers",
+      "status": "fail",
+      "message": "Assert.Equal() Failure\nExpected: 7\nActual:   6",
+      "output": "String with params output: 2, True"
+    }
+  ]
+}

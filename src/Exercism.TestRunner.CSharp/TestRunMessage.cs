@@ -7,15 +7,12 @@ namespace Exercism.TestRunner.CSharp
     internal static class TestRunMessage
     {
         public static string FromMessages(IEnumerable<string> messages) =>
-            Combine(messages);
+            messages.Join();
 
         public static string FromErrors(Diagnostic[] errors) =>
-            Combine(errors.Select(FromError));
+            errors.Select(FromError).Join();
 
         private static string FromError(Diagnostic error) =>
             error.GetMessage();
-        
-        private static string Combine(IEnumerable<string> messages) =>
-            string.Join("\n", messages).Replace("\r\n", "\n");
     }
 }

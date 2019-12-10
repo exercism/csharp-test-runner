@@ -3,6 +3,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
@@ -75,6 +77,20 @@ namespace Exercism.TestRunner.CSharp
                     syntaxTree.WithRootAndOptions(enableTestsRewriter.Visit(syntaxTree.GetRoot()), syntaxTree.Options));
 
             return compilation;
+        }
+
+        private class UnskipTestsRewriter : CSharpSyntaxRewriter
+        {
+            public override SyntaxNode VisitAttributeArgument(AttributeArgumentSyntax node)
+            {
+                if (IsSkipAttributeArgument(node))
+                    return null;
+            
+                return base.VisitAttributeArgument(node);
+            }
+
+            private static bool IsSkipAttributeArgument(AttributeArgumentSyntax node) =>
+                node.NameEquals?.Name.ToString() == "Skip";
         }
     }
 }

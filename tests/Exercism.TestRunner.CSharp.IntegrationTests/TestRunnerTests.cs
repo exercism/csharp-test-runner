@@ -1,11 +1,12 @@
+using System;
 using System.IO;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
-    [Xunit.TestCaseOrderer("SequentialTestCollectionOrderer", "Exercism.TestRunner.CSharp")]
     public class TestRunnerTests
-    {
+    {   
         [Fact]
         public void SingleCompileError() =>
             AssertSolutionHasExpectedResults("SingleCompileError");
@@ -25,6 +26,10 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         [Fact]
         public void MultipleTestsAndMultipleFails() =>
             AssertSolutionHasExpectedResults("MultipleTestsWithMultipleFails");
+
+        [Fact]
+        public void MultipleTestsAndTestOutput() =>
+            AssertSolutionHasExpectedResults("MultipleTestsWithTestOutput");
 
         [Fact]
         public void SingleTestThatPasses() =>
