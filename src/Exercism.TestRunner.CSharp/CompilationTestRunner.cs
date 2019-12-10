@@ -23,13 +23,13 @@ namespace Exercism.TestRunner.CSharp
             var unorderedTestResults = new List<TestResult>();
 
             ExecutionMessageSink.Execution.TestFailedEvent += args =>
-                unorderedTestResults.Add(new TestResult(args.Message.Test.DisplayName, TestRunMessage.FromFailedTest(args.Message), TestStatus.Fail));
+                unorderedTestResults.Add(TestResult.FromFailed(args.Message));
             
             ExecutionMessageSink.Execution.TestPassedEvent += args =>
-                unorderedTestResults.Add(new TestResult(args.Message.Test.DisplayName, null, TestStatus.Pass));
+                unorderedTestResults.Add(TestResult.FromPassed(args.Message));
 
             var testCases = TestCases(assemblyInfo);
-            
+
             using var assemblyRunner = CreateTestAssemblyRunner(testCases, assemblyInfo.ToTestAssembly());
             await assemblyRunner.RunAsync();
 
