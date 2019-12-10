@@ -1,3 +1,7 @@
 *
 !run.sh
 !run.ps1
+
+!src/Exercism.TestRunner.CSharp
+src/Exercism.TestRunner.CSharp/bin
+src/Exercism.TestRunner.CSharp/obj

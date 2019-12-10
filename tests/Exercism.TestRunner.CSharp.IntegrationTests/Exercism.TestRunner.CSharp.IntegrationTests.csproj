@@ -16,6 +16,10 @@
     <Compile Remove="@(SolutionFiles)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Exercism.TestRunner.CSharp\Exercism.TestRunner.CSharp.csproj" />
+  </ItemGroup>
+
   <Target Name="CopySolutions" AfterTargets="Build">
     <RemoveDir Directories="$(OutputPath)\Solutions" />
     <Copy SourceFiles="@(SolutionFiles)" DestinationFolder="$(OutputPath)\Solutions\%(RecursiveDir)" SkipUnchangedFiles="true" />

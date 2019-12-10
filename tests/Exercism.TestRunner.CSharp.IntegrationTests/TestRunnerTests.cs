@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
+    [Xunit.TestCaseOrderer("SequentialTestCollectionOrderer", "Exercism.TestRunner.CSharp")]
     public class TestRunnerTests
     {
         [Fact]
