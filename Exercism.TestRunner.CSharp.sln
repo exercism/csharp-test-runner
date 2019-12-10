@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exercism.TestRunner.CSharp.IntegrationTests", "tests\Exercism.TestRunner.CSharp.IntegrationTests\Exercism.TestRunner.CSharp.IntegrationTests.csproj", "{89F04548-B730-4F84-AC39-5B8C6A47CA35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exercism.TestRunner.CSharp.IntegrationTests", "test\Exercism.TestRunner.CSharp.IntegrationTests\Exercism.TestRunner.CSharp.IntegrationTests.csproj", "{89F04548-B730-4F84-AC39-5B8C6A47CA35}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exercism.TestRunner.CSharp", "src\Exercism.TestRunner.CSharp\Exercism.TestRunner.CSharp.csproj", "{76037C86-908F-4C18-BDBE-1C1CAFF0CB65}"
 EndProject
