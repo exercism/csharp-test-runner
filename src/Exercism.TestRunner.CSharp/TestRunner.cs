@@ -1,7 +1,4 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -9,18 +6,11 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task<TestRun> Run(Options options)
         {
-            var compilation = await SolutionCompiler.Compile(options);
-            var compilationWithAllTestsEnabled = compilation.EnableAllTests();
+            var compilation = await ProjectCompiler.Compile(options);
+            if (compilation.HasErrors())
+                return TestRun.FromErrors(TestRunMessage.FromErrors(compilation.GetErrors()));
 
-            var assembly = compilationWithAllTestsEnabled.ToAssembly();
-            
-            var diagnostics = compilationWithAllTestsEnabled.GetDiagnostics().ToArray();
-            var errors = diagnostics.Where(diag => diag.Severity == DiagnosticSeverity.Error).ToArray();
-            
-            if (errors.Any())
-                return new TestRun(message: string.Join("\n", errors.Select(error => error.GetMessage())), TestStatus.Error, Array.Empty<TestResult>());
-
-            return await InMemoryXunitTestRunner.RunAllTests(assembly);
+            return await CompilationTestRunner.Run(compilation);
         }
     }
 }
