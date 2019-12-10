@@ -9,8 +9,8 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         public static string NormalizeJson(this string json) =>
             JsonConvert.SerializeObject(JsonConvert.DeserializeObject(json), Formatting.None, CreateJsonSerializerSettings()).NormalizeNewlines();
 
-        public static string NormalizeNewlines(this string json) =>
-            json.Replace("\n", Environment.NewLine);
+        private static string NormalizeNewlines(this string json) =>
+            json.Replace("\r\n", "\n");
 
         private static JsonSerializerSettings CreateJsonSerializerSettings() =>
             new JsonSerializerSettings { ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() } };

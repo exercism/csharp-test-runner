@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using CommandLine;
 using Serilog;
 
@@ -10,14 +11,15 @@ namespace Exercism.TestRunner.CSharp
             Logging.Configure();
 
             Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(CreateTestResults);
+                .WithParsed(options => CreateTestResults(options).GetAwaiter().GetResult());
         }
 
-        private static void CreateTestResults(Options options)
+        private static async Task CreateTestResults(Options options)
         {
             Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
-            TestRunner.Run(options);
+            var testRun = await TestRunner.Run(options);
+            TestRunWriter.WriteToFile(options, testRun);
 
             Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
         }

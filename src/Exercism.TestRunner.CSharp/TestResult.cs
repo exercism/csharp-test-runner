@@ -1,6 +1,6 @@
-namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
+namespace Exercism.TestRunner.CSharp
 {
-    public class TestResult
+    internal class TestResult
     {
         public string Name { get; }
         public string Message { get; }

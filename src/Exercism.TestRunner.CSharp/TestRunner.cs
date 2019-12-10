@@ -1,33 +1,26 @@
 using System;
-using System.IO;
-using Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 
 namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunner
     {
-        public static void Run(Options options)
+        public static async Task<TestRun> Run(Options options)
         {
-            var testRunnerOutput = RunDotnetTestWithExercismLogger(options);
-            if (testRunnerOutput.Success)
-                return;
+            var compilation = await SolutionCompiler.Compile(options);
+            var compilationWithAllTestsEnabled = compilation.EnableAllTests();
 
-            var testRun = new TestRun(testRunnerOutput.Normalized, TestStatus.Error, Array.Empty<TestResult>());
+            var assembly = compilationWithAllTestsEnabled.ToAssembly();
+            
+            var diagnostics = compilationWithAllTestsEnabled.GetDiagnostics().ToArray();
+            var errors = diagnostics.Where(diag => diag.Severity == DiagnosticSeverity.Error).ToArray();
+            
+            if (errors.Any())
+                return new TestRun(message: string.Join("\n", errors.Select(error => error.GetMessage())), TestStatus.Error, Array.Empty<TestResult>());
 
-            var resultsFilePath = GetResultsFilePath(options);
-            TestRunWriter.WriteToFile(resultsFilePath, testRun);
+            return await InMemoryXunitTestRunner.RunAllTests(assembly);
         }
-
-        private static TestRunnerOutput RunDotnetTestWithExercismLogger(Options options)
-        {
-            var (output, exitCode) = ProcessRunner.Run("dotnet", GetDotnetTestArguments(options));
-            return new TestRunnerOutput(output, exitCode == 0);
-        }
-
-        private static string GetDotnetTestArguments(Options options) =>
-            $"test {options.InputDirectory} --logger:exercism;ResultsDirectoryName={options.OutputDirectory} --test-adapter-path:.";
-
-        private static string GetResultsFilePath(Options options) =>
-            Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
     }
 }

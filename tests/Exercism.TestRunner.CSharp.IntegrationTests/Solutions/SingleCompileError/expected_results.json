@@ -1,5 +1,5 @@
 {
   "status": "error",
-  "message": "error CS0117: 'Fake' does not contain a definition for 'Add'",
+  "message": "'Fake' does not contain a definition for 'Add'",
   "tests": []
 }

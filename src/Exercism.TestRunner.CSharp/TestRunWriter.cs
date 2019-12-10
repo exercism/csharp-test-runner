@@ -1,16 +1,13 @@
 using System.IO;
 using System.Text.Json;
 
-namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
+namespace Exercism.TestRunner.CSharp
 {
-    public static class TestRunWriter
+    internal static class TestRunWriter
     {
-        public static void WriteToFile(string filePath, TestRun solutionAnalysis)
+        public static void WriteToFile(Options options, TestRun solutionAnalysis)
         {
-            var directoryPath = Path.GetDirectoryName(filePath);
-
-            if (!Directory.Exists(directoryPath))
-                Directory.CreateDirectory(directoryPath);
+            var filePath = GetResultsFilePath(options);
 
             using var fileStream = File.Create(filePath);
             using var jsonTextWriter = new Utf8JsonWriter(fileStream, new JsonWriterOptions { Indented = true });
@@ -21,6 +18,9 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
             jsonTextWriter.WriteEndObject();
             jsonTextWriter.Flush();
         }
+
+        private static string GetResultsFilePath(Options options) =>
+            Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
 
         private static void WriteMessage(this Utf8JsonWriter jsonTextWriter, string message)
         {
@@ -48,8 +48,8 @@ namespace Microsoft.VisualStudio.TestPlatform.Extension.Exercism.TestLogger
         {
             jsonTextWriter.WriteStartObject();
             jsonTextWriter.WriteName(test.Name);
-            jsonTextWriter.WriteMessage(test.Message);
             jsonTextWriter.WriteStatus(test.Status);
+            jsonTextWriter.WriteMessage(test.Message);
             jsonTextWriter.WriteEndObject();
         }
 
