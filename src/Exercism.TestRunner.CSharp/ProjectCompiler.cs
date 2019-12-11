@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Buildalyzer;
@@ -11,6 +12,8 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task<Compilation> Compile(Options options)
         {
+            AddDirectoryBuildProps(options);
+
             var manager = new AnalyzerManager();
             var analyzer = manager.GetProject(GetProjectPath(options));
 
@@ -26,5 +29,18 @@ namespace Exercism.TestRunner.CSharp
 
         private static string GetProjectPath(Options options) =>
             Path.Combine(options.InputDirectory, $"{options.Slug.Dehumanize().Pascalize()}.csproj");
+
+        private static void AddDirectoryBuildProps(Options options)
+        {
+            var directoryBuildProps = $@"<Project>
+  <PropertyGroup>
+    <OutDir>{options.OutputDirectory}/bin</OutDir>
+    <BaseIntermediateOutputPath>{options.OutputDirectory}/obj</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>";
+            var directoryBuildPath = Path.Combine(options.InputDirectory, "Directory.Build.props");
+
+            File.WriteAllText(directoryBuildPath, directoryBuildProps);
+        }
     }
 }
