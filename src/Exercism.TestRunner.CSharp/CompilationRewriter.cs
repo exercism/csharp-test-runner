@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -102,7 +103,11 @@ namespace Exercism.TestRunner.CSharp
             {
                 if (node.Expression is MemberAccessExpressionSyntax memberAccessExpression)
                 {
-                    if (memberAccessExpression.WithoutTrivia().ToFullString().EndsWith("Console.Write"))
+                    var memberAccess = memberAccessExpression.WithoutTrivia().ToFullString();
+
+                    if (memberAccess.EndsWith("Console.Write") ||
+                        memberAccess.EndsWith("Console.Error.Write") ||
+                        memberAccess.EndsWith("Console.Out.Write"))
                         return node.WithExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
@@ -114,8 +119,10 @@ namespace Exercism.TestRunner.CSharp
                                         IdentifierName("Diagnostics")),
                                     IdentifierName("Trace")),
                                 IdentifierName("Write")));
-                    
-                    if (memberAccessExpression.WithoutTrivia().ToFullString().EndsWith("Console.WriteLine"))
+
+                    if (memberAccess.EndsWith("Console.WriteLine") ||
+                        memberAccess.EndsWith("Console.Error.WriteLine") ||
+                        memberAccess.EndsWith("Console.Out.WriteLine"))
                         return node.WithExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
@@ -128,7 +135,7 @@ namespace Exercism.TestRunner.CSharp
                                     IdentifierName("Trace")),
                                 IdentifierName("WriteLine")));
                 }
-                
+
                 return base.VisitInvocationExpression(node);
             }
 

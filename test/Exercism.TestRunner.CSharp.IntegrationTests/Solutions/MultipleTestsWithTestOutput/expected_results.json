@@ -14,7 +14,7 @@
       "name": "FakeTest.Mul_should_multiply_numbers",
       "status": "fail",
       "message": "Assert.Equal() Failure\nExpected: 7\nActual:   6",
-      "output": "String with params output\nValues used:\n2, True"
+      "output": "String with params output\nValues used:\n2, True\n-----"
     }
   ]
 }
