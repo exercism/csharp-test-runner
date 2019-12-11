@@ -24,3 +24,6 @@ obj/
 
 # Application files
 results.json
+
+# Test files
+test/**/Directory.Build.props
