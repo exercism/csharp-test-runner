@@ -4,12 +4,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -19,14 +16,8 @@ namespace Exercism.TestRunner.CSharp
         private static readonly TestMessageSink DiagnosticMessageSink = new TestMessageSink();
         private static readonly TestMessageSink ExecutionMessageSink = new TestMessageSink();
 
-        public static async Task<TestRun> Run(Compilation compilation)
-        {
-            var optimizedCompilation = compilation
-                .UnskipTests()
-                .CaptureTracesAsTestOutput();
-
-            return await Run(optimizedCompilation.ToAssembly().ToAssemblyInfo());
-        }
+        public static async Task<TestRun> Run(Compilation compilation) =>
+            await Run(compilation.Rewrite().ToAssembly().ToAssemblyInfo());
 
         private static async Task<TestRun> Run(IAssemblyInfo assemblyInfo)
         {
@@ -52,8 +43,8 @@ namespace Exercism.TestRunner.CSharp
         private static IReflectionAssemblyInfo ToAssemblyInfo(this Assembly assembly) =>
             Reflector.Wrap(assembly);
 
-        private static SequentialXunitTestAssemblyRunner CreateTestAssemblyRunner(IEnumerable<IXunitTestCase> testCases, TestAssembly testAssembly) =>
-            new SequentialXunitTestAssemblyRunner(
+        private static SequentialTestAssemblyRunner CreateTestAssemblyRunner(IEnumerable<IXunitTestCase> testCases, TestAssembly testAssembly) =>
+            new SequentialTestAssemblyRunner(
                 testAssembly,
                 testCases,
                 DiagnosticMessageSink,
@@ -70,92 +61,12 @@ namespace Exercism.TestRunner.CSharp
 
             return discoverySink.TestCases.Cast<IXunitTestCase>().ToArray();
         }
-
-        private static Compilation UnskipTests(this Compilation compilation) =>
-            compilation.Rewrite(new UnskipTestsRewriter());
-
-        private static Compilation CaptureTracesAsTestOutput(this Compilation compilation) =>
-            compilation.Rewrite(new CaptureTracesAsTestOutputRewriter());
-
-        private class UnskipTestsRewriter : CSharpSyntaxRewriter
-        {
-            public override SyntaxNode VisitAttributeArgument(AttributeArgumentSyntax node)
-            {
-                if (IsSkipAttributeArgument(node))
-                    return null;
-
-                return base.VisitAttributeArgument(node);
-            }
-
-            private static bool IsSkipAttributeArgument(AttributeArgumentSyntax node) =>
-                node.NameEquals?.Name.ToString() == "Skip";
-        }
-
-        private class CaptureTracesAsTestOutputRewriter : CSharpSyntaxRewriter
-        {
-            public override SyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
-            {
-                if (node.DescendantNodes().Any(IsTestClass))
-                    return base.VisitCompilationUnit(
-                        node.WithUsings(
-                            node.Usings.Add(
-                                UsingDirective(QualifiedName(
-                                IdentifierName("Xunit").WithLeadingTrivia(Space),
-                                IdentifierName("Abstractions"))))));
-
-                return base.VisitCompilationUnit(node);
-            }
-
-            private static bool IsTestClass(SyntaxNode descendant) =>
-                descendant is ClassDeclarationSyntax classDeclaration &&
-                classDeclaration.Identifier.Text.EndsWith("Test");
-
-            public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
-            {
-                if (IsTestClass(node))
-                    return base.VisitClassDeclaration(
-                        node.WithBaseList(
-                                BaseList(
-                                    SingletonSeparatedList<BaseTypeSyntax>(
-                                        SimpleBaseType(
-                                            IdentifierName("TracingTestBase")))))
-                            .WithMembers(node.Members.Insert(0, ConstructorDeclaration(
-                                    Identifier("FakeTest"))
-                                .WithModifiers(
-                                    TokenList(
-                                        Token(SyntaxKind.PublicKeyword).WithTrailingTrivia(Space)))
-                                .WithParameterList(
-                                    ParameterList(
-                                        SingletonSeparatedList<ParameterSyntax>(
-                                            Parameter(
-                                                    Identifier("output"))
-                                                .WithType(
-                                                    IdentifierName("ITestOutputHelper").WithTrailingTrivia(Space)))))
-                                .WithInitializer(
-                                    ConstructorInitializer(
-                                        SyntaxKind.BaseConstructorInitializer,
-                                        ArgumentList(
-                                            SingletonSeparatedList<ArgumentSyntax>(
-                                                Argument(
-                                                    IdentifierName("output"))))))
-                                .WithBody(
-                                    Block()))));
-
-                return base.VisitClassDeclaration(node);
-            }
-        }
-        
-        private class SequentialOrderer : ITestCaseOrderer
-        {
-            public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases) where TTestCase : ITestCase =>
-                testCases.ToList();
-        }
     
-        private class SequentialXunitTestAssemblyRunner : XunitTestAssemblyRunner
+        private class SequentialTestAssemblyRunner : XunitTestAssemblyRunner
         {
             private readonly ITestCaseOrderer _testCaseOrderer = new SequentialOrderer();
 
-            public SequentialXunitTestAssemblyRunner(ITestAssembly testAssembly, IEnumerable<IXunitTestCase> testCases, IMessageSink diagnosticMessageSink, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions) : base(testAssembly, testCases, diagnosticMessageSink, executionMessageSink, executionOptions)
+            public SequentialTestAssemblyRunner(ITestAssembly testAssembly, IEnumerable<IXunitTestCase> testCases, IMessageSink diagnosticMessageSink, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions) : base(testAssembly, testCases, diagnosticMessageSink, executionMessageSink, executionOptions)
             {
             }   
 
@@ -163,6 +74,11 @@ namespace Exercism.TestRunner.CSharp
                 CancellationTokenSource cancellationTokenSource) =>
                 new XunitTestCollectionRunner(testCollection, testCases, DiagnosticMessageSink, messageBus, _testCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();
 
+            private class SequentialOrderer : ITestCaseOrderer
+            {
+                public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases) where TTestCase : ITestCase =>
+                    testCases.ToList();
+            }
         }
     }
 }
