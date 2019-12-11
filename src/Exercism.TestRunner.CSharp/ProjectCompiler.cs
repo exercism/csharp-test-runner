@@ -11,7 +11,7 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task<Compilation> Compile(Options options)
         {
-            AddAdditionalFiles(options);
+            CreateDirectoryBuildPropsFile(options);
 
             var manager = new AnalyzerManager();
             var analyzer = manager.GetProject(GetProjectPath(options));
@@ -23,34 +23,31 @@ namespace Exercism.TestRunner.CSharp
             project = project.WithCompilationOptions(
                 project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
 
-            return await project.GetCompilationAsync();
+            project = project.AddDocument("TracingTestBase.cs", Resource.Read("TracingTestBase")).Project;
+            project = project.AddDocument("TestOutputTraceListener.cs", Resource.Read("TestOutputTraceListener")).Project;
+
+            var compilation = await project.GetCompilationAsync();
+
+            DeleteDirectoryBuildPropsFile(options);
+
+            return compilation;
         }
 
         private static string GetProjectPath(Options options) =>
             Path.Combine(options.InputDirectory, $"{options.Slug.Dehumanize().Pascalize()}.csproj");
 
-        private static void AddAdditionalFiles(Options options)
-        {
-            AddDirectoryBuildPropsFile(options);
-            AddTestOutputTraceListenerFile(options);
-            AddTracingTestFile(options);
-        }
-
-        private static void AddDirectoryBuildPropsFile(Options options)
+        private static void CreateDirectoryBuildPropsFile(Options options)
         {
             var template = Resource.Read("Exercism.TestRunner.CSharp.AdditionalFiles.Directory.Build.props");
             var contents = template.Replace("$OutputDirectory", options.OutputDirectory);
 
-            AddAdditionalFile("Directory.Build.props", contents, options);
+            File.WriteAllText(GetDirectoryBuildPropsFilePath(options), contents);
         }
 
-        private static void AddTestOutputTraceListenerFile(Options options) =>
-            AddAdditionalFile("TestOutputTraceListener.cs", Resource.Read("TestOutputTraceListener"), options);
+        private static void DeleteDirectoryBuildPropsFile(Options options) =>
+            File.Delete(GetDirectoryBuildPropsFilePath(options));
 
-        private static void AddTracingTestFile(Options options) =>
-            AddAdditionalFile("TracingTestBase.cs", Resource.Read("TracingTestBase"), options);
-
-        private static void AddAdditionalFile(string fileName, string contents, Options options) =>
-            File.WriteAllText(Path.Combine(options.InputDirectory, fileName), contents);
+        private static string GetDirectoryBuildPropsFilePath(Options options) =>
+            Path.Combine(options.InputDirectory, "Directory.Build.props");
     }
 }

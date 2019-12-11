@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -21,6 +22,17 @@ namespace Exercism.TestRunner.CSharp
             using var memoryStream = new MemoryStream();
             var emitResult = compilation.Emit(memoryStream);
             return emitResult.Success ? Assembly.Load(memoryStream.ToArray()) : null;
+        }
+
+        public static Compilation Rewrite(this Compilation compilation, CSharpSyntaxRewriter rewriter)
+        {
+            foreach (var syntaxTree in compilation.SyntaxTrees)
+                compilation = compilation.ReplaceSyntaxTree(
+                    syntaxTree,
+                    syntaxTree.WithRootAndOptions(
+                        rewriter.Visit(syntaxTree.GetRoot()), syntaxTree.Options));
+
+            return compilation;
         }
     }
 }

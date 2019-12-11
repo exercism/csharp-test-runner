@@ -19,7 +19,7 @@ namespace Exercism.TestRunner.CSharp
         private static readonly TestMessageSink ExecutionMessageSink = new TestMessageSink();
 
         public static async Task<TestRun> Run(Compilation compilation) =>
-            await Run(compilation.UnskipTests().ToAssembly().ToAssemblyInfo());
+            await Run(compilation.UnskipTests().CaptureTracesAsTestOutput().ToAssembly().ToAssemblyInfo());
 
         private static async Task<TestRun> Run(IAssemblyInfo assemblyInfo)
         {
@@ -68,19 +68,12 @@ namespace Exercism.TestRunner.CSharp
             return discoverySink.TestCases.Cast<IXunitTestCase>().ToArray();
         }
 
-        private static Compilation UnskipTests(this Compilation compilation)
-        {
-            var enableTestsRewriter = new UnskipTestsRewriter();
-            var captureTracesAsTestOutputRewriter = new CaptureTracesAsTestOutputRewriter();
-
-            foreach (var syntaxTree in compilation.SyntaxTrees)
-                compilation = compilation.ReplaceSyntaxTree(
-                    syntaxTree,
-                    syntaxTree.WithRootAndOptions(
-                        captureTracesAsTestOutputRewriter.Visit(enableTestsRewriter.Visit(syntaxTree.GetRoot())), syntaxTree.Options));
-
-            return compilation;
-        }
+        private static Compilation UnskipTests(this Compilation compilation) =>
+            compilation.Rewrite(new UnskipTestsRewriter());
+        
+        private static Compilation CaptureTracesAsTestOutput(this Compilation compilation) =>
+            compilation
+                .Rewrite(new CaptureTracesAsTestOutputRewriter());
 
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
