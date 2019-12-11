@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Buildalyzer;
@@ -32,15 +31,12 @@ namespace Exercism.TestRunner.CSharp
 
         private static void AddDirectoryBuildProps(Options options)
         {
-            var directoryBuildProps = $@"<Project>
-  <PropertyGroup>
-    <OutDir>{options.OutputDirectory}/bin</OutDir>
-    <BaseIntermediateOutputPath>{options.OutputDirectory}/obj</BaseIntermediateOutputPath>
-  </PropertyGroup>
-</Project>";
-            var directoryBuildPath = Path.Combine(options.InputDirectory, "Directory.Build.props");
+            const string directoryBuildPropsFileName = "Directory.Build.props";
+            var directoryBuildPropsTemplate = Resource.Read(directoryBuildPropsFileName);
+            var directoryBuildPropsPath = Path.Combine(options.InputDirectory, directoryBuildPropsFileName);
+            var directoryBuildProps = directoryBuildPropsTemplate.Replace("$OutputDirectory", options.OutputDirectory);
 
-            File.WriteAllText(directoryBuildPath, directoryBuildProps);
+            File.WriteAllText(directoryBuildPropsPath, directoryBuildProps);
         }
     }
 }

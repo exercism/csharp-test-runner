@@ -5,6 +5,11 @@
         <OutputType>Exe</OutputType>
         <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="@(Content)" />
+        <EmbeddedResource Include="Content\**" />
+    </ItemGroup>
     
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.6.0" />
