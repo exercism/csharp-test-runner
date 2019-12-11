@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -70,11 +71,13 @@ namespace Exercism.TestRunner.CSharp
         private static Compilation UnskipTests(this Compilation compilation)
         {
             var enableTestsRewriter = new UnskipTestsRewriter();
+            var captureTracesAsTestOutputRewriter = new CaptureTracesAsTestOutputRewriter();
 
             foreach (var syntaxTree in compilation.SyntaxTrees)
                 compilation = compilation.ReplaceSyntaxTree(
                     syntaxTree,
-                    syntaxTree.WithRootAndOptions(enableTestsRewriter.Visit(syntaxTree.GetRoot()), syntaxTree.Options));
+                    syntaxTree.WithRootAndOptions(
+                        captureTracesAsTestOutputRewriter.Visit(enableTestsRewriter.Visit(syntaxTree.GetRoot())), syntaxTree.Options));
 
             return compilation;
         }
@@ -91,6 +94,61 @@ namespace Exercism.TestRunner.CSharp
 
             private static bool IsSkipAttributeArgument(AttributeArgumentSyntax node) =>
                 node.NameEquals?.Name.ToString() == "Skip";
+        }
+
+        private class CaptureTracesAsTestOutputRewriter : CSharpSyntaxRewriter
+        {
+            public override SyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
+            {
+                if (node.DescendantNodes().Any(IsTestClass))
+                    return base.VisitCompilationUnit(
+                        node.WithUsings(
+                            node.Usings.Add(
+                                UsingDirective(QualifiedName(
+                                IdentifierName("Xunit").WithLeadingTrivia(Space),
+                                IdentifierName("Abstractions"))))));
+                
+                return base.VisitCompilationUnit(node);
+            }
+
+            private static bool IsTestClass(SyntaxNode descendant) =>
+                descendant is ClassDeclarationSyntax classDeclaration &&
+                classDeclaration.Identifier.Text.EndsWith("Test") &&
+                classDeclaration.Identifier.Text.EndsWith("Test");
+
+            public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
+            {
+                if (IsTestClass(node))
+                    return base.VisitClassDeclaration(
+                        node.WithBaseList(
+                                BaseList(
+                                    SingletonSeparatedList<BaseTypeSyntax>(
+                                        SimpleBaseType(
+                                            IdentifierName("TracingTestBase")))))
+                            .WithMembers(node.Members.Insert(0, ConstructorDeclaration(
+                                    Identifier("FakeTest"))
+                                .WithModifiers(
+                                    TokenList(
+                                        Token(SyntaxKind.PublicKeyword).WithTrailingTrivia(Space)))
+                                .WithParameterList(
+                                    ParameterList(
+                                        SingletonSeparatedList<ParameterSyntax>(
+                                            Parameter(
+                                                    Identifier("output"))
+                                                .WithType(
+                                                    IdentifierName("ITestOutputHelper").WithTrailingTrivia(Space)))))
+                                .WithInitializer(
+                                    ConstructorInitializer(
+                                        SyntaxKind.BaseConstructorInitializer,
+                                        ArgumentList(
+                                            SingletonSeparatedList<ArgumentSyntax>(
+                                                Argument(
+                                                    IdentifierName("output"))))))
+                                .WithBody(
+                                    Block()))));
+                
+                return base.VisitClassDeclaration(node);
+            }
         }
     }
 }

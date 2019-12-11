@@ -11,7 +11,7 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task<Compilation> Compile(Options options)
         {
-            AddDirectoryBuildProps(options);
+            AddAdditionalFiles(options);
 
             var manager = new AnalyzerManager();
             var analyzer = manager.GetProject(GetProjectPath(options));
@@ -29,14 +29,28 @@ namespace Exercism.TestRunner.CSharp
         private static string GetProjectPath(Options options) =>
             Path.Combine(options.InputDirectory, $"{options.Slug.Dehumanize().Pascalize()}.csproj");
 
-        private static void AddDirectoryBuildProps(Options options)
+        private static void AddAdditionalFiles(Options options)
         {
-            const string directoryBuildPropsFileName = "Directory.Build.props";
-            var directoryBuildPropsTemplate = Resource.Read(directoryBuildPropsFileName);
-            var directoryBuildPropsPath = Path.Combine(options.InputDirectory, directoryBuildPropsFileName);
-            var directoryBuildProps = directoryBuildPropsTemplate.Replace("$OutputDirectory", options.OutputDirectory);
-
-            File.WriteAllText(directoryBuildPropsPath, directoryBuildProps);
+            AddDirectoryBuildPropsFile(options);
+            AddTestOutputTraceListenerFile(options);
+            AddTracingTestFile(options);
         }
+
+        private static void AddDirectoryBuildPropsFile(Options options)
+        {
+            var template = Resource.Read("Exercism.TestRunner.CSharp.AdditionalFiles.Directory.Build.props");
+            var contents = template.Replace("$OutputDirectory", options.OutputDirectory);
+
+            AddAdditionalFile("Directory.Build.props", contents, options);
+        }
+
+        private static void AddTestOutputTraceListenerFile(Options options) =>
+            AddAdditionalFile("TestOutputTraceListener.cs", Resource.Read("TestOutputTraceListener"), options);
+
+        private static void AddTracingTestFile(Options options) =>
+            AddAdditionalFile("TracingTestBase.cs", Resource.Read("TracingTestBase"), options);
+
+        private static void AddAdditionalFile(string fileName, string contents, Options options) =>
+            File.WriteAllText(Path.Combine(options.InputDirectory, fileName), contents);
     }
 }
