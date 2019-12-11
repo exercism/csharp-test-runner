@@ -31,6 +31,10 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             AssertSolutionHasExpectedResults("MultipleTestsWithTestOutput");
 
         [Fact]
+        public void MultipleTestsAndTestOutputExceedingLimit() =>
+            AssertSolutionHasExpectedResults("MultipleTestsWithTestOutputExceedingLimit");
+
+        [Fact]
         public void SingleTestThatPasses() =>
             AssertSolutionHasExpectedResults("SingleTestThatPasses");
 

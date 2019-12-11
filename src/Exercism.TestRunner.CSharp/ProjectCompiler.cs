@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Buildalyzer;
@@ -12,7 +11,7 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task<Compilation> Compile(Options options)
         {
-            AddDirectoryBuildProps(options);
+            CreateDirectoryBuildPropsFile(options);
 
             var manager = new AnalyzerManager();
             var analyzer = manager.GetProject(GetProjectPath(options));
@@ -24,23 +23,31 @@ namespace Exercism.TestRunner.CSharp
             project = project.WithCompilationOptions(
                 project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
 
-            return await project.GetCompilationAsync();
+            project = project.AddDocument("TracingTestBase.cs", Resource.Read("TracingTestBase")).Project;
+            project = project.AddDocument("TestOutputTraceListener.cs", Resource.Read("TestOutputTraceListener")).Project;
+
+            var compilation = await project.GetCompilationAsync();
+
+            DeleteDirectoryBuildPropsFile(options);
+
+            return compilation;
         }
 
         private static string GetProjectPath(Options options) =>
             Path.Combine(options.InputDirectory, $"{options.Slug.Dehumanize().Pascalize()}.csproj");
 
-        private static void AddDirectoryBuildProps(Options options)
+        private static void CreateDirectoryBuildPropsFile(Options options)
         {
-            var directoryBuildProps = $@"<Project>
-  <PropertyGroup>
-    <OutDir>{options.OutputDirectory}/bin</OutDir>
-    <BaseIntermediateOutputPath>{options.OutputDirectory}/obj</BaseIntermediateOutputPath>
-  </PropertyGroup>
-</Project>";
-            var directoryBuildPath = Path.Combine(options.InputDirectory, "Directory.Build.props");
+            var template = Resource.Read("Exercism.TestRunner.CSharp.AdditionalFiles.Directory.Build.props");
+            var contents = template.Replace("$OutputDirectory", options.OutputDirectory);
 
-            File.WriteAllText(directoryBuildPath, directoryBuildProps);
+            File.WriteAllText(GetDirectoryBuildPropsFilePath(options), contents);
         }
+
+        private static void DeleteDirectoryBuildPropsFile(Options options) =>
+            File.Delete(GetDirectoryBuildPropsFilePath(options));
+
+        private static string GetDirectoryBuildPropsFilePath(Options options) =>
+            Path.Combine(options.InputDirectory, "Directory.Build.props");
     }
 }
