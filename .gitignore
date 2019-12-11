@@ -24,9 +24,3 @@ obj/
 
 # Application files
 results.json
-results.trx
-
-# Test files
-test/**/Directory.Build.props
-test/**/TestOutputTraceListener.cs
-test/**/TracingTestBase.cs
