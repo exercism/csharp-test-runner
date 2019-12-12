@@ -7,8 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove="AdditionalFiles\**" />
-        <EmbeddedResource Include="AdditionalFiles\**" />
+        <AdditionalFiles Include="AdditionalFiles/**" />
+        <Compile Remove="@(AdditionalFiles)" />
+        <Content Include="@(AdditionalFiles)" CopyToOutputDirectory="Always" />
     </ItemGroup>
     
     <ItemGroup>

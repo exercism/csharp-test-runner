@@ -23,8 +23,8 @@ namespace Exercism.TestRunner.CSharp
             project = project.WithCompilationOptions(
                 project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
 
-            project = project.AddDocument("TracingTestBase.cs", Resource.Read("TracingTestBase")).Project;
-            project = project.AddDocument("TestOutputTraceListener.cs", Resource.Read("TestOutputTraceListener")).Project;
+            project = project.AddDocument("TracingTestBase.cs", AdditionalFile.Read("TracingTestBase.cs")).Project;
+            project = project.AddDocument("TestOutputTraceListener.cs", AdditionalFile.Read("TestOutputTraceListener.cs")).Project;
 
             var compilation = await project.GetCompilationAsync();
 
@@ -38,7 +38,7 @@ namespace Exercism.TestRunner.CSharp
 
         private static void CreateDirectoryBuildPropsFile(Options options)
         {
-            var template = Resource.Read("Exercism.TestRunner.CSharp.AdditionalFiles.Directory.Build.props");
+            var template = AdditionalFile.Read("Directory.Build.props");
             var contents = template.Replace("$OutputDirectory", options.OutputDirectory);
 
             File.WriteAllText(GetDirectoryBuildPropsFilePath(options), contents);
