@@ -17,16 +17,15 @@ namespace Exercism.TestRunner.CSharp
             var analyzer = manager.GetProject(GetProjectPath(options));
 
             using var workspace = new AdhocWorkspace();
-            var project = analyzer.AddToWorkspace(workspace);
+            var project = analyzer
+                .AddToWorkspace(workspace)
+                .AddAdditionalFile("TracingTestBase.cs")
+                .AddAdditionalFile("TestOutputTraceListener.cs");
 
-            // TODO: report issue with Buildalyzer on Mac not detecting DLL output type
-            project = project.WithCompilationOptions(
-                project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary));
-
-            project = project.AddDocument("TracingTestBase.cs", AdditionalFile.Read("TracingTestBase.cs")).Project;
-            project = project.AddDocument("TestOutputTraceListener.cs", AdditionalFile.Read("TestOutputTraceListener.cs")).Project;
-
-            var compilation = await project.GetCompilationAsync();
+            // Buildalyzer issue not detecting output kind on macOS
+            var compilation = await project.WithCompilationOptions(
+                    project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary))
+                .GetCompilationAsync();
 
             DeleteDirectoryBuildPropsFile(options);
 
@@ -49,5 +48,8 @@ namespace Exercism.TestRunner.CSharp
 
         private static string GetDirectoryBuildPropsFilePath(Options options) =>
             Path.Combine(options.InputDirectory, "Directory.Build.props");
+        
+        private static Project AddAdditionalFile(this Project project, string fileName) =>
+            project.AddDocument(fileName, AdditionalFile.Read(fileName)).Project;
     }
 }
