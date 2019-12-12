@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Xunit.Abstractions;
-using Xunit.Sdk;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Exercism.TestRunner.CSharp
@@ -75,7 +69,7 @@ namespace Exercism.TestRunner.CSharp
                                         SimpleBaseType(
                                             IdentifierName("TracingTestBase")))))
                             .WithMembers(node.Members.Insert(0, ConstructorDeclaration(
-                                    Identifier("FakeTest"))
+                                    Identifier(node.Identifier.Text))
                                 .WithModifiers(
                                     TokenList(
                                         Token(SyntaxKind.PublicKeyword).WithTrailingTrivia(Space)))
