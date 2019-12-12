@@ -20,7 +20,7 @@ COPY src/Exercism.TestRunner.CSharp/Exercism.TestRunner.CSharp.csproj ./
 RUN dotnet restore
 
 # Copy everything else and build
-COPY . ./
+COPY src/Exercism.TestRunner.CSharp/ ./
 RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner
 
 # Build runtime image
