@@ -2,7 +2,7 @@ using System.IO;
 
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
-    internal class TestSolution
+    public class TestSolution
     {
         public string Slug { get; }
         public string Directory { get; }
