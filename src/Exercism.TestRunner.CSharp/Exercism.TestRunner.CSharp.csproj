@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+    </ItemGroup>
+
+    <ItemGroup>
         <AdditionalFiles Include="AdditionalFiles/**" />
         <Compile Remove="@(AdditionalFiles)" />
         <Content Include="@(AdditionalFiles)" CopyToOutputDirectory="Always" />
