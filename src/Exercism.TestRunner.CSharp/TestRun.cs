@@ -24,7 +24,7 @@ namespace Exercism.TestRunner.CSharp
             if (tests.Any(test => test.Status == TestStatus.Fail))
                 return TestStatus.Fail;
 
-            if (tests.All(test => test.Status == TestStatus.Pass))
+            if (tests.All(test => test.Status == TestStatus.Pass) && tests.Any())
                 return TestStatus.Pass;
 
             return TestStatus.Error;
