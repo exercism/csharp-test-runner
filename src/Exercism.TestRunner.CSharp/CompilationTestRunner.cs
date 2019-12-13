@@ -61,14 +61,14 @@ namespace Exercism.TestRunner.CSharp
 
             return discoverySink.TestCases.Cast<IXunitTestCase>().ToArray();
         }
-    
+
         private class SequentialTestAssemblyRunner : XunitTestAssemblyRunner
         {
             private readonly ITestCaseOrderer _testCaseOrderer = new SequentialOrderer();
 
             public SequentialTestAssemblyRunner(ITestAssembly testAssembly, IEnumerable<IXunitTestCase> testCases, IMessageSink diagnosticMessageSink, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions) : base(testAssembly, testCases, diagnosticMessageSink, executionMessageSink, executionOptions)
             {
-            }   
+            }
 
             protected override Task<RunSummary> RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable<IXunitTestCase> testCases,
                 CancellationTokenSource cancellationTokenSource) =>

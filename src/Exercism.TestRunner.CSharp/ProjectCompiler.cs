@@ -48,7 +48,7 @@ namespace Exercism.TestRunner.CSharp
 
         private static string GetDirectoryBuildPropsFilePath(Options options) =>
             Path.Combine(options.InputDirectory, "Directory.Build.props");
-        
+
         private static Project AddAdditionalFile(this Project project, string fileName) =>
             project.AddDocument(fileName, AdditionalFile.Read(fileName)).Project;
     }
