@@ -1,9 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Buildalyzer;
-using Buildalyzer.Workspaces;
 using Humanizer;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.MSBuild;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -13,19 +16,14 @@ namespace Exercism.TestRunner.CSharp
         {
             CreateDirectoryBuildPropsFile(options);
 
-            var manager = new AnalyzerManager();
-            var analyzer = manager.GetProject(GetProjectPath(options));
-
-            using var workspace = new AdhocWorkspace();
-            var project = analyzer
-                .AddToWorkspace(workspace)
+            var workspace = MSBuildWorkspace.Create();
+            var project = (await workspace.OpenProjectAsync(GetProjectPath(options)))
                 .AddAdditionalFile("TracingTestBase.cs")
-                .AddAdditionalFile("TestOutputTraceListener.cs");
-
-            // Buildalyzer issue not detecting output kind on macOS
-            var compilation = await project.WithCompilationOptions(
-                    project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary))
-                .GetCompilationAsync();
+                .AddAdditionalFile("TestOutputTraceListener.cs")
+                .WithMetadataReferences(GetMetadataReferences())
+                .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+                
+            var compilation = await project.GetCompilationAsync();
 
             DeleteDirectoryBuildPropsFile(options);
 
@@ -51,5 +49,11 @@ namespace Exercism.TestRunner.CSharp
         
         private static Project AddAdditionalFile(this Project project, string fileName) =>
             project.AddDocument(fileName, AdditionalFile.Read(fileName)).Project;
+        
+        private static IEnumerable<PortableExecutableReference> GetMetadataReferences() =>
+            AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")
+                .ToString()
+                .Split(":")
+                .Select(metadataFilePath => MetadataReference.CreateFromFile(metadataFilePath));
     }
 }
