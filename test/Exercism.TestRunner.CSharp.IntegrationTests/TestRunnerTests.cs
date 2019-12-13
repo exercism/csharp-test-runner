@@ -6,7 +6,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
     {
         [Theory]
         [TestSolutionsData]
-        public void SolutionIsRepresentedCorrectly(TestSolution solution)
+        public void SolutionIsTestedCorrectly(TestSolution solution)
         {
             var testRun = TestSolutionRunner.Run(solution);
             Assert.Equal(testRun.Expected.NormalizeJson(), testRun.Actual.NormalizeJson());
