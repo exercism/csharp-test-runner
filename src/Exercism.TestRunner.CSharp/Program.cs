@@ -1,13 +1,17 @@
 using System.Threading.Tasks;
 using CommandLine;
+using Microsoft.Build.Locator;
 using Serilog;
 
 namespace Exercism.TestRunner.CSharp
 {
     public static class Program
-    {
+    {   
         public static void Main(string[] args)
         {
+            if (!MSBuildLocator.IsRegistered)
+                MSBuildLocator.RegisterDefaults();
+            
             Logging.Configure();
 
             Parser.Default.ParseArguments<Options>(args)

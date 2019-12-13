@@ -1,9 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Buildalyzer;
-using Buildalyzer.Workspaces;
 using Humanizer;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.MSBuild;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -11,45 +14,27 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task<Compilation> Compile(Options options)
         {
-            CreateDirectoryBuildPropsFile(options);
+            var workspace = MSBuildWorkspace.Create();
+            var project = await workspace.OpenProjectAsync(GetProjectPath(options));
 
-            var manager = new AnalyzerManager();
-            var analyzer = manager.GetProject(GetProjectPath(options));
-
-            using var workspace = new AdhocWorkspace();
-            var project = analyzer
-                .AddToWorkspace(workspace)
+            return await project
                 .AddAdditionalFile("TracingTestBase.cs")
-                .AddAdditionalFile("TestOutputTraceListener.cs");
-
-            // Buildalyzer issue not detecting output kind on macOS
-            var compilation = await project.WithCompilationOptions(
-                    project.CompilationOptions.WithOutputKind(OutputKind.DynamicallyLinkedLibrary))
+                .AddAdditionalFile("TestOutputTraceListener.cs")
+                .WithMetadataReferences(GetMetadataReferences())
+                .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .GetCompilationAsync();
-
-            DeleteDirectoryBuildPropsFile(options);
-
-            return compilation;
         }
 
         private static string GetProjectPath(Options options) =>
             Path.Combine(options.InputDirectory, $"{options.Slug.Dehumanize().Pascalize()}.csproj");
 
-        private static void CreateDirectoryBuildPropsFile(Options options)
-        {
-            var template = AdditionalFile.Read("Directory.Build.props");
-            var contents = template.Replace("$OutputDirectory", options.OutputDirectory);
-
-            File.WriteAllText(GetDirectoryBuildPropsFilePath(options), contents);
-        }
-
-        private static void DeleteDirectoryBuildPropsFile(Options options) =>
-            File.Delete(GetDirectoryBuildPropsFilePath(options));
-
-        private static string GetDirectoryBuildPropsFilePath(Options options) =>
-            Path.Combine(options.InputDirectory, "Directory.Build.props");
-
         private static Project AddAdditionalFile(this Project project, string fileName) =>
             project.AddDocument(fileName, AdditionalFile.Read(fileName)).Project;
+
+        private static IEnumerable<PortableExecutableReference> GetMetadataReferences() =>
+            AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")
+                .ToString()
+                .Split(":")
+                .Select(metadataFilePath => MetadataReference.CreateFromFile(metadataFilePath));
     }
 }
