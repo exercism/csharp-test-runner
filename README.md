@@ -1,6 +1,8 @@
 # Exercism C# test runner
 
-This repository contains the C# test runner, which is an implementation of the [test runner interface][test-runner-interface] that is shared across tracks. A test runner automatically verifies if a submission passes all the tests.
+A test runner automatically verifies if a submission passes all the tests.
+
+This repository contains the C# test runner, which implements the [test runner interface][test-runner-interface].
 
 ## Running the tests
 
