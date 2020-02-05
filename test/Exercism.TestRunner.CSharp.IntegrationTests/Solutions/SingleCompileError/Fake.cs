@@ -1,4 +1,4 @@
 public static class Fake
 {
-    public static int Invalid(int x, int y) => x + y;
+    public static int Add(int x, int y) => x + y
 }
