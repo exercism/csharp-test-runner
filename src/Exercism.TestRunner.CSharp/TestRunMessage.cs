@@ -13,6 +13,6 @@ namespace Exercism.TestRunner.CSharp
             errors.Select(FromError).Join();
 
         private static string FromError(Diagnostic error) =>
-            error.GetMessage();
+            $"{System.IO.Path.GetFileName(error.Location.SourceTree.FilePath)}:{error.Location.GetLineSpan().StartLinePosition.Line}: {error.GetMessage()}";
     }
 }
