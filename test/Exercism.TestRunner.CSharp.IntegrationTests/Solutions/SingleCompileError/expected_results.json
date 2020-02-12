@@ -1,5 +1,5 @@
 {
   "status": "error",
-  "message": "; expected",
+  "message": "Fake.cs:2: ; expected",
   "tests": []
 }
