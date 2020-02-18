@@ -9,7 +9,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         public void SolutionIsTestedCorrectly(TestSolution solution)
         {
             var testRun = TestSolutionRunner.Run(solution);
-            Assert.Equal(testRun.Expected.NormalizeJson(), testRun.Actual.NormalizeJson());
+            Assert.Equal(testRun.Expected, testRun.Actual);
         }
     }
 }

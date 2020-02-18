@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
+using System.Reflection; 
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Xunit;
@@ -43,8 +42,8 @@ namespace Exercism.TestRunner.CSharp
         private static IReflectionAssemblyInfo ToAssemblyInfo(this Assembly assembly) =>
             Reflector.Wrap(assembly);
 
-        private static SequentialTestAssemblyRunner CreateTestAssemblyRunner(IEnumerable<IXunitTestCase> testCases, TestAssembly testAssembly) =>
-            new SequentialTestAssemblyRunner(
+        private static XunitTestAssemblyRunner CreateTestAssemblyRunner(IEnumerable<IXunitTestCase> testCases, TestAssembly testAssembly) =>
+            new XunitTestAssemblyRunner(
                 testAssembly,
                 testCases,
                 DiagnosticMessageSink,
@@ -60,25 +59,6 @@ namespace Exercism.TestRunner.CSharp
             discoverySink.Finished.WaitOne();
 
             return discoverySink.TestCases.Cast<IXunitTestCase>().ToArray();
-        }
-
-        private class SequentialTestAssemblyRunner : XunitTestAssemblyRunner
-        {
-            private readonly ITestCaseOrderer _testCaseOrderer = new SequentialOrderer();
-
-            public SequentialTestAssemblyRunner(ITestAssembly testAssembly, IEnumerable<IXunitTestCase> testCases, IMessageSink diagnosticMessageSink, IMessageSink executionMessageSink, ITestFrameworkExecutionOptions executionOptions) : base(testAssembly, testCases, diagnosticMessageSink, executionMessageSink, executionOptions)
-            {
-            }
-
-            protected override Task<RunSummary> RunTestCollectionAsync(IMessageBus messageBus, ITestCollection testCollection, IEnumerable<IXunitTestCase> testCases,
-                CancellationTokenSource cancellationTokenSource) =>
-                new XunitTestCollectionRunner(testCollection, testCases, DiagnosticMessageSink, messageBus, _testCaseOrderer, new ExceptionAggregator(Aggregator), cancellationTokenSource).RunAsync();
-
-            private class SequentialOrderer : ITestCaseOrderer
-            {
-                public IEnumerable<TTestCase> OrderTestCases<TTestCase>(IEnumerable<TTestCase> testCases) where TTestCase : ITestCase =>
-                    testCases.ToList();
-            }
         }
     }
 }
