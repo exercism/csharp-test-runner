@@ -67,8 +67,8 @@ namespace Exercism.TestRunner.CSharp
                                 BaseList(
                                     SingletonSeparatedList<BaseTypeSyntax>(
                                         SimpleBaseType(
-                                            IdentifierName("TracingTestBase")))))
-                            .WithMembers(node.Members.Insert(0, ConstructorDeclaration(
+                                            IdentifierName("TestBase")))))
+                            .WithMembers(node.Members.Add(ConstructorDeclaration(
                                     Identifier(node.Identifier.Text))
                                 .WithModifiers(
                                     TokenList(

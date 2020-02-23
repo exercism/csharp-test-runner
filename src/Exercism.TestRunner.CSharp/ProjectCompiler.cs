@@ -18,8 +18,7 @@ namespace Exercism.TestRunner.CSharp
             var project = await workspace.OpenProjectAsync(GetProjectPath(options));
 
             return await project
-                .AddAdditionalFile("TracingTestBase.cs")
-                .AddAdditionalFile("TestOutputTraceListener.cs")
+                .AddAdditionalFile("TestBase.cs")
                 .WithMetadataReferences(GetMetadataReferences())
                 .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .GetCompilationAsync();
