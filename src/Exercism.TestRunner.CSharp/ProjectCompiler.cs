@@ -33,7 +33,7 @@ namespace Exercism.TestRunner.CSharp
         private static IEnumerable<PortableExecutableReference> GetMetadataReferences() =>
             AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")
                 .ToString()
-                .Split(":")
+                .Split(Path.PathSeparator)
                 .Select(metadataFilePath => MetadataReference.CreateFromFile(metadataFilePath));
     }
 }
