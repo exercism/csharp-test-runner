@@ -1,66 +1,73 @@
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunWriter
     {
-        public static void WriteToFile(Options options, TestRun solutionAnalysis)
+        public static void WriteToFile(Options options, TestRun testRun)
         {
+            var json = SerializeAsJson(testRun);
             var filePath = GetResultsFilePath(options);
+            File.WriteAllText(filePath, json);
+        }
 
-            using var fileStream = File.Create(filePath);
-            using var jsonTextWriter = new Utf8JsonWriter(fileStream, new JsonWriterOptions { Indented = true });
-            jsonTextWriter.WriteStartObject();
-            jsonTextWriter.WriteStatus(solutionAnalysis.Status);
-            jsonTextWriter.WriteMessage(solutionAnalysis.Message);
-            jsonTextWriter.WriteTests(solutionAnalysis.Tests);
-            jsonTextWriter.WriteEndObject();
-            jsonTextWriter.Flush();
+        private static string SerializeAsJson(TestRun testRun)
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions { IgnoreNullValues = true };
+            return JsonSerializer.Serialize(testRun.ToJsonTestRun(), jsonSerializerOptions);
         }
 
         private static string GetResultsFilePath(Options options) =>
             Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
 
-        private static void WriteMessage(this Utf8JsonWriter jsonTextWriter, string message) =>
-            jsonTextWriter.WriteOptionalString("message", message);
+        private static JsonTestResult ToJsonTestResult(this TestResult testResult) =>
+            new JsonTestResult
+            {
+                Name = testResult.Name,
+                Status = testResult.Status.ToString().ToLower(),
+                Message = testResult.Message.ToNullIfEmptyOrWhiteSpace(),
+                Output = testResult.Output.ToNullIfEmptyOrWhiteSpace()
+            };
+        
+        private static JsonTestRun ToJsonTestRun(this TestRun testRun) =>
+            new JsonTestRun
+            {
+                Status = testRun.Status.ToString().ToLower(),
+                Message = testRun.Message.ToNullIfEmptyOrWhiteSpace(),
+                Tests = testRun.Tests.Select(ToJsonTestResult).ToArray()
+            };
 
-        private static void WriteStatus(this Utf8JsonWriter jsonTextWriter, TestStatus status) =>
-            jsonTextWriter.WriteString("status", status.ToString().ToLower());
+        private static string ToNullIfEmptyOrWhiteSpace(this string str) =>
+            string.IsNullOrWhiteSpace(str) ? null : str.Trim().Replace("\r\n", "\n");
 
-        private static void WriteTests(this Utf8JsonWriter jsonTextWriter, TestResult[] tests)
+        private class JsonTestResult
         {
-            jsonTextWriter.WritePropertyName("tests");
-            jsonTextWriter.WriteStartArray();
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
 
-            foreach (var test in tests)
-                jsonTextWriter.WriteTest(test);
+            [JsonPropertyName("status")]
+            public string Status { get; set; }
 
-            jsonTextWriter.WriteEndArray();
+            [JsonPropertyName("message")]
+            public string Message { get; set; }
+
+            [JsonPropertyName("output")]
+            public string Output { get; set; }
         }
 
-        private static void WriteTest(this Utf8JsonWriter jsonTextWriter, TestResult test)
+        private class JsonTestRun
         {
-            jsonTextWriter.WriteStartObject();
-            jsonTextWriter.WriteName(test.Name);
-            jsonTextWriter.WriteStatus(test.Status);
-            jsonTextWriter.WriteMessage(test.Message);
-            jsonTextWriter.WriteOutput(test.Output);
-            jsonTextWriter.WriteEndObject();
-        }
+            [JsonPropertyName("status")]
+            public string Status { get; set; }
 
-        private static void WriteName(this Utf8JsonWriter jsonTextWriter, string name) =>
-            jsonTextWriter.WriteOptionalString("name", name);
+            [JsonPropertyName("message")]
+            public string Message { get; set; }
 
-        private static void WriteOutput(this Utf8JsonWriter jsonTextWriter, string output) =>
-            jsonTextWriter.WriteOptionalString("output", output);
-
-        private static void WriteOptionalString(this Utf8JsonWriter jsonTextWriter, string propertyName, string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-
-            jsonTextWriter.WriteString(propertyName, StringExtensions.Normalize(value));
+            [JsonPropertyName("tests")]
+            public JsonTestResult[] Tests { get; set; }
         }
     }
 }

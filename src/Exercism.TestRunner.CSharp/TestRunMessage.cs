@@ -7,10 +7,10 @@ namespace Exercism.TestRunner.CSharp
     internal static class TestRunMessage
     {
         public static string FromMessages(IEnumerable<string> messages) =>
-            messages.Join();
+            string.Join("\n", messages);
 
         public static string FromErrors(Diagnostic[] errors) =>
-            errors.Select(FromError).Join();
+            string.Join("\n", errors.Select(FromError));
 
         private static string FromError(Diagnostic error) =>
             $"{System.IO.Path.GetFileName(error.Location.SourceTree.FilePath)}:{error.Location.GetLineSpan().StartLinePosition.Line}: {error.GetMessage()}";
