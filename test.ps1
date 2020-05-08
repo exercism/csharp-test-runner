@@ -21,7 +21,7 @@ param (
 )
 
 function Run-Test-Runner ([string] $SolutionDir) {
-    ./run.ps1 "fake" $SolutionDir
+    ./run.ps1 "fake" $SolutionDir $SolutionDir
 }
 
 function Move-Generated-Test-Results-To-Expected ([string] $SolutionsDir) {
