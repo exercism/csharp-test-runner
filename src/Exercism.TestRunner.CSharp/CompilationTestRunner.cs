@@ -35,7 +35,7 @@ namespace Exercism.TestRunner.CSharp
             await assemblyRunner.RunAsync();
 
             var orderedTestNames = testCases.Select(testCase => testCase.DisplayName).ToArray();
-            var orderedTestResults = testResults.OrderBy(testResult => Array.IndexOf(orderedTestNames, testResult.Name)).ToArray();
+            var orderedTestResults = testResults.OrderBy(testResult => Array.IndexOf(orderedTestNames, testResult.Test)).ToArray();
 
             return TestRun.FromTests(orderedTestResults);
         }

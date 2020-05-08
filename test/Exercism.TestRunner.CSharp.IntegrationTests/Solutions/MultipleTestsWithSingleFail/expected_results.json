@@ -2,15 +2,18 @@
   "status": "fail",
   "tests": [
     {
-      "name": "FakeTest.Add_should_add_numbers",
+      "name": "Add should add numbers",
+      "test": "FakeTest.Add_should_add_numbers",
       "status": "pass"
     },
     {
-      "name": "FakeTest.Sub_should_subtract_numbers",
+      "name": "Sub should subtract numbers",
+      "test": "FakeTest.Sub_should_subtract_numbers",
       "status": "pass"
     },
     {
-      "name": "FakeTest.Mul_should_multiply_numbers",
+      "name": "Mul should multiply numbers",
+      "test": "FakeTest.Mul_should_multiply_numbers",
       "status": "fail",
       "message": "Assert.Equal() Failure\nExpected: 5\nActual:   6"
     }

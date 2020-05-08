@@ -27,6 +27,7 @@ namespace Exercism.TestRunner.CSharp
             new JsonTestResult
             {
                 Name = testResult.Name,
+                Test = testResult.Test,
                 Status = testResult.Status.ToString().ToLower(),
                 Message = testResult.Message.ToNullIfEmptyOrWhiteSpace(),
                 Output = testResult.Output.ToNullIfEmptyOrWhiteSpace()
@@ -47,6 +48,9 @@ namespace Exercism.TestRunner.CSharp
         {
             [JsonPropertyName("name")]
             public string Name { get; set; }
+
+            [JsonPropertyName("test")]
+            public string Test { get; set; }
 
             [JsonPropertyName("status")]
             public string Status { get; set; }

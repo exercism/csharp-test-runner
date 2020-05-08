@@ -2,23 +2,28 @@
   "status": "pass",
   "tests": [
     {
-      "name": "FakeTest.Add_should_add_numbers",
+      "name": "Add should add numbers",
+      "test": "FakeTest.Add_should_add_numbers",
       "status": "pass"
     },
     {
-      "name": "FakeTest.Sub_should_subtract_numbers",
+      "name": "Sub should subtract numbers",
+      "test": "FakeTest.Sub_should_subtract_numbers",
       "status": "pass"
     },
     {
-      "name": "FakeTest.Mul_should_multiply_numbers",
+      "name": "Mul should multiply numbers",
+      "test": "FakeTest.Mul_should_multiply_numbers",
       "status": "pass"
     },
     {
-      "name": "FooTest.Upper_should_uppercase_string",
+      "name": "Upper should uppercase string",
+      "test": "FooTest.Upper_should_uppercase_string",
       "status": "pass"
     },
     {
-      "name": "FooTest.Lower_should_lowercase_string",
+      "name": "Lower should lowercase string",
+      "test": "FooTest.Lower_should_lowercase_string",
       "status": "pass"
     }
   ]
