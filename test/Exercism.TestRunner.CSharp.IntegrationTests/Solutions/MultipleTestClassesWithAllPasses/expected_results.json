@@ -4,26 +4,31 @@
     {
       "name": "Add should add numbers",
       "test": "FakeTest.Add_should_add_numbers",
+      "expected": "2",
       "status": "pass"
     },
     {
       "name": "Sub should subtract numbers",
       "test": "FakeTest.Sub_should_subtract_numbers",
+      "expected": "4",
       "status": "pass"
     },
     {
       "name": "Mul should multiply numbers",
       "test": "FakeTest.Mul_should_multiply_numbers",
+      "expected": "6",
       "status": "pass"
     },
     {
       "name": "Upper should uppercase string",
       "test": "FooTest.Upper_should_uppercase_string",
+      "expected": "\u0022HELLO\u0022",
       "status": "pass"
     },
     {
       "name": "Lower should lowercase string",
       "test": "FooTest.Lower_should_lowercase_string",
+      "expected": "\u0022hello\u0022",
       "status": "pass"
     }
   ]

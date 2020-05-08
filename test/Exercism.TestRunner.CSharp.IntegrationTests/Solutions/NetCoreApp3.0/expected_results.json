@@ -4,6 +4,7 @@
     {
       "name": "Add should add numbers",
       "test": "FakeTest.Add_should_add_numbers",
+      "expected": "2",
       "status": "pass"
     }
   ]

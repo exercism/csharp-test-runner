@@ -17,17 +17,24 @@ namespace Exercism.TestRunner.CSharp
         private static readonly TestMessageSink ExecutionMessageSink = new TestMessageSink();
 
         public static async Task<TestRun> Run(Compilation compilation) =>
-            await Run(compilation.Rewrite().ToAssembly().ToAssemblyInfo());
+            await Run(compilation.Rewrite().ToAssembly().ToAssemblyInfo(), compilation);
 
-        private static async Task<TestRun> Run(IAssemblyInfo assemblyInfo)
+        private static async Task<TestRun> Run(IAssemblyInfo assemblyInfo, Compilation compilation)
         {
+            SyntaxNode GetSyntaxNode(ITestMethod testMethod)
+            {
+                var symbol = compilation.GetSymbolsWithName(testMethod.Method.Name, SymbolFilter.Member).FirstOrDefault();
+                var syntaxReference = symbol?.DeclaringSyntaxReferences.FirstOrDefault();
+                return syntaxReference?.GetSyntax();
+            }
+            
             var testResults = new List<TestResult>();
-
+            
             ExecutionMessageSink.Execution.TestFailedEvent += args =>
-                testResults.Add(TestResult.FromFailed(args.Message));
+                testResults.Add(TestResult.FromFailed(args.Message, GetSyntaxNode(args.Message.TestMethod)));
 
             ExecutionMessageSink.Execution.TestPassedEvent += args =>
-                testResults.Add(TestResult.FromPassed(args.Message));
+                testResults.Add(TestResult.FromPassed(args.Message, GetSyntaxNode(args.Message.TestMethod)));
 
             var testCases = TestCases(assemblyInfo);
 
