@@ -1,0 +1,5 @@
+{
+  "status": "error",
+  "message": "FakeTest.cs:75: Member \u0027Fake.Add(int, int)\u0027 cannot be accessed with an instance reference; qualify it with a type name instead\nFakeTest.cs:83: Member \u0027Fake.Add(int, int)\u0027 cannot be accessed with an instance reference; qualify it with a type name instead\nFakeTest.cs:91: Member \u0027Fake.Describe(int)\u0027 cannot be accessed with an instance reference; qualify it with a type name instead\nFakeTest.cs:99: Member \u0027Fake.Describe(int)\u0027 cannot be accessed with an instance reference; qualify it with a type name instead\nFakeTest.cs:107: Member \u0027Fake.Positive(int)\u0027 cannot be accessed with an instance reference; qualify it with a type name instead\nFakeTest.cs:115: Member \u0027Fake.Positive(int)\u0027 cannot be accessed with an instance reference; qualify it with a type name instead",
+  "tests": []
+}

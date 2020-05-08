@@ -29,6 +29,7 @@ namespace Exercism.TestRunner.CSharp
                 Name = testResult.Name,
                 Test = testResult.Test,
                 Expected = testResult.Expected,
+                Command = testResult.Command,
                 Status = testResult.Status.ToString().ToLower(),
                 Message = testResult.Message.ToNullIfEmptyOrWhiteSpace(),
                 Output = testResult.Output.ToNullIfEmptyOrWhiteSpace()
@@ -55,6 +56,9 @@ namespace Exercism.TestRunner.CSharp
 
             [JsonPropertyName("expected")]
             public string Expected { get; set; }
+
+            [JsonPropertyName("command")]
+            public string Command { get; set; }
 
             [JsonPropertyName("status")]
             public string Status { get; set; }
