@@ -7,18 +7,18 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunWriter
     {
-        public static void WriteToFile(Options options, TestRun testRun)
-        {
-            var json = SerializeAsJson(testRun);
-            var filePath = GetResultsFilePath(options);
-            File.WriteAllText(filePath, json);
-        }
+        public static void WriteToFile(Options options, TestRun testRun) =>
+            File.WriteAllText(GetResultsFilePath(options), SerializeAsJson(testRun));
 
-        private static string SerializeAsJson(TestRun testRun)
-        {
-            var jsonSerializerOptions = new JsonSerializerOptions { IgnoreNullValues = true };
-            return JsonSerializer.Serialize(testRun.ToJsonTestRun(), jsonSerializerOptions);
-        }
+        private static string SerializeAsJson(TestRun testRun) =>
+            JsonSerializer.Serialize(testRun.ToJsonTestRun(), CreateJsonSerializerOptions());
+
+        private static JsonSerializerOptions CreateJsonSerializerOptions() =>
+            new JsonSerializerOptions
+            {
+                IgnoreNullValues = true,
+                WriteIndented = true
+            };
 
         private static string GetResultsFilePath(Options options) =>
             Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
@@ -31,7 +31,7 @@ namespace Exercism.TestRunner.CSharp
                 Message = testResult.Message.ToNullIfEmptyOrWhiteSpace(),
                 Output = testResult.Output.ToNullIfEmptyOrWhiteSpace()
             };
-        
+
         private static JsonTestRun ToJsonTestRun(this TestRun testRun) =>
             new JsonTestRun
             {

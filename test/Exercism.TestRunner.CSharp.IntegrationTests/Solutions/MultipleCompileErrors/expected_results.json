@@ -1,5 +1,5 @@
 {
   "status": "error",
-  "message": "FakeTest.cs:6: 'Fake' does not contain a definition for 'Add'\nFakeTest.cs:10: 'Fake' does not contain a definition for 'Sub'",
+  "message": "FakeTest.cs:6: \u0027Fake\u0027 does not contain a definition for \u0027Add\u0027\nFakeTest.cs:10: \u0027Fake\u0027 does not contain a definition for \u0027Sub\u0027",
   "tests": []
 }

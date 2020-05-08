@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection; 
@@ -33,7 +34,10 @@ namespace Exercism.TestRunner.CSharp
             using var assemblyRunner = CreateTestAssemblyRunner(testCases, assemblyInfo.ToTestAssembly());
             await assemblyRunner.RunAsync();
 
-            return TestRun.FromTests(testResults.ToArray());
+            var orderedTestNames = testCases.Select(testCase => testCase.DisplayName).ToArray();
+            var orderedTestResults = testResults.OrderBy(testResult => Array.IndexOf(orderedTestNames, testResult.Name)).ToArray();
+
+            return TestRun.FromTests(orderedTestResults);
         }
 
         private static TestAssembly ToTestAssembly(this IAssemblyInfo assemblyInfo) =>
