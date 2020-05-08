@@ -13,7 +13,7 @@
     <ItemGroup>
         <AdditionalFiles Include="AdditionalFiles/**" />
         <Compile Remove="@(AdditionalFiles)" />
-        <Content Include="@(AdditionalFiles)" CopyToOutputDirectory="Always" />
+        <EmbeddedResource Include="@(AdditionalFiles)" />
     </ItemGroup>
     
     <ItemGroup>
