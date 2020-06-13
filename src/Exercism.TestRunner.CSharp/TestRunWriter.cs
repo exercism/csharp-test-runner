@@ -11,63 +11,60 @@ namespace Exercism.TestRunner.CSharp
             File.WriteAllText(GetResultsFilePath(options), SerializeAsJson(testRun));
 
         private static string SerializeAsJson(TestRun testRun) =>
-            JsonSerializer.Serialize(testRun.ToJsonTestRun(), CreateJsonSerializerOptions());
+            JsonSerializer.Serialize(testRun, CreateJsonSerializerOptions());
 
-        private static JsonSerializerOptions CreateJsonSerializerOptions() =>
-            new JsonSerializerOptions
+        private static JsonSerializerOptions CreateJsonSerializerOptions()
+        {
+            var options = new JsonSerializerOptions
             {
                 IgnoreNullValues = true,
-                WriteIndented = true
+                WriteIndented = true,
             };
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            
+            return options;
+        }
 
         private static string GetResultsFilePath(Options options) =>
             Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
 
-        private static JsonTestResult ToJsonTestResult(this TestResult testResult) =>
-            new JsonTestResult
-            {
-                Name = testResult.Name,
-                Status = testResult.Status.ToString().ToLower(),
-                Message = testResult.Message.ToNullIfEmptyOrWhiteSpace(),
-                Output = testResult.Output.ToNullIfEmptyOrWhiteSpace()
-            };
+        // private static string ToNullIfEmptyOrWhiteSpace(this string str) =>
+        //     string.IsNullOrWhiteSpace(str) ? null : str.Trim().Replace("\r\n", "\n");
 
-        private static JsonTestRun ToJsonTestRun(this TestRun testRun) =>
-            new JsonTestRun
-            {
-                Status = testRun.Status.ToString().ToLower(),
-                Message = testRun.Message.ToNullIfEmptyOrWhiteSpace(),
-                Tests = testRun.Tests.Select(ToJsonTestResult).ToArray()
-            };
+        
+    }
+    
+    internal class TestResult
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
 
-        private static string ToNullIfEmptyOrWhiteSpace(this string str) =>
-            string.IsNullOrWhiteSpace(str) ? null : str.Trim().Replace("\r\n", "\n");
+        [JsonPropertyName("status")]
+        public TestStatus Status { get; set; }
 
-        private class JsonTestResult
-        {
-            [JsonPropertyName("name")]
-            public string Name { get; set; }
+        [JsonPropertyName("message")]
+        public string Message { get; set; }
 
-            [JsonPropertyName("status")]
-            public string Status { get; set; }
+        [JsonPropertyName("output")]
+        public string Output { get; set; }
+    }
 
-            [JsonPropertyName("message")]
-            public string Message { get; set; }
+    internal class TestRun
+    {
+        [JsonPropertyName("status")]
+        public TestStatus Status { get; set; }
 
-            [JsonPropertyName("output")]
-            public string Output { get; set; }
-        }
+        [JsonPropertyName("message")]
+        public string Message { get; set; }
 
-        private class JsonTestRun
-        {
-            [JsonPropertyName("status")]
-            public string Status { get; set; }
-
-            [JsonPropertyName("message")]
-            public string Message { get; set; }
-
-            [JsonPropertyName("tests")]
-            public JsonTestResult[] Tests { get; set; }
-        }
+        [JsonPropertyName("tests")]
+        public TestResult[] Tests { get; set; }
+    }
+    
+    internal enum TestStatus
+    {
+        Pass,
+        Fail,
+        Error
     }
 }

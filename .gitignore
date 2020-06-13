@@ -24,6 +24,10 @@ obj/
 
 # Application files
 results.json
+TestResults/
+msbuild.log
+*.trx
+
 
 # Test files
 test/**/Directory.Build.props
