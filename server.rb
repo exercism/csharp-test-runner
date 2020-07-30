@@ -5,10 +5,8 @@ require 'puma'
 require 'sinatra'
 require 'sinatra/json'
 
-set :logger, Logger.new(STDOUT)
-
 post '/job' do
-  # Uniq ID for this jo
+  # Uniq ID for this job
   job_id = SecureRandom.uuid
 
   # Create dirs
@@ -22,7 +20,7 @@ post '/job' do
   zip_file = "#{job_dir}/files.gzip"
   File.write(zip_file, params[:zipped_files])
   `unzip #{zip_file} -d #{input_dir}`
-  logger.info `ls input_dir`
+  logger.info `ls -lah #{input_dir}`
 
   # Run command
   cmd = "/bin/sh bin/run.sh #{params[:exercise]} #{input_dir} #{output_dir}"
