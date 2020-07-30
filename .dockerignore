@@ -1,6 +1,7 @@
 *
 !run.sh
 !run.ps1
+!server.rb
 
 !src/Exercism.TestRunner.CSharp
 !src/Exercism.TestRunner.CSharp/AdditionalFiles
