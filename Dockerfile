@@ -9,11 +9,11 @@ RUN wget -P /usr/local/bin https://github.com/exercism/local-tooling-webserver/r
 
 # Copy csproj and restore as distinct layers
 COPY src/Exercism.TestRunner.CSharp/Exercism.TestRunner.CSharp.csproj ./
-RUN dotnet restore
+RUN dotnet restore -r linux-musl-x64
 
 # Copy everything else and build
 COPY src/Exercism.TestRunner.CSharp/ ./
-RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner
+RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS runtime
