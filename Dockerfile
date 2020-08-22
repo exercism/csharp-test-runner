@@ -18,6 +18,7 @@ RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS runtime
 WORKDIR /opt/test-runner
+
 COPY --from=build /opt/test-runner/ .
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 
