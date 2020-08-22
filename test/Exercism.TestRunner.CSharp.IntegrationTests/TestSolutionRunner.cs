@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
     internal static class TestSolutionRunner
@@ -8,7 +10,18 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             return CreateTestRun(testSolution);
         }
 
-        private static void RunTestRunner(TestSolution testSolution) =>
+        private static void RunTestRunner(TestSolution testSolution)
+        {
+            if (Options.UseDocker)
+                RunTestRunnerUsingDocker(testSolution);
+            else
+                RunTestRunnerWithoutDocker(testSolution);
+        }
+
+        private static void RunTestRunnerUsingDocker(TestSolution testSolution) =>
+            Process.Start("docker", $"run -v {testSolution.Directory}:/solution -v {testSolution.Directory}:/results exercism/csharp-test-runner {testSolution.Slug} /solution /results").WaitForExit();
+
+        private static void RunTestRunnerWithoutDocker(TestSolution testSolution) =>
             Program.Main(new[] { testSolution.Slug, testSolution.Directory, testSolution.Directory });
 
         private static TestRun CreateTestRun(TestSolution solution)
