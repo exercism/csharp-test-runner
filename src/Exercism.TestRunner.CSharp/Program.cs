@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using CommandLine;
+using Humanizer;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,7 +35,8 @@ namespace Exercism.TestRunner.CSharp
         {
             Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
-            var projectFilePath = @"/Users/erik/Code/exercism/csharp-test-runner/test/Exercism.TestRunner.CSharp.IntegrationTests/Solutions/MultipleTestsWithTestOutput/Fake.csproj";
+            var exercise = options.Slug.Dehumanize().Pascalize();
+            var projectFilePath = Path.Combine(options.InputDirectory, $"{exercise}.csproj");
             var projectDirectory = Path.GetDirectoryName(projectFilePath);
 
             using var workspace = MSBuildWorkspace.Create();
@@ -55,10 +57,6 @@ namespace Exercism.TestRunner.CSharp
             Process.Start(processStartInfo)?.WaitForExit();
 
             var testRun = CreateTestRun(projectDirectory);
-
-            
-
-
             TestRunWriter.WriteToFile(options, testRun);
 
             Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
@@ -79,20 +77,6 @@ namespace Exercism.TestRunner.CSharp
             }
 
             var testResults = TestRunLog.Parse(projectDirectory);
-
-            //
-            // var xDoc = XDocument.Load(
-            //     "/Users/erik/Code/exercism/csharp-test-runner/test/Exercism.TestRunner.CSharp.IntegrationTests/Solutions/MultipleTestsWithTestOutput/TestResults/tests.trx");
-            //
-            // var ns = xDoc.Root.Name.Namespace;
-            // var unitTestResults = xDoc.Descendants(ns + "UnitTestResult");
-            //
-            // var testResults = unitTestResults.Select(result => new TestResult
-            // {
-            //     Name = result.Attribute(ns + "testName").Value,
-            //     Status = result.Attribute(ns + "outcome").Value == "Failed" ? TestStatus.Fail : TestStatus.Pass,
-            // }).ToArray();
-            //
             var status = testResults.Any(x => x.Status == TestStatus.Error) ? TestStatus.Error : TestStatus.Pass;
 
             return new TestRun

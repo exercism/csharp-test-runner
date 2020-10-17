@@ -27,11 +27,6 @@ namespace Exercism.TestRunner.CSharp
 
         private static string GetResultsFilePath(Options options) =>
             Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
-
-        // private static string ToNullIfEmptyOrWhiteSpace(this string str) =>
-        //     string.IsNullOrWhiteSpace(str) ? null : str.Trim().Replace("\r\n", "\n");
-
-        
     }
     
     internal class TestResult
