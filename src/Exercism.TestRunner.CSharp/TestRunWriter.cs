@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -6,7 +6,7 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunWriter
     {
-        public static void WriteToFile(Options options, TestRun testRun) =>
+        public static void WriteToFile(TestRun testRun, Options options) =>
             File.WriteAllText(GetResultsFilePath(options), SerializeAsJson(testRun));
 
         private static string SerializeAsJson(TestRun testRun) =>
@@ -26,39 +26,5 @@ namespace Exercism.TestRunner.CSharp
 
         private static string GetResultsFilePath(Options options) =>
             Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
-    }
-    
-    internal class TestResult
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("status")]
-        public TestStatus Status { get; set; }
-
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
-
-        [JsonPropertyName("output")]
-        public string Output { get; set; }
-    }
-
-    internal class TestRun
-    {
-        [JsonPropertyName("status")]
-        public TestStatus Status { get; set; }
-
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
-
-        [JsonPropertyName("tests")]
-        public TestResult[] Tests { get; set; }
-    }
-    
-    internal enum TestStatus
-    {
-        Pass,
-        Fail,
-        Error
     }
 }

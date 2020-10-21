@@ -5,12 +5,11 @@ using System.Xml.Serialization;
 
 namespace Exercism.TestRunner.CSharp
 {
-    internal static class TestRunLog
+    internal static class TestResultParser
     {
-        internal static TestResult[] Parse(string projectDirectory)
+        internal static TestResult[] FromFile(string logFilePath)
         {
-            var testResultsFile = Path.Combine(projectDirectory, "TestResults", "tests.trx");
-            using var fileStream = File.OpenRead(testResultsFile);
+            using var fileStream = File.OpenRead(logFilePath);
 
             var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
             return result.Results.UnitTestResult.Select(selector: ToTestResult).ToArray();
