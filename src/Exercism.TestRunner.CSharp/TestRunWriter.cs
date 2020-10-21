@@ -6,8 +6,8 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunWriter
     {
-        public static void WriteToFile(TestRun testRun, Options options) =>
-            File.WriteAllText(GetResultsFilePath(options), SerializeAsJson(testRun));
+        public static void WriteToFile(TestRun testRun, string resultsJsonFilePath) =>
+            File.WriteAllText(resultsJsonFilePath, SerializeAsJson(testRun));
 
         private static string SerializeAsJson(TestRun testRun) =>
             JsonSerializer.Serialize(testRun, CreateJsonSerializerOptions());
@@ -23,8 +23,5 @@ namespace Exercism.TestRunner.CSharp
             
             return options;
         }
-
-        private static string GetResultsFilePath(Options options) =>
-            Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
     }
 }

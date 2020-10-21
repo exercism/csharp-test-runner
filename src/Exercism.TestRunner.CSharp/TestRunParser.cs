@@ -5,7 +5,7 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunParser
     {
-        public static TestRun FromFile(string projectDirectory)
+        public static TestRun ReadFromFile(string projectDirectory)
         {
             var logLines = File.ReadLines(Path.Combine(projectDirectory, "msbuild.log"));
             var buildFailed = logLines.Any();

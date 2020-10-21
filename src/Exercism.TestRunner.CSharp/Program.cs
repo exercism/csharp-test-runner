@@ -31,39 +31,67 @@ namespace Exercism.TestRunner.CSharp
         {
             Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
-            var exercise = options.Slug.Dehumanize().Pascalize();
-            var projectFilePath = Path.Combine(options.InputDirectory, $"{exercise}.csproj");
-            var projectDirectory = Path.GetDirectoryName(projectFilePath);
+            var testProject = await TestProjectReader.FromOptions(options);
+            TestRunner.RunTests(testProject);
 
-            using var workspace = MSBuildWorkspace.Create();
-            var project = await workspace.OpenProjectAsync(projectFilePath);
-
-            var testsDocument = project.Documents.Single(document => document.Name.EndsWith("Test.cs"));
-            var testsRoot = await testsDocument.GetSyntaxRootAsync();
-            testsRoot = new TestProjectRewriter.UnskipTests().Visit(testsRoot);
-            testsRoot = new TestProjectRewriter.CaptureConsoleOutput().Visit(testsRoot);
-            var updatedTestsDocument = testsDocument.WithSyntaxRoot(testsRoot);
-
-            var tryApplyChanges = project.Solution.Workspace.TryApplyChanges(updatedTestsDocument.Project.Solution);
-
-            var processStartInfo = new ProcessStartInfo("dotnet", "test --verbosity=quiet --logger \"trx;LogFileName=tests.trx\" /flp:v=q");
-            processStartInfo.RedirectStandardError = true;
-            processStartInfo.RedirectStandardOutput = true;
-            processStartInfo.WorkingDirectory = projectDirectory;
-            Process.Start(processStartInfo)?.WaitForExit();
-
-            var testRun = TestRunParser.FromFile(projectDirectory);
-            TestRunWriter.WriteToFile(testRun, options);
+            var testRun = TestRunParser.ReadFromFile(Path.GetDirectoryName(testProject.Project.FilePath)!);
+            
+            var resultsJsonFilePath = Path.GetFullPath(Path.Combine(options.OutputDirectory, "results.json"));
+            TestRunWriter.WriteToFile(testRun, resultsJsonFilePath);
 
             Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
         }
     }
 
-    internal class TestProjectRewriter
+    internal class TestRunner
     {
-        
+        public static async Task RunTests(TestProject testProject)
+        {
+            try
+            {
+                await TestProjectRewriter.Rewrite(testProject);
+                RunDotnetTest(testProject);
+            }
+            finally
+            {
+                TestProjectRewriter.UndoRewrite(testProject);
+            }
+        }
 
-        public class UnskipTests : CSharpSyntaxRewriter
+        private static void RunDotnetTest(TestProject testProject)
+        {
+            var processStartInfo = new ProcessStartInfo("dotnet",
+                "test --verbosity=quiet --logger \"trx;LogFileName=tests.trx\" /flp:v=q");
+            // processStartInfo.RedirectStandardError = true;
+            // processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.WorkingDirectory = Path.GetDirectoryName(testProject.Project.FilePath)!;
+            Process.Start(processStartInfo)?.WaitForExit();
+        }
+    }
+
+    internal static class TestProjectRewriter
+    {
+        public static async Task Rewrite(TestProject testProject)
+        {
+            var testsDocument = testProject.Project.Documents.Single(document => document.Name.EndsWith("Test.cs"));
+            var testsRoot = await testsDocument.GetSyntaxRootAsync();
+
+            var rewrittenTestsRoot = testsRoot.UnskipTests().CaptureConsoleOutput();
+            var rewrittenTestsDocument = testsDocument.WithSyntaxRoot(rewrittenTestsRoot);
+
+            testProject.Project.Solution.Workspace.TryApplyChanges(rewrittenTestsDocument.Project.Solution);
+        }
+
+        public static void UndoRewrite(TestProject testProject) =>
+            testProject.Project.Solution.Workspace.TryApplyChanges(testProject.Project.Solution);
+
+        private static SyntaxNode UnskipTests(this SyntaxNode testsRoot) =>
+            new UnskipTestsRewriter().Visit(testsRoot);
+
+        private static SyntaxNode CaptureConsoleOutput(this SyntaxNode testsRoot) =>
+            new CaptureConsoleOutputRewriter().Visit(testsRoot);
+
+        private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
             public override SyntaxNode? VisitAttribute(AttributeSyntax node)
             {
@@ -76,7 +104,7 @@ namespace Exercism.TestRunner.CSharp
             }
         }
 
-        public class CaptureConsoleOutput : CSharpSyntaxRewriter
+        private class CaptureConsoleOutputRewriter : CSharpSyntaxRewriter
         {
             public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) => 
                 base.VisitClassDeclaration(
