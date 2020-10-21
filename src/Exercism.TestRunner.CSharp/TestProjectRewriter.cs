@@ -8,22 +8,31 @@ namespace Exercism.TestRunner.CSharp
     internal class TestProjectRewriter
     {
         private readonly TestProject _testProject;
+        private readonly Document _testsDocument;
+        private SyntaxNode _originalTestsRoot;
+        private Workspace _newWorkspace;
 
-        public TestProjectRewriter(TestProject testProject) => _testProject = testProject;
+        public TestProjectRewriter(TestProject testProject)
+        {
+            _testProject = testProject;
+            _testsDocument = _testProject.TestsDocument();
+        }
 
         public async Task Rewrite()
         {
-            var testsRoot = await _testProject.TestsDocument().GetSyntaxRootAsync();
+            var syntaxRoot = await _testsDocument.GetSyntaxRootAsync();
+            var rewrittenTestsRoot = CaptureConsoleOutput(UnskipTests(syntaxRoot));
+            var rewrittenTestsDocument = _testsDocument.WithSyntaxRoot(rewrittenTestsRoot);
 
-            var rewrittenTestsRoot = CaptureConsoleOutput(UnskipTests(testsRoot));
-            var rewrittenTestsDocument = _testProject.TestsDocument().WithSyntaxRoot(rewrittenTestsRoot);
+            var tryApplyChanges = _testProject.Workspace.TryApplyChanges(rewrittenTestsDocument.Project.Solution);
 
-            _testProject.Project.Solution.Workspace.TryApplyChanges(rewrittenTestsDocument.Project.Solution);
+            _newWorkspace = rewrittenTestsDocument.Project.Solution.Workspace;
         }
 
         public void UndoRewrite()
         {
-            var tryApplyChanges = _testProject.Project.Solution.Workspace.TryApplyChanges(_testProject.Project.Solution);
+            var originalTestsDocument = _testsDocument.WithSyntaxRoot(_originalTestsRoot);
+            var tryApplyChanges = _newWorkspace.TryApplyChanges(originalTestsDocument.Project.Solution);
         }
 
         private static SyntaxNode UnskipTests(SyntaxNode testsRoot) =>

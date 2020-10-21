@@ -9,7 +9,7 @@ namespace Exercism.TestRunner.CSharp
         {
             var workspace = MSBuildWorkspace.Create();
             var project = await workspace.OpenProjectAsync(options.ProjectFilePath);
-            return new TestProject(project);
+            return new TestProject(project, workspace);
         }
     }
 }
