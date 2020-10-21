@@ -20,8 +20,9 @@ namespace Exercism.TestRunner.CSharp
             
             Logging.Configure();
 
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(options => CreateTestResults(options).GetAwaiter().GetResult());
+            Parser.Default
+                .ParseArguments<Options>(args)
+                .WithParsedAsync(CreateTestResults);
         }
 
         private static async Task CreateTestResults(Options options)
