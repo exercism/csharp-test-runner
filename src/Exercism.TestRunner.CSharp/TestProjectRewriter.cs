@@ -21,8 +21,10 @@ namespace Exercism.TestRunner.CSharp
             _testProject.Project.Solution.Workspace.TryApplyChanges(rewrittenTestsDocument.Project.Solution);
         }
 
-        public void UndoRewrite() =>
-            _testProject.Project.Solution.Workspace.TryApplyChanges(_testProject.Project.Solution);
+        public void UndoRewrite()
+        {
+            var tryApplyChanges = _testProject.Project.Solution.Workspace.TryApplyChanges(_testProject.Project.Solution);
+        }
 
         private static SyntaxNode UnskipTests(SyntaxNode testsRoot) =>
             new UnskipTestsRewriter().Visit(testsRoot);

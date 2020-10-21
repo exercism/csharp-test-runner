@@ -25,7 +25,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             JsonSerializer.Deserialize<TestRunResult>(ReadFile(solution, fileName), CreateJsonSerializerOptions());
 
         private static string ReadFile(TestSolution solution, string fileName) =>
-            File.ReadAllText(Path.Combine(solution.Directory, fileName));
+            File.ReadAllText(Path.Combine(solution.DirectoryFullPath, fileName));
 
         private static void NormalizeTestRunResult(TestRunResult testRunResult)
         {

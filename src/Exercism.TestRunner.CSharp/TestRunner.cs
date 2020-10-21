@@ -30,6 +30,9 @@ namespace Exercism.TestRunner.CSharp
 
             var processStartInfo = new ProcessStartInfo(command, arguments);
             processStartInfo.WorkingDirectory = Path.GetDirectoryName(options.ProjectFilePath)!;
+            processStartInfo.RedirectStandardInput = true;
+            processStartInfo.RedirectStandardError = true;
+            processStartInfo.RedirectStandardOutput = true;
             Process.Start(processStartInfo)?.WaitForExit();
         }
     }

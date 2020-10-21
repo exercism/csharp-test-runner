@@ -7,14 +7,14 @@ namespace Exercism.TestRunner.CSharp
 {
     public static class Program
     {   
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {   
             if (!MSBuildLocator.IsRegistered)
                 MSBuildLocator.RegisterDefaults();
-            
+
             Logging.Configure();
 
-            Parser.Default
+            await Parser.Default
                 .ParseArguments<Options>(args)
                 .WithParsedAsync(CreateTestResults);
         }

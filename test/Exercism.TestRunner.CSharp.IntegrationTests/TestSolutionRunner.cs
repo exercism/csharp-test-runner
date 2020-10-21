@@ -1,28 +1,31 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
     internal static class TestSolutionRunner
     {
-        public static TestRun Run(TestSolution testSolution)
+        public static async Task<TestRun> Run(string directory)
         {
-            RunTestRunner(testSolution);
+            var testSolution = new TestSolution("Fake", directory);
+
+            await RunTestRunner(testSolution);
             return CreateTestRun(testSolution);
         }
 
-        private static void RunTestRunner(TestSolution testSolution)
+        private static async Task RunTestRunner(TestSolution testSolution)
         {
             if (Options.UseDocker)
                 RunTestRunnerUsingDocker(testSolution);
             else
-                RunTestRunnerWithoutDocker(testSolution);
+                await RunTestRunnerWithoutDocker(testSolution);
         }
 
         private static void RunTestRunnerUsingDocker(TestSolution testSolution) =>
-            Process.Start("docker", $"run -v {testSolution.Directory}:/solution -v {testSolution.Directory}:/results exercism/csharp-test-runner {testSolution.Slug} /solution /results").WaitForExit();
+            Process.Start("docker", $"run -v {testSolution.DirectoryFullPath}:/solution -v {testSolution.DirectoryFullPath}:/results exercism/csharp-test-runner {testSolution.Slug} /solution /results")!.WaitForExit();
 
-        private static void RunTestRunnerWithoutDocker(TestSolution testSolution) =>
-            Program.Main(new[] { testSolution.Slug, testSolution.Directory, testSolution.Directory });
+        private static async Task RunTestRunnerWithoutDocker(TestSolution testSolution) =>
+            await Program.Main(new[] { testSolution.Slug, testSolution.DirectoryFullPath, testSolution.DirectoryFullPath });
 
         private static TestRun CreateTestRun(TestSolution solution)
         {
