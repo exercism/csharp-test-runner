@@ -1,14 +1,11 @@
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
-using Humanizer;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.MSBuild;
 using Serilog;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -32,7 +29,7 @@ namespace Exercism.TestRunner.CSharp
             Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
             var testProject = await TestProjectReader.FromOptions(options);
-            TestRunner.RunTests(testProject);
+            await TestRunner.RunTests(testProject);
 
             var testRun = TestRunParser.ReadFromFile(Path.GetDirectoryName(testProject.Project.FilePath)!);
             
@@ -62,8 +59,6 @@ namespace Exercism.TestRunner.CSharp
         {
             var processStartInfo = new ProcessStartInfo("dotnet",
                 "test --verbosity=quiet --logger \"trx;LogFileName=tests.trx\" /flp:v=q");
-            // processStartInfo.RedirectStandardError = true;
-            // processStartInfo.RedirectStandardOutput = true;
             processStartInfo.WorkingDirectory = Path.GetDirectoryName(testProject.Project.FilePath)!;
             Process.Start(processStartInfo)?.WaitForExit();
         }
@@ -73,11 +68,10 @@ namespace Exercism.TestRunner.CSharp
     {
         public static async Task Rewrite(TestProject testProject)
         {
-            var testsDocument = testProject.Project.Documents.Single(document => document.Name.EndsWith("Test.cs"));
-            var testsRoot = await testsDocument.GetSyntaxRootAsync();
+            var testsRoot = await testProject.TestsDocument().GetSyntaxRootAsync();
 
             var rewrittenTestsRoot = testsRoot.UnskipTests().CaptureConsoleOutput();
-            var rewrittenTestsDocument = testsDocument.WithSyntaxRoot(rewrittenTestsRoot);
+            var rewrittenTestsDocument = testProject.TestsDocument().WithSyntaxRoot(rewrittenTestsRoot);
 
             testProject.Project.Solution.Workspace.TryApplyChanges(rewrittenTestsDocument.Project.Solution);
         }

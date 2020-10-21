@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Humanizer;
 using Microsoft.CodeAnalysis;
@@ -16,6 +17,8 @@ namespace Exercism.TestRunner.CSharp
             Project = project;
             Options = options;
         }
+
+        public Document TestsDocument() => Project.Documents.Single(document => document.Name.EndsWith("Test.cs"));
     }
     
     internal static class TestProjectReader
