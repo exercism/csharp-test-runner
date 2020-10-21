@@ -42,9 +42,9 @@ namespace Exercism.TestRunner.CSharp
             var testsRoot = await testsDocument.GetSyntaxRootAsync();
             testsRoot = new UnskipTests().Visit(testsRoot);
             testsRoot = new CaptureConsoleOutput().Visit(testsRoot);
-            testsDocument = testsDocument.WithSyntaxRoot(testsRoot);
+            var updatedTestsDocument = testsDocument.WithSyntaxRoot(testsRoot);
 
-            var tryApplyChanges = workspace.TryApplyChanges(testsDocument.Project.Solution);
+            var tryApplyChanges = project.Solution.Workspace.TryApplyChanges(updatedTestsDocument.Project.Solution);
 
             var processStartInfo = new ProcessStartInfo("dotnet", "test --verbosity=quiet --logger \"trx;LogFileName=tests.trx\" /flp:v=q");
             processStartInfo.RedirectStandardError = true;
