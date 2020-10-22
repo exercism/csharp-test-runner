@@ -1,10 +1,11 @@
 using CommandLine;
+
 using Serilog;
 
 namespace Exercism.TestRunner.CSharp
 {
     public static class Program
-    {   
+    {
         public static void Main(string[] args)
         {
             Logging.Configure();

@@ -30,7 +30,7 @@ namespace Exercism.TestRunner.CSharp
                 Tests = testResults
             };
         }
-        
+
         private static TestStatus ToTestStatus(this TestResult[] tests)
         {
             if (tests.Any(test => test.Status == TestStatus.Fail))
@@ -49,10 +49,10 @@ namespace Exercism.TestRunner.CSharp
                 Status = TestStatus.Error,
                 Tests = Array.Empty<TestResult>()
             };
-            
+
         private static string NormalizeLogLine(this string logLine) =>
             logLine.RemoveProjectReference().UseUnixNewlines().Trim();
-        
+
         private static string RemoveProjectReference(this string logLine) =>
             logLine[..(logLine.LastIndexOf('[') - 1)];
     }

@@ -8,7 +8,7 @@ namespace Exercism.TestRunner.CSharp
         Fail,
         Error
     }
-    
+
     internal class TestResult
     {
         [JsonPropertyName("name")]

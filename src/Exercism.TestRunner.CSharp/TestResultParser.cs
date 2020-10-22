@@ -17,7 +17,7 @@ namespace Exercism.TestRunner.CSharp
             {
                 return Array.Empty<TestResult>();
             }
-            
+
             return result.Results.UnitTestResult
                 .Select(selector: ToTestResult)
                 .OrderBy(testResult => testResult.Name)
@@ -47,7 +47,7 @@ namespace Exercism.TestRunner.CSharp
         private static string Output(this XmlUnitTestResult xmlUnitTestResult) =>
             xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
     }
-    
+
     [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
     public class XmlOutput
     {
