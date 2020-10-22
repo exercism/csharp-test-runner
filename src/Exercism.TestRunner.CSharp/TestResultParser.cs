@@ -11,14 +11,17 @@ namespace Exercism.TestRunner.CSharp
         internal static TestResult[] FromFile(string logFilePath)
         {
             using var fileStream = File.OpenRead(logFilePath);
-
             var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
+
             if (result.Results == null)
             {
                 return Array.Empty<TestResult>();
             }
             
-            return result.Results.UnitTestResult.Select(selector: ToTestResult).ToArray();
+            return result.Results.UnitTestResult
+                .Select(selector: ToTestResult)
+                .OrderBy(testResult => testResult.Name)
+                .ToArray();
         }
 
         private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult) =>
