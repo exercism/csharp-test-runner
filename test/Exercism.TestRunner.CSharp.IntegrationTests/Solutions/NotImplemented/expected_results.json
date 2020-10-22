@@ -2,9 +2,9 @@
   "status": "fail",
   "tests": [
     {
-      "name": "FakeTest.Add_should_add_numbers",
+      "name": "FakeTests.Add_should_add_numbers",
       "status": "fail",
-      "message": "Please implement the Fake.Add method"
+      "message": "System.NotImplementedException : Please implement the Fake.Add method"
     }
   ]
 }
