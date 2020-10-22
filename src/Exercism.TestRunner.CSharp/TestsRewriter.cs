@@ -23,7 +23,7 @@ namespace Exercism.TestRunner.CSharp
 
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
-            public override SyntaxNode? VisitAttribute(AttributeSyntax node)
+            public override SyntaxNode VisitAttribute(AttributeSyntax node)
             {
                 if (node.Name.ToString() == "Fact")
                 {
@@ -36,7 +36,7 @@ namespace Exercism.TestRunner.CSharp
 
         private class CaptureConsoleOutputRewriter : CSharpSyntaxRewriter
         {
-            public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
+            public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node) =>
                 base.VisitClassDeclaration(
                     node.WithBaseList(BaseList(
                             SingletonSeparatedList<BaseTypeSyntax>(
