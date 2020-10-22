@@ -17,7 +17,7 @@ namespace Exercism.TestRunner.CSharp
 
         private static SyntaxNode CaptureConsoleOutput(this SyntaxNode testsRoot) =>
             new CaptureConsoleOutputRewriter().Visit(testsRoot);
-            
+
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
             public override SyntaxNode? VisitAttribute(AttributeSyntax node)
@@ -33,7 +33,7 @@ namespace Exercism.TestRunner.CSharp
 
         private class CaptureConsoleOutputRewriter : CSharpSyntaxRewriter
         {
-            public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) => 
+            public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
                 base.VisitClassDeclaration(
                     node.WithBaseList(SyntaxFactory.BaseList(
                             SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
@@ -65,7 +65,7 @@ namespace Exercism.TestRunner.CSharp
                                             SyntaxFactory.VariableDeclarator(
                                                 SyntaxFactory.Identifier("_stringWriter"))))),
                             SyntaxFactory.ConstructorDeclaration(
-                                    SyntaxFactory.Identifier("FakeTest"))
+                                    Identifier(node.Identifier.Text))
                                 .WithModifiers(
                                     SyntaxFactory.TokenList(
                                         SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
@@ -229,8 +229,8 @@ namespace Exercism.TestRunner.CSharp
                                                         SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
                                                             SyntaxFactory.Argument(
                                                                 SyntaxFactory.IdentifierName("output"))))))))).NormalizeWhitespace());
-            
-            
+
+
         }
     }
 }
