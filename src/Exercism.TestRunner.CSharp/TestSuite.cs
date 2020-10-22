@@ -1,17 +1,19 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Exercism.TestRunner.CSharp
 {
     internal class TestSuite
     {
+        private readonly SyntaxTree _originalSyntaxTree;
         private readonly string _testsFilePath;
         private readonly string _testResultsFilePath;
 
-        private TestSuite(string testsFilePath, string testResultsFilePath)
+        private TestSuite(SyntaxTree originalSyntaxTree, string testsFilePath, string testResultsFilePath)
         {
+            _originalSyntaxTree = originalSyntaxTree;
             _testsFilePath = testsFilePath;
             _testResultsFilePath = testResultsFilePath;
         }
@@ -20,6 +22,7 @@ namespace Exercism.TestRunner.CSharp
         {
             Rewrite();
             RunDotnetTest();
+            UndoRewrite();
         }
 
         private void RunDotnetTest()
@@ -37,19 +40,14 @@ namespace Exercism.TestRunner.CSharp
             Process.Start(processStartInfo)?.WaitForExit();
         }
 
-        private void Rewrite()
-        {
-            using var fileStream = File.Open(_testsFilePath, FileMode.Open, FileAccess.ReadWrite);
-            var syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(fileStream));
+        private void Rewrite() => File.WriteAllText(_testsFilePath, _originalSyntaxTree.Rewrite().ToString());
 
-            var rewrittenSyntaxTree = syntaxTree.Rewrite();
-            var sourceText = rewrittenSyntaxTree.GetText();
-            
-            using var fileWriter = new StreamWriter(fileStream);
-            fileStream.Seek(0, SeekOrigin.Begin);
-            sourceText.Write(fileWriter);
+        private void UndoRewrite() => File.WriteAllText(_testsFilePath, _originalSyntaxTree.ToString());
+
+        public static TestSuite FromOptions(Options options)
+        {
+            var originalSyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(options.TestsFilePath));
+            return new TestSuite(originalSyntaxTree, options.TestsFilePath, options.TestResultsFilePath);
         }
-        
-        public static TestSuite FromOptions(Options options) => new TestSuite(options.TestsFilePath, options.TestResultsFilePath);
     }
 }
