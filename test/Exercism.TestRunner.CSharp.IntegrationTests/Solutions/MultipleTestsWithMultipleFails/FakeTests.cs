@@ -1,6 +1,6 @@
 using Xunit;
 
-public class FakeTest
+public class FakeTests
 {
     [Fact]
     public void Add_should_add_numbers() =>

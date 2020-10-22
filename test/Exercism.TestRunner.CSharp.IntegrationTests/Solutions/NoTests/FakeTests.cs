@@ -1,5 +1,5 @@
 using Xunit;
 
-public class FakeTest
+public class FakeTests
 {
 }
