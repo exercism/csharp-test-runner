@@ -4,9 +4,9 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
 {
     internal static class TestSolutionRunner
     {
-        public static TestRun Run(string directory)
+        public static TestRun Run(string directory, string slug = "Fake")
         {
-            var testSolution = new TestSolution("Fake", directory);
+            var testSolution = new TestSolution(slug, directory);
 
             RunTestRunner(testSolution);
             return CreateTestRun(testSolution);

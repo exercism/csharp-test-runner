@@ -1,0 +1,9 @@
+{
+  "status": "pass",
+  "tests": [
+    {
+      "name": "FooTests.Add_should_add_numbers",
+      "status": "pass"
+    }
+  ]
+}
