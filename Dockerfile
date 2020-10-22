@@ -11,7 +11,7 @@ RUN dotnet restore -r linux-musl-x64
 
 # Copy everything else and build
 COPY src/Exercism.TestRunner.CSharp/ ./
-RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore
+RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore -p:PublishReadyToRun=true
 
 # Pre-install packages for offline usage
 RUN dotnet add package Microsoft.NET.Test.Sdk -v 16.7.1 && \
