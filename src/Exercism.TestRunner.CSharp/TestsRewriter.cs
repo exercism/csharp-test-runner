@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -37,200 +38,200 @@ namespace Exercism.TestRunner.CSharp
         {
             public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) =>
                 base.VisitClassDeclaration(
-                    node.WithBaseList(SyntaxFactory.BaseList(
-                            SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
-                                SyntaxFactory.SimpleBaseType(
-                                    SyntaxFactory.QualifiedName(
-                                        SyntaxFactory.IdentifierName("System"),
-                                        SyntaxFactory.IdentifierName("IDisposable"))))))
+                    node.WithBaseList(BaseList(
+                            SingletonSeparatedList<BaseTypeSyntax>(
+                                SimpleBaseType(
+                                    QualifiedName(
+                                        IdentifierName("System"),
+                                        IdentifierName("IDisposable"))))))
                         .AddMembers(
-                            SyntaxFactory.FieldDeclaration(
-                                SyntaxFactory.VariableDeclaration(
-                                        SyntaxFactory.QualifiedName(
-                                            SyntaxFactory.QualifiedName(
-                                                SyntaxFactory.IdentifierName("Xunit"),
-                                                SyntaxFactory.IdentifierName("Abstractions")),
-                                            SyntaxFactory.IdentifierName("ITestOutputHelper")))
+                            FieldDeclaration(
+                                VariableDeclaration(
+                                        QualifiedName(
+                                            QualifiedName(
+                                                IdentifierName("Xunit"),
+                                                IdentifierName("Abstractions")),
+                                            IdentifierName("ITestOutputHelper")))
                                     .WithVariables(
-                                        SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
-                                            SyntaxFactory.VariableDeclarator(
-                                                SyntaxFactory.Identifier("_testOutput"))))),
-                            SyntaxFactory.FieldDeclaration(
-                                SyntaxFactory.VariableDeclaration(
-                                        SyntaxFactory.QualifiedName(
-                                            SyntaxFactory.QualifiedName(
-                                                SyntaxFactory.IdentifierName("System"),
-                                                SyntaxFactory.IdentifierName("IO")),
-                                            SyntaxFactory.IdentifierName("StringWriter")))
+                                        SingletonSeparatedList<VariableDeclaratorSyntax>(
+                                            VariableDeclarator(
+                                                Identifier("_testOutput"))))),
+                            FieldDeclaration(
+                                VariableDeclaration(
+                                        QualifiedName(
+                                            QualifiedName(
+                                                IdentifierName("System"),
+                                                IdentifierName("IO")),
+                                            IdentifierName("StringWriter")))
                                     .WithVariables(
-                                        SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
-                                            SyntaxFactory.VariableDeclarator(
-                                                SyntaxFactory.Identifier("_stringWriter"))))),
-                            SyntaxFactory.ConstructorDeclaration(
-                                    SyntaxFactory.Identifier(node.Identifier.Text))
+                                        SingletonSeparatedList<VariableDeclaratorSyntax>(
+                                            VariableDeclarator(
+                                                Identifier("_stringWriter"))))),
+                            ConstructorDeclaration(
+                                    Identifier(node.Identifier.Text))
                                 .WithModifiers(
-                                    SyntaxFactory.TokenList(
-                                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                                    TokenList(
+                                        Token(SyntaxKind.PublicKeyword)))
                                 .WithParameterList(
-                                    SyntaxFactory.ParameterList(
-                                        SyntaxFactory.SingletonSeparatedList<ParameterSyntax>(
-                                            SyntaxFactory.Parameter(
-                                                    SyntaxFactory.Identifier("testOutput"))
+                                    ParameterList(
+                                        SingletonSeparatedList<ParameterSyntax>(
+                                            Parameter(
+                                                    Identifier("testOutput"))
                                                 .WithType(
-                                                    SyntaxFactory.QualifiedName(
-                                                        SyntaxFactory.QualifiedName(
-                                                            SyntaxFactory.IdentifierName("Xunit"),
-                                                            SyntaxFactory.IdentifierName("Abstractions")),
-                                                        SyntaxFactory.IdentifierName("ITestOutputHelper"))))))
+                                                    QualifiedName(
+                                                        QualifiedName(
+                                                            IdentifierName("Xunit"),
+                                                            IdentifierName("Abstractions")),
+                                                        IdentifierName("ITestOutputHelper"))))))
                                 .WithBody(
-                                    SyntaxFactory.Block(
-                                        SyntaxFactory.ExpressionStatement(
-                                            SyntaxFactory.AssignmentExpression(
+                                    Block(
+                                        ExpressionStatement(
+                                            AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
-                                                SyntaxFactory.IdentifierName("_testOutput"),
-                                                SyntaxFactory.IdentifierName("testOutput"))),
-                                        SyntaxFactory.ExpressionStatement(
-                                            SyntaxFactory.AssignmentExpression(
+                                                IdentifierName("_testOutput"),
+                                                IdentifierName("testOutput"))),
+                                        ExpressionStatement(
+                                            AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
-                                                SyntaxFactory.IdentifierName("_stringWriter"),
-                                                SyntaxFactory.ObjectCreationExpression(
-                                                        SyntaxFactory.QualifiedName(
-                                                            SyntaxFactory.QualifiedName(
-                                                                SyntaxFactory.IdentifierName("System"),
-                                                                SyntaxFactory.IdentifierName("IO")),
-                                                            SyntaxFactory.IdentifierName("StringWriter")))
+                                                IdentifierName("_stringWriter"),
+                                                ObjectCreationExpression(
+                                                        QualifiedName(
+                                                            QualifiedName(
+                                                                IdentifierName("System"),
+                                                                IdentifierName("IO")),
+                                                            IdentifierName("StringWriter")))
                                                     .WithArgumentList(
-                                                        SyntaxFactory.ArgumentList()))),
-                                        SyntaxFactory.ExpressionStatement(
-                                            SyntaxFactory.InvocationExpression(
-                                                    SyntaxFactory.MemberAccessExpression(
+                                                        ArgumentList()))),
+                                        ExpressionStatement(
+                                            InvocationExpression(
+                                                    MemberAccessExpression(
                                                         SyntaxKind.SimpleMemberAccessExpression,
-                                                        SyntaxFactory.MemberAccessExpression(
+                                                        MemberAccessExpression(
                                                             SyntaxKind.SimpleMemberAccessExpression,
-                                                            SyntaxFactory.IdentifierName("System"),
-                                                            SyntaxFactory.IdentifierName("Console")),
-                                                        SyntaxFactory.IdentifierName("SetOut")))
+                                                            IdentifierName("System"),
+                                                            IdentifierName("Console")),
+                                                        IdentifierName("SetOut")))
                                                 .WithArgumentList(
-                                                    SyntaxFactory.ArgumentList(
-                                                        SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                                                            SyntaxFactory.Argument(
-                                                                SyntaxFactory.IdentifierName("_stringWriter")))))),
-                                        SyntaxFactory.ExpressionStatement(
-                                            SyntaxFactory.InvocationExpression(
-                                                    SyntaxFactory.MemberAccessExpression(
+                                                    ArgumentList(
+                                                        SingletonSeparatedList<ArgumentSyntax>(
+                                                            Argument(
+                                                                IdentifierName("_stringWriter")))))),
+                                        ExpressionStatement(
+                                            InvocationExpression(
+                                                    MemberAccessExpression(
                                                         SyntaxKind.SimpleMemberAccessExpression,
-                                                        SyntaxFactory.MemberAccessExpression(
+                                                        MemberAccessExpression(
                                                             SyntaxKind.SimpleMemberAccessExpression,
-                                                            SyntaxFactory.IdentifierName("System"),
-                                                            SyntaxFactory.IdentifierName("Console")),
-                                                        SyntaxFactory.IdentifierName("SetError")))
+                                                            IdentifierName("System"),
+                                                            IdentifierName("Console")),
+                                                        IdentifierName("SetError")))
                                                 .WithArgumentList(
-                                                    SyntaxFactory.ArgumentList(
-                                                        SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                                                            SyntaxFactory.Argument(
-                                                                SyntaxFactory.IdentifierName("_stringWriter")))))),
-                                        SyntaxFactory.ExpressionStatement(
-                                            SyntaxFactory.InvocationExpression(
-                                                    SyntaxFactory.MemberAccessExpression(
+                                                    ArgumentList(
+                                                        SingletonSeparatedList<ArgumentSyntax>(
+                                                            Argument(
+                                                                IdentifierName("_stringWriter")))))),
+                                        ExpressionStatement(
+                                            InvocationExpression(
+                                                    MemberAccessExpression(
                                                         SyntaxKind.SimpleMemberAccessExpression,
-                                                        SyntaxFactory.MemberAccessExpression(
+                                                        MemberAccessExpression(
                                                             SyntaxKind.SimpleMemberAccessExpression,
-                                                            SyntaxFactory.MemberAccessExpression(
+                                                            MemberAccessExpression(
                                                                 SyntaxKind.SimpleMemberAccessExpression,
-                                                                SyntaxFactory.MemberAccessExpression(
+                                                                MemberAccessExpression(
                                                                     SyntaxKind.SimpleMemberAccessExpression,
-                                                                    SyntaxFactory.IdentifierName("System"),
-                                                                    SyntaxFactory.IdentifierName("Diagnostics")),
-                                                                SyntaxFactory.IdentifierName("Trace")),
-                                                            SyntaxFactory.IdentifierName("Listeners")),
-                                                        SyntaxFactory.IdentifierName("Add")))
+                                                                    IdentifierName("System"),
+                                                                    IdentifierName("Diagnostics")),
+                                                                IdentifierName("Trace")),
+                                                            IdentifierName("Listeners")),
+                                                        IdentifierName("Add")))
                                                 .WithArgumentList(
-                                                    SyntaxFactory.ArgumentList(
-                                                        SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                                                            SyntaxFactory.Argument(
-                                                                SyntaxFactory.ObjectCreationExpression(
-                                                                        SyntaxFactory.QualifiedName(
-                                                                            SyntaxFactory.QualifiedName(
-                                                                                SyntaxFactory.IdentifierName("System"),
-                                                                                SyntaxFactory.IdentifierName("Diagnostics")),
-                                                                            SyntaxFactory.IdentifierName("ConsoleTraceListener")))
+                                                    ArgumentList(
+                                                        SingletonSeparatedList<ArgumentSyntax>(
+                                                            Argument(
+                                                                ObjectCreationExpression(
+                                                                        QualifiedName(
+                                                                            QualifiedName(
+                                                                                IdentifierName("System"),
+                                                                                IdentifierName("Diagnostics")),
+                                                                            IdentifierName("ConsoleTraceListener")))
                                                                     .WithArgumentList(
-                                                                        SyntaxFactory.ArgumentList())))))))),
-                            SyntaxFactory.MethodDeclaration(
-                                    SyntaxFactory.PredefinedType(
-                                        SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-                                    SyntaxFactory.Identifier("Dispose"))
+                                                                        ArgumentList())))))))),
+                            MethodDeclaration(
+                                    PredefinedType(
+                                        Token(SyntaxKind.VoidKeyword)),
+                                    Identifier("Dispose"))
                                 .WithModifiers(
-                                    SyntaxFactory.TokenList(
-                                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                                    TokenList(
+                                        Token(SyntaxKind.PublicKeyword)))
                                 .WithBody(
-                                    SyntaxFactory.Block(
-                                        SyntaxFactory.LocalDeclarationStatement(
-                                            SyntaxFactory.VariableDeclaration(
-                                                    SyntaxFactory.IdentifierName("var"))
+                                    Block(
+                                        LocalDeclarationStatement(
+                                            VariableDeclaration(
+                                                    IdentifierName("var"))
                                                 .WithVariables(
-                                                    SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
-                                                        SyntaxFactory.VariableDeclarator(
-                                                                SyntaxFactory.Identifier("output"))
+                                                    SingletonSeparatedList<VariableDeclaratorSyntax>(
+                                                        VariableDeclarator(
+                                                                Identifier("output"))
                                                             .WithInitializer(
-                                                                SyntaxFactory.EqualsValueClause(
-                                                                    SyntaxFactory.InvocationExpression(
-                                                                        SyntaxFactory.MemberAccessExpression(
+                                                                EqualsValueClause(
+                                                                    InvocationExpression(
+                                                                        MemberAccessExpression(
                                                                             SyntaxKind.SimpleMemberAccessExpression,
-                                                                            SyntaxFactory.IdentifierName("_stringWriter"),
-                                                                            SyntaxFactory.IdentifierName("ToString")))))))),
-                                        SyntaxFactory.IfStatement(
-                                            SyntaxFactory.BinaryExpression(
+                                                                            IdentifierName("_stringWriter"),
+                                                                            IdentifierName("ToString")))))))),
+                                        IfStatement(
+                                            BinaryExpression(
                                                 SyntaxKind.GreaterThanExpression,
-                                                SyntaxFactory.MemberAccessExpression(
+                                                MemberAccessExpression(
                                                     SyntaxKind.SimpleMemberAccessExpression,
-                                                    SyntaxFactory.IdentifierName("output"),
-                                                    SyntaxFactory.IdentifierName("Length")),
-                                                SyntaxFactory.LiteralExpression(
+                                                    IdentifierName("output"),
+                                                    IdentifierName("Length")),
+                                                LiteralExpression(
                                                     SyntaxKind.NumericLiteralExpression,
-                                                    SyntaxFactory.Literal(500))),
-                                            SyntaxFactory.Block(
-                                                SyntaxFactory.SingletonList<StatementSyntax>(
-                                                    SyntaxFactory.ExpressionStatement(
-                                                        SyntaxFactory.AssignmentExpression(
+                                                    Literal(500))),
+                                            Block(
+                                                SingletonList<StatementSyntax>(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
                                                             SyntaxKind.SimpleAssignmentExpression,
-                                                            SyntaxFactory.IdentifierName("output"),
-                                                            SyntaxFactory.BinaryExpression(
+                                                            IdentifierName("output"),
+                                                            BinaryExpression(
                                                                 SyntaxKind.AddExpression,
-                                                                SyntaxFactory.InvocationExpression(
-                                                                        SyntaxFactory.MemberAccessExpression(
+                                                                InvocationExpression(
+                                                                        MemberAccessExpression(
                                                                             SyntaxKind.SimpleMemberAccessExpression,
-                                                                            SyntaxFactory.IdentifierName("output"),
-                                                                            SyntaxFactory.IdentifierName("Substring")))
+                                                                            IdentifierName("output"),
+                                                                            IdentifierName("Substring")))
                                                                     .WithArgumentList(
-                                                                        SyntaxFactory.ArgumentList(
-                                                                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                                                        ArgumentList(
+                                                                            SeparatedList<ArgumentSyntax>(
                                                                                 new SyntaxNodeOrToken[]{
-                                                                                    SyntaxFactory.Argument(
-                                                                                        SyntaxFactory.LiteralExpression(
+                                                                                    Argument(
+                                                                                        LiteralExpression(
                                                                                             SyntaxKind.NumericLiteralExpression,
-                                                                                            SyntaxFactory.Literal(0))),
-                                                                                    SyntaxFactory.Token(SyntaxKind.CommaToken),
-                                                                                    SyntaxFactory.Argument(
-                                                                                        SyntaxFactory.LiteralExpression(
+                                                                                            Literal(0))),
+                                                                                    Token(SyntaxKind.CommaToken),
+                                                                                    Argument(
+                                                                                        LiteralExpression(
                                                                                             SyntaxKind.NumericLiteralExpression,
-                                                                                            SyntaxFactory.Literal(450)))}))),
-                                                                SyntaxFactory.LiteralExpression(
+                                                                                            Literal(450)))}))),
+                                                                LiteralExpression(
                                                                     SyntaxKind.StringLiteralExpression,
-                                                                    SyntaxFactory.Literal(@"
+                                                                    Literal(@"
 
     Output was truncated. Please limit to 500 chars.")))))))),
-                                        SyntaxFactory.ExpressionStatement(
-                                            SyntaxFactory.InvocationExpression(
-                                                    SyntaxFactory.MemberAccessExpression(
+                                        ExpressionStatement(
+                                            InvocationExpression(
+                                                    MemberAccessExpression(
                                                         SyntaxKind.SimpleMemberAccessExpression,
-                                                        SyntaxFactory.IdentifierName("_testOutput"),
-                                                        SyntaxFactory.IdentifierName("WriteLine")))
+                                                        IdentifierName("_testOutput"),
+                                                        IdentifierName("WriteLine")))
                                                 .WithArgumentList(
-                                                    SyntaxFactory.ArgumentList(
-                                                        SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                                                            SyntaxFactory.Argument(
-                                                                SyntaxFactory.IdentifierName("output"))))))))).NormalizeWhitespace());
+                                                    ArgumentList(
+                                                        SingletonSeparatedList<ArgumentSyntax>(
+                                                            Argument(
+                                                                IdentifierName("output"))))))))).NormalizeWhitespace());
 
 
         }
