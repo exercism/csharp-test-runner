@@ -39,7 +39,7 @@ function Move-Generated-Test-Results-To-Expected ([string] $SolutionsDir) {
 }
 
 function Update-Expected {
-    $solutionsDir = Join-Path "test" "Exercism.TestRunner.CSharp.IntegrationTests" "Solutions"
+    $solutionsDir = Join-Path "test" (Join-Path "Exercism.TestRunner.CSharp.IntegrationTests" "Solutions")
     
     Get-ChildItem $solutionsDir -Directory | ForEach-Object { 
         Run-Test-Runner $_.FullName
