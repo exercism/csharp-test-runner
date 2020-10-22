@@ -29,4 +29,10 @@ param (
 )
 
 docker build -t exercism/csharp-test-runner .
-docker run -v ${InputDirectory}:/solution -v ${OutputDirectory}:/results exercism/csharp-test-runner $Exercise /solution /results
+docker run `
+  --network none `
+  --read-only `
+  --mount type=bind,src=${InputDirectory},dst=/input/ `
+  --mount type=bind,src=${OutputDirectory},dst=/output/ `
+  --mount type=tmpfs,dst=/tmp `
+  exercism/csharp-test-runner $Exercise /input /output

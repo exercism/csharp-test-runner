@@ -3,7 +3,7 @@ using Xunit.Sdk;
 using System.Collections.Generic;
 using System.Linq;
 
-public class FakeTest
+public class FakeTests
 {
     [Fact]
     public void Add_should_add_numbers() =>

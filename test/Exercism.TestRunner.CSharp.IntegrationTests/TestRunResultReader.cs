@@ -12,7 +12,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
 
         public static string ReadExpected(TestSolution solution) =>
             ReadTestRunResult(solution, "expected_results.json");
-        
+
         private static string ReadTestRunResult(TestSolution solution, string fileName)
         {
             var testRunResult = DeserializeTestRunResult(solution, fileName);
@@ -25,7 +25,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             JsonSerializer.Deserialize<TestRunResult>(ReadFile(solution, fileName), CreateJsonSerializerOptions());
 
         private static string ReadFile(TestSolution solution, string fileName) =>
-            File.ReadAllText(Path.Combine(solution.Directory, fileName));
+            File.ReadAllText(Path.Combine(solution.DirectoryFullPath, fileName));
 
         private static void NormalizeTestRunResult(TestRunResult testRunResult)
         {
@@ -43,37 +43,37 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             options.Converters.Add(new JsonStringEnumConverter());
             return options;
         }
-        
+
         private enum TestStatus
         {
             Pass,
             Fail,
             Error
         }
-    
+
         private struct TestRunResult
         {
             [JsonPropertyName("status")]
             public TestStatus Status { get; set; }
-        
+
             [JsonPropertyName("message")]
             public string Message { get; set; }
-        
+
             [JsonPropertyName("tests")]
             public TestResult[] Tests { get; set; }
         }
-    
+
         private struct TestResult
         {
             [JsonPropertyName("status")]
             public TestStatus Status { get; set; }
-        
+
             [JsonPropertyName("message")]
             public string Message { get; set; }
-        
+
             [JsonPropertyName("name")]
             public string Name { get; set; }
-        
+
             [JsonPropertyName("output")]
             public string Output { get; set; }
         }

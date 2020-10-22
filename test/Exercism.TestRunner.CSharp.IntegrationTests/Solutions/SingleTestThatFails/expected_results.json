@@ -2,7 +2,7 @@
   "status": "fail",
   "tests": [
     {
-      "name": "FakeTest.Add_should_add_numbers",
+      "name": "FakeTests.Add_should_add_numbers",
       "status": "fail",
       "message": "Assert.Equal() Failure\nExpected: 3\nActual:   2"
     }

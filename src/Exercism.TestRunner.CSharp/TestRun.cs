@@ -1,33 +1,38 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Exercism.TestRunner.CSharp
 {
+    internal enum TestStatus
+    {
+        Pass,
+        Fail,
+        Error
+    }
+
+    internal class TestResult
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("status")]
+        public TestStatus Status { get; set; }
+
+        [JsonPropertyName("message")]
+        public string Message { get; set; }
+
+        [JsonPropertyName("output")]
+        public string Output { get; set; }
+    }
+
     internal class TestRun
     {
-        public string Message { get; }
-        public TestStatus Status { get; }
-        public TestResult[] Tests { get; }
+        [JsonPropertyName("status")]
+        public TestStatus Status { get; set; }
 
-        private TestRun(string message, TestStatus status, TestResult[] tests) =>
-            (Message, Status, Tests) = (message, status, tests);
+        [JsonPropertyName("message")]
+        public string Message { get; set; }
 
-        public static TestRun FromErrors(string errors) =>
-            new TestRun(errors, TestStatus.Error, Array.Empty<TestResult>());
-
-        public static TestRun FromTests(TestResult[] tests) =>
-            new TestRun(null, ToTestStatus(tests), tests);
-
-        private static TestStatus ToTestStatus(IReadOnlyCollection<TestResult> tests)
-        {
-            if (tests.Any(test => test.Status == TestStatus.Fail))
-                return TestStatus.Fail;
-
-            if (tests.All(test => test.Status == TestStatus.Pass) && tests.Any())
-                return TestStatus.Pass;
-
-            return TestStatus.Error;
-        }
+        [JsonPropertyName("tests")]
+        public TestResult[] Tests { get; set; }
     }
 }

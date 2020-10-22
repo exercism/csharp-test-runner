@@ -2,18 +2,18 @@
   "status": "fail",
   "tests": [
     {
-      "name": "FakeTest.Add_should_add_numbers",
+      "name": "FakeTests.Add_should_add_numbers",
       "status": "fail",
       "message": "Assert.Equal() Failure\nExpected: 3\nActual:   2"
     },
     {
-      "name": "FakeTest.Sub_should_subtract_numbers",
-      "status": "pass"
-    },
-    {
-      "name": "FakeTest.Mul_should_multiply_numbers",
+      "name": "FakeTests.Mul_should_multiply_numbers",
       "status": "fail",
       "message": "Assert.Equal() Failure\nExpected: 7\nActual:   6"
+    },
+    {
+      "name": "FakeTests.Sub_should_subtract_numbers",
+      "status": "pass"
     }
   ]
 }

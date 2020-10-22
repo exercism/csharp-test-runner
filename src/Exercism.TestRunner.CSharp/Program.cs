@@ -1,29 +1,27 @@
-using System.Threading.Tasks;
 using CommandLine;
-using Microsoft.Build.Locator;
+
 using Serilog;
 
 namespace Exercism.TestRunner.CSharp
 {
     public static class Program
-    {   
+    {
         public static void Main(string[] args)
         {
-            if (!MSBuildLocator.IsRegistered)
-                MSBuildLocator.RegisterDefaults();
-            
             Logging.Configure();
 
-            Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(options => CreateTestResults(options).GetAwaiter().GetResult());
+            Parser.Default
+                .ParseArguments<Options>(args)
+                .WithParsed(CreateTestResults);
         }
 
-        private static async Task CreateTestResults(Options options)
+        private static void CreateTestResults(Options options)
         {
             Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
-            var testRun = await TestRunner.Run(options);
-            TestRunWriter.WriteToFile(options, testRun);
+            var testSuite = TestSuite.FromOptions(options);
+            var testRun = testSuite.Run();
+            testRun.WriteToFile(options.ResultsJsonFilePath);
 
             Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
         }
