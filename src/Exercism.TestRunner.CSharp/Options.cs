@@ -18,7 +18,7 @@ namespace Exercism.TestRunner.CSharp
         public Options(string slug, string inputDirectory, string outputDirectory) =>
             (Slug, InputDirectory, OutputDirectory) = (slug, inputDirectory, outputDirectory);
         
-        public string ProjectFilePath => Path.Combine(InputDirectory, $"{Exercise}.csproj");
+        public string TestsFilePath => Path.Combine(InputDirectory, $"{Exercise}Tests.cs");
         
         public string BuildLogFilePath => Path.Combine(InputDirectory, "msbuild.log");
 

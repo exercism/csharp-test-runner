@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Exercism.TestRunner.CSharp.IntegrationTests
@@ -6,107 +5,107 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
     public class TestRunnerTests
     {
         [Fact]
-        public async Task MultipleCompileErrors()
+        public void MultipleCompileErrors()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleCompileErrors");
+            var testRun = TestSolutionRunner.Run("MultipleCompileErrors");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
 
         [Fact]
-        public async Task MultipleTestClassesWithAllPasses()
+        public void MultipleTestClassesWithAllPasses()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleTestClassesWithAllPasses");
+            var testRun = TestSolutionRunner.Run("MultipleTestClassesWithAllPasses");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
 
         [Fact]
-        public async Task MultipleTestsWithAllPasses()
+        public void MultipleTestsWithAllPasses()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleTestsWithAllPasses");
+            var testRun = TestSolutionRunner.Run("MultipleTestsWithAllPasses");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task MultipleTestsWithMultipleFails()
+        public void MultipleTestsWithMultipleFails()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleTestsWithMultipleFails");
+            var testRun = TestSolutionRunner.Run("MultipleTestsWithMultipleFails");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task MultipleTestsWithSingleFail()
+        public void MultipleTestsWithSingleFail()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleTestsWithSingleFail");
+            var testRun = TestSolutionRunner.Run("MultipleTestsWithSingleFail");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task MultipleTestsWithTestOutput()
+        public void MultipleTestsWithTestOutput()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleTestsWithTestOutput");
+            var testRun = TestSolutionRunner.Run("MultipleTestsWithTestOutput");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
                 
         [Fact]
-        public async Task MultipleTestsWithTestOutputExceedingLimit()
+        public void MultipleTestsWithTestOutputExceedingLimit()
         {
-            var testRun = await TestSolutionRunner.Run("MultipleTestsWithTestOutputExceedingLimit");
+            var testRun = TestSolutionRunner.Run("MultipleTestsWithTestOutputExceedingLimit");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task NetCoreApp2_1()
+        public void NetCoreApp2_1()
         {
-            var testRun = await TestSolutionRunner.Run("NetCoreApp2.1");
+            var testRun = TestSolutionRunner.Run("NetCoreApp2.1");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task NetCoreApp2_2()
+        public void NetCoreApp2_2()
         {
-            var testRun = await TestSolutionRunner.Run("NetCoreApp2.2");
+            var testRun = TestSolutionRunner.Run("NetCoreApp2.2");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task NetCoreApp3_0()
+        public void NetCoreApp3_0()
         {
-            var testRun = await TestSolutionRunner.Run("NetCoreApp3.0");
+            var testRun = TestSolutionRunner.Run("NetCoreApp3.0");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task NoTests()
+        public void NoTests()
         {
-            var testRun = await TestSolutionRunner.Run("NoTests");
+            var testRun = TestSolutionRunner.Run("NoTests");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task NotImplemented()
+        public void NotImplemented()
         {
-            var testRun = await TestSolutionRunner.Run("NotImplemented");
+            var testRun = TestSolutionRunner.Run("NotImplemented");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task SingleCompileError()
+        public void SingleCompileError()
         {
-            var testRun = await TestSolutionRunner.Run("SingleCompileError");
+            var testRun = TestSolutionRunner.Run("SingleCompileError");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
         [Fact]
-        public async Task SingleTestThatFails()
+        public void SingleTestThatFails()
         {
-            var testRun = await TestSolutionRunner.Run("SingleTestThatFails");
+            var testRun = TestSolutionRunner.Run("SingleTestThatFails");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
 
         [Fact]
-        public async Task SingleTestThatPasses()
+        public void SingleTestThatPasses()
         {
-            var testRun = await TestSolutionRunner.Run("SingleTestThatPasses");
+            var testRun = TestSolutionRunner.Run("SingleTestThatPasses");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
     }

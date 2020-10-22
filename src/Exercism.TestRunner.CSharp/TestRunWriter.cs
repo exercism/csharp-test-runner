@@ -6,10 +6,10 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunWriter
     {
-        public static void WriteToFile(TestRun testRun, Options options) =>
-            File.WriteAllText(options.ResultsJsonFilePath, SerializeAsJson(testRun));
+        public static void WriteToFile(this TestRun testRun, string resultsJsonFilePath) =>
+            File.WriteAllText(resultsJsonFilePath, testRun.ToJson());
 
-        private static string SerializeAsJson(TestRun testRun) =>
+        private static string ToJson(this TestRun testRun) =>
             JsonSerializer.Serialize(testRun, CreateJsonSerializerOptions());
 
         private static JsonSerializerOptions CreateJsonSerializerOptions()

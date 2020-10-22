@@ -1,46 +1,23 @@
-﻿using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Exercism.TestRunner.CSharp
 {
-    internal class TestProjectRewriter
+    internal static class TestsRewriter
     {
-        private readonly TestProject _testProject;
-        private readonly Document _testsDocument;
-        private SyntaxNode _originalTestsRoot;
-        private Workspace _newWorkspace;
+        public static SyntaxTree Rewrite(this SyntaxTree tree) =>
+            tree.WithRootAndOptions(tree.GetRoot().Rewrite(), tree.Options);
 
-        public TestProjectRewriter(TestProject testProject)
-        {
-            _testProject = testProject;
-            _testsDocument = _testProject.TestsDocument();
-        }
+        private static SyntaxNode Rewrite(this SyntaxNode node) =>
+            node.UnskipTests().CaptureConsoleOutput();
 
-        public async Task Rewrite()
-        {
-            var syntaxRoot = await _testsDocument.GetSyntaxRootAsync();
-            var rewrittenTestsRoot = CaptureConsoleOutput(UnskipTests(syntaxRoot));
-            var rewrittenTestsDocument = _testsDocument.WithSyntaxRoot(rewrittenTestsRoot);
-
-            var tryApplyChanges = _testProject.Workspace.TryApplyChanges(rewrittenTestsDocument.Project.Solution);
-
-            _newWorkspace = rewrittenTestsDocument.Project.Solution.Workspace;
-        }
-
-        public void UndoRewrite()
-        {
-            var originalTestsDocument = _testsDocument.WithSyntaxRoot(_originalTestsRoot);
-            var tryApplyChanges = _newWorkspace.TryApplyChanges(originalTestsDocument.Project.Solution);
-        }
-
-        private static SyntaxNode UnskipTests(SyntaxNode testsRoot) =>
+        private static SyntaxNode UnskipTests(this SyntaxNode testsRoot) =>
             new UnskipTestsRewriter().Visit(testsRoot);
 
-        private static SyntaxNode CaptureConsoleOutput(SyntaxNode testsRoot) =>
+        private static SyntaxNode CaptureConsoleOutput(this SyntaxNode testsRoot) =>
             new CaptureConsoleOutputRewriter().Visit(testsRoot);
-
+            
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
             public override SyntaxNode? VisitAttribute(AttributeSyntax node)
