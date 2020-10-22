@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -22,20 +23,31 @@ namespace Exercism.TestRunner.CSharp
         private static TestRun TestRunWithoutError(Options options)
         {
             var testResults = TestResultParser.FromFile(options.TestResultsFilePath);
-            var status = testResults.Any(x => x.Status == TestStatus.Error) ? TestStatus.Error : TestStatus.Pass;
 
             return new TestRun
             {
-                Status = status,
+                Status = testResults.ToTestStatus(),
                 Tests = testResults
             };
+        }
+        
+        private static TestStatus ToTestStatus(this TestResult[] tests)
+        {
+            if (tests.Any(test => test.Status == TestStatus.Fail))
+                return TestStatus.Fail;
+
+            if (tests.All(test => test.Status == TestStatus.Pass) && tests.Any())
+                return TestStatus.Pass;
+
+            return TestStatus.Error;
         }
 
         private static TestRun TestRunWithError(IEnumerable<string> logLines) =>
             new TestRun
             {
                 Message = string.Join("\n", logLines),
-                Status = TestStatus.Error
+                Status = TestStatus.Error,
+                Tests = Array.Empty<TestResult>()
             };
     }
 }
