@@ -28,6 +28,8 @@ TestResults/
 msbuild.log
 *.trx
 
-
 # Test files
 test/**/Directory.Build.props
+
+# SDK files
+global.json
