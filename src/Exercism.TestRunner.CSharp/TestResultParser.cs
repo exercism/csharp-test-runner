@@ -42,10 +42,10 @@ namespace Exercism.TestRunner.CSharp
             };
 
         private static string Message(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Output?.ErrorInfo?.Message;
+            xmlUnitTestResult.Output?.ErrorInfo?.Message?.UseUnixNewlines()?.Trim();
 
         private static string Output(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Output?.StdOut;
+            xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
     }
     
     [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
