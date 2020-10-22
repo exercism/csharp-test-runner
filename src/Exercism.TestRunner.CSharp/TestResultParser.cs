@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,11 @@ namespace Exercism.TestRunner.CSharp
             using var fileStream = File.OpenRead(logFilePath);
 
             var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
+            if (result.Results == null)
+            {
+                return Array.Empty<TestResult>();
+            }
+            
             return result.Results.UnitTestResult.Select(selector: ToTestResult).ToArray();
         }
 
