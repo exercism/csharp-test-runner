@@ -45,9 +45,21 @@ namespace Exercism.TestRunner.CSharp
         private static TestRun TestRunWithError(IEnumerable<string> logLines) =>
             new TestRun
             {
-                Message = string.Join("\n", logLines),
+                Message = string.Join("\n", logLines.Select(Normalize)),
                 Status = TestStatus.Error,
                 Tests = Array.Empty<TestResult>()
             };
+
+        private static string Normalize(string logLine) =>
+            logLine
+                .UnixNewlines()
+                .RemoveProjectReference()
+                .Trim();
+
+        private static string UnixNewlines(this string logLine) =>
+            logLine.Replace("\r\n", "\n");
+        
+        private static string RemoveProjectReference(this string logLine) =>
+            logLine[..(logLine.LastIndexOf('[') - 1)];
     }
 }
