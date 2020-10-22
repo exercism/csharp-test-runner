@@ -10,7 +10,9 @@ namespace Exercism.TestRunner.CSharp
             tree.WithRootAndOptions(tree.GetRoot().Rewrite(), tree.Options);
 
         private static SyntaxNode Rewrite(this SyntaxNode node) =>
-            node.UnskipTests().CaptureConsoleOutput();
+            node
+                .UnskipTests()
+                .CaptureConsoleOutput();
 
         private static SyntaxNode UnskipTests(this SyntaxNode testsRoot) =>
             new UnskipTestsRewriter().Visit(testsRoot);
@@ -65,7 +67,7 @@ namespace Exercism.TestRunner.CSharp
                                             SyntaxFactory.VariableDeclarator(
                                                 SyntaxFactory.Identifier("_stringWriter"))))),
                             SyntaxFactory.ConstructorDeclaration(
-                                    Identifier(node.Identifier.Text))
+                                    SyntaxFactory.Identifier(node.Identifier.Text))
                                 .WithModifiers(
                                     SyntaxFactory.TokenList(
                                         SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
