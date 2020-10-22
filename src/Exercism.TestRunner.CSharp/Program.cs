@@ -19,9 +19,7 @@ namespace Exercism.TestRunner.CSharp
             Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
 
             var testSuite = TestSuite.FromOptions(options);
-            testSuite.Run();
-
-            var testRun = TestRunParser.Parse(options);
+            var testRun = testSuite.Run();
             testRun.WriteToFile(options.ResultsJsonFilePath);
 
             Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);

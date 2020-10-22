@@ -8,31 +8,31 @@ namespace Exercism.TestRunner.CSharp
     internal class TestSuite
     {
         private readonly SyntaxTree _originalSyntaxTree;
-        private readonly string _testsFilePath;
-        private readonly string _testResultsFilePath;
+        private readonly Options _options;
 
-        private TestSuite(SyntaxTree originalSyntaxTree, string testsFilePath, string testResultsFilePath)
+        private TestSuite(SyntaxTree originalSyntaxTree, Options options)
         {
             _originalSyntaxTree = originalSyntaxTree;
-            _testsFilePath = testsFilePath;
-            _testResultsFilePath = testResultsFilePath;
+            _options = options;
         }
 
-        public void Run()
+        public TestRun Run()
         {
             Rewrite();
             RunDotnetTest();
             UndoRewrite();
+
+            return TestRunParser.Parse(_options);
         }
 
         private void RunDotnetTest()
         {
             var command = "dotnet";
-            var arguments = $"test --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_testResultsFilePath)}\" /flp:v=q";
+            var arguments = $"test --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q";
 
             var processStartInfo = new ProcessStartInfo(command, arguments)
             {
-                WorkingDirectory = Path.GetDirectoryName(_testsFilePath)!,
+                WorkingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!,
                 RedirectStandardInput = true,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
@@ -40,14 +40,14 @@ namespace Exercism.TestRunner.CSharp
             Process.Start(processStartInfo)?.WaitForExit();
         }
 
-        private void Rewrite() => File.WriteAllText(_testsFilePath, _originalSyntaxTree.Rewrite().ToString());
+        private void Rewrite() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.Rewrite().ToString());
 
-        private void UndoRewrite() => File.WriteAllText(_testsFilePath, _originalSyntaxTree.ToString());
+        private void UndoRewrite() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.ToString());
 
         public static TestSuite FromOptions(Options options)
         {
             var originalSyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(options.TestsFilePath));
-            return new TestSuite(originalSyntaxTree, options.TestsFilePath, options.TestResultsFilePath);
+            return new TestSuite(originalSyntaxTree, options);
         }
     }
 }
