@@ -54,23 +54,16 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         }
         
         [Fact]
-        public void NetCoreApp2_1()
-        {
-            var testRun = TestSolutionRunner.Run("NetCoreApp2.1");
-            Assert.Equal(testRun.Expected, testRun.Actual);
-        }
-        
-        [Fact]
-        public void NetCoreApp2_2()
-        {
-            var testRun = TestSolutionRunner.Run("NetCoreApp2.2");
-            Assert.Equal(testRun.Expected, testRun.Actual);
-        }
-        
-        [Fact]
         public void NetCoreApp3_0()
         {
             var testRun = TestSolutionRunner.Run("NetCoreApp3.0");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
+        
+        [Fact]
+        public void NetCoreApp3_1()
+        {
+            var testRun = TestSolutionRunner.Run("NetCoreApp3.1");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
         
