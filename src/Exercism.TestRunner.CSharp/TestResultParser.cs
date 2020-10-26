@@ -68,9 +68,6 @@ namespace Exercism.TestRunner.CSharp
         [XmlAttribute(AttributeName = "testName")]
         public string TestName { get; set; }
 
-        [XmlAttribute(AttributeName = "computerName")]
-        public string ComputerName { get; set; }
-
         [XmlAttribute(AttributeName = "outcome")]
         public string Outcome { get; set; }
     }
@@ -80,10 +77,6 @@ namespace Exercism.TestRunner.CSharp
     {
         [XmlElement(ElementName = "Message", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
         public string Message { get; set; }
-
-        [XmlElement(ElementName = "StackTrace",
-            Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public string StackTrace { get; set; }
     }
 
     [XmlRoot(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
@@ -99,8 +92,5 @@ namespace Exercism.TestRunner.CSharp
     {
         [XmlElement(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
         public XmlResults Results { get; set; }
-
-        [XmlAttribute(AttributeName = "xmlns")]
-        public string Xmlns { get; set; }
     }
 }
