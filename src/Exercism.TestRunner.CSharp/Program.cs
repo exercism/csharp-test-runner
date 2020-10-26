@@ -1,29 +1,25 @@
 using CommandLine;
 
-using Serilog;
+using System;
 
 namespace Exercism.TestRunner.CSharp
 {
     public static class Program
     {
-        public static void Main(string[] args)
-        {
-            Logging.Configure();
-
+        public static void Main(string[] args) =>
             Parser.Default
                 .ParseArguments<Options>(args)
                 .WithParsed(CreateTestResults);
-        }
 
         private static void CreateTestResults(Options options)
         {
-            Log.Information("Running test runner for {Exercise} solution in directory {Directory}", options.Slug, options.InputDirectory);
+            Console.WriteLine($"Running test runner for '{options.Slug}' solution...");
 
             var testSuite = TestSuite.FromOptions(options);
             var testRun = testSuite.Run();
             testRun.WriteToFile(options.ResultsJsonFilePath);
 
-            Log.Information("Ran test runner for {Exercise} solution in directory {Directory}", options.Slug, options.OutputDirectory);
+            Console.WriteLine($"Ran test runner for '{options.Slug}' solution");
         }
     }
 }
