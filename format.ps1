@@ -11,7 +11,7 @@
     that NPM has to be installed for this functionality to work.
 #>
 
-dotnet tool install -g dotnet-format --version 4.0.130203
+dotnet tool restore
 dotnet format
 
 npx prettier@1.18.2 --write "**/*.{json,md}"
