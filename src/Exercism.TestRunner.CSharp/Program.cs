@@ -1,6 +1,6 @@
-using CommandLine;
-
 using System;
+
+using CommandLine;
 
 namespace Exercism.TestRunner.CSharp
 {
