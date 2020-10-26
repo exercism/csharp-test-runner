@@ -13,13 +13,13 @@ namespace Exercism.TestRunner.CSharp
 
         private static void CreateTestResults(Options options)
         {
-            Console.WriteLine($"Running test runner for '{options.Slug}' solution...");
+            Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Running test runner for '{options.Slug}' solution...");
 
             var testSuite = TestSuite.FromOptions(options);
             var testRun = testSuite.Run();
             testRun.WriteToFile(options.ResultsJsonFilePath);
 
-            Console.WriteLine($"Ran test runner for '{options.Slug}' solution");
+            Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Ran test runner for '{options.Slug}' solution");
         }
     }
 }
