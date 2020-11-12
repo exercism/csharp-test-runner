@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.302-alpine3.12 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0.100-alpine3.12-amd64 AS build
 WORKDIR /app
 
 # Download exercism tooling webserver
@@ -14,12 +14,12 @@ COPY src/Exercism.TestRunner.CSharp/ ./
 RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore -p:PublishReadyToRun=true
 
 # Pre-install packages for offline usage
-RUN dotnet add package Microsoft.NET.Test.Sdk -v 16.7.1 && \
+RUN dotnet add package Microsoft.NET.Test.Sdk -v 16.8.0 && \
     dotnet add package xunit -v 2.4.1 && \
     dotnet add package xunit.runner.visualstudio -v 2.4.3
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.302-alpine3.12 AS runtime
+FROM mcr.microsoft.com/dotnet/sdk:5.0.100-alpine3.12-amd64 AS runtime
 WORKDIR /opt/test-runner
 
 COPY --from=build /opt/test-runner/ .
