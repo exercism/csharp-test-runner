@@ -51,9 +51,22 @@ namespace Exercism.TestRunner.CSharp
             };
 
         private static string NormalizeLogLine(this string logLine) =>
-            logLine.RemoveProjectReference().UseUnixNewlines().Trim();
+            logLine.RemoveProjectReference().RemovePath().UseUnixNewlines().Trim();
 
         private static string RemoveProjectReference(this string logLine) =>
             logLine[..(logLine.LastIndexOf('[') - 1)];
+
+        private static string RemovePath(this string logLine)
+        {
+            var testFileIndex = logLine.IndexOf(".cs(", StringComparison.Ordinal);
+            if (testFileIndex == -1)
+                return logLine;
+
+            var lastDirectorySeparatorIndex = logLine.LastIndexOf(Path.DirectorySeparatorChar, testFileIndex);
+            if (lastDirectorySeparatorIndex == -1)
+                return logLine;
+            
+            return logLine.Substring(lastDirectorySeparatorIndex + 1);
+        }
     }
 }
