@@ -1,10 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0.100-alpine3.12-amd64 AS build
 WORKDIR /app
 
-# Download exercism tooling webserver
-RUN wget -P /usr/local/bin https://github.com/exercism/tooling-webserver/releases/download/0.10.0/tooling_webserver && \
-    chmod +x /usr/local/bin/tooling_webserver
-
 # Copy csproj and restore as distinct layers
 COPY src/Exercism.TestRunner.CSharp/Exercism.TestRunner.CSharp.csproj ./
 RUN dotnet restore -r linux-musl-x64
