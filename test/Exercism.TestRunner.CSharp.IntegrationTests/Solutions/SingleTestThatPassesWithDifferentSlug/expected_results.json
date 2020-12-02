@@ -3,7 +3,8 @@
   "tests": [
     {
       "name": "Add should add numbers",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Foo.Add(1, 1))"
     }
   ]
 }

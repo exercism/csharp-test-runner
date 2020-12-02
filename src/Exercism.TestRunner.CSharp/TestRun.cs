@@ -22,6 +22,9 @@ namespace Exercism.TestRunner.CSharp
 
         [JsonPropertyName("output")]
         public string Output { get; set; }
+
+        [JsonPropertyName("test_code")]
+        public string TestCode { get; set; }
     }
 
     internal class TestRun

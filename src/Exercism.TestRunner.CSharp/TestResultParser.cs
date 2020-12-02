@@ -6,11 +6,15 @@ using System.Xml.Serialization;
 
 using Humanizer;
 
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
 namespace Exercism.TestRunner.CSharp
 {
     internal static class TestResultParser
-    {   
-        internal static TestResult[] FromFile(string logFilePath)
+    {
+        internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree)
         {
             using var fileStream = File.OpenRead(logFilePath);
             var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
@@ -21,18 +25,19 @@ namespace Exercism.TestRunner.CSharp
             }
 
             return result.Results.UnitTestResult
-                .Select(selector: ToTestResult)
+                .Select(selector: testResult => ToTestResult(testResult, testsSyntaxTree))
                 .OrderBy(testResult => testResult.Name)
                 .ToArray();
         }
 
-        private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult) =>
+        private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, SyntaxTree testsSyntaxTree) =>
             new TestResult
             {
                 Name = xmlUnitTestResult.Name(),
                 Status = xmlUnitTestResult.Status(),
                 Message = xmlUnitTestResult.Message(),
-                Output = xmlUnitTestResult.Output()
+                Output = xmlUnitTestResult.Output(),
+                TestCode = xmlUnitTestResult.TestCode(testsSyntaxTree)
             };
 
         private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
@@ -53,6 +58,30 @@ namespace Exercism.TestRunner.CSharp
 
         private static string Output(this XmlUnitTestResult xmlUnitTestResult) =>
             xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
+
+        private static string TestCode(this XmlUnitTestResult xmlUnitTestResult, SyntaxTree testsSyntaxTree)
+        {
+            var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
+            var className = classAndMethodName[0];
+            var methodName = classAndMethodName[1];
+
+            var root = testsSyntaxTree.GetRoot();
+            var testMethod = root.DescendantNodes()
+                .OfType<MethodDeclarationSyntax>()
+                .Single(method =>
+                    method.Identifier.Text == methodName &&
+                    method.Parent is ClassDeclarationSyntax classDeclaration &&
+                    classDeclaration.Identifier.Text == className);
+
+            if (testMethod.Body != null)
+                return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia()))
+                    .ToString();
+
+            return testMethod.ExpressionBody!
+                .Expression
+                .WithoutLeadingTrivia()
+                .ToString();
+        }
     }
 
     [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
