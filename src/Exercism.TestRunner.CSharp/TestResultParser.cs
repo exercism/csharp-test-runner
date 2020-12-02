@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
+using Humanizer;
+
 namespace Exercism.TestRunner.CSharp
 {
     internal static class TestResultParser
-    {
+    {   
         internal static TestResult[] FromFile(string logFilePath)
         {
             using var fileStream = File.OpenRead(logFilePath);
@@ -27,11 +29,16 @@ namespace Exercism.TestRunner.CSharp
         private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult) =>
             new TestResult
             {
-                Name = xmlUnitTestResult.TestName,
+                Name = xmlUnitTestResult.Name(),
                 Status = xmlUnitTestResult.Status(),
                 Message = xmlUnitTestResult.Message(),
                 Output = xmlUnitTestResult.Output()
             };
+
+        private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
+            xmlUnitTestResult.TestName
+                .Substring(xmlUnitTestResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
+                .Humanize();
 
         private static TestStatus Status(this XmlUnitTestResult xmlUnitTestResult) =>
             xmlUnitTestResult.Outcome switch
