@@ -2,7 +2,7 @@
   "status": "pass",
   "tests": [
     {
-      "name": "FakeTests.Add_should_add_numbers",
+      "name": "Add should add numbers",
       "status": "pass"
     }
   ]
