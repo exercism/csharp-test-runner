@@ -23,7 +23,7 @@ namespace Exercism.TestRunner.CSharp
             RunDotnetTest();
             UndoRewrite();
 
-            return TestRunParser.Parse(_options);
+            return TestRunParser.Parse(_options, _originalSyntaxTree);
         }
 
         private void RunDotnetTest()

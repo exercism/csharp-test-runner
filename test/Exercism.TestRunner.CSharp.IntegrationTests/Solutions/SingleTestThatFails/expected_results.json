@@ -4,7 +4,8 @@
     {
       "name": "Add should add numbers",
       "status": "fail",
-      "message": "Assert.Equal() Failure\nExpected: 3\nActual:   2"
+      "message": "Assert.Equal() Failure\nExpected: 3\nActual:   2",
+      "test_code": "Assert.Equal(3, Fake.Add(1, 1))"
     }
   ]
 }

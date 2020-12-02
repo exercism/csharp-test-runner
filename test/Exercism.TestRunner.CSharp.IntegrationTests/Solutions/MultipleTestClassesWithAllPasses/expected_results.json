@@ -3,23 +3,28 @@
   "tests": [
     {
       "name": "Add should add numbers",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Fake.Add(1, 1))"
     },
     {
       "name": "Lower should lowercase string",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(\u0022hello\u0022, Foo.Lower(\u0022HELLO\u0022))"
     },
     {
       "name": "Mul should multiply numbers",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(6, Fake.Mul(2, 3))"
     },
     {
       "name": "Sub should subtract numbers",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(4, Fake.Sub(7, 3))"
     },
     {
       "name": "Upper should uppercase string",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(\u0022HELLO\u0022, Foo.Upper(\u0022hello\u0022))"
     }
   ]
 }

@@ -3,16 +3,19 @@
   "tests": [
     {
       "name": "Add should add numbers",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Fake.Add(1, 1))"
     },
     {
       "name": "Mul should multiply numbers",
       "status": "fail",
-      "message": "Assert.Equal() Failure\nExpected: 5\nActual:   6"
+      "message": "Assert.Equal() Failure\nExpected: 5\nActual:   6",
+      "test_code": "Assert.Equal(5, Fake.Mul(2, 3))"
     },
     {
       "name": "Sub should subtract numbers",
-      "status": "pass"
+      "status": "pass",
+      "test_code": "Assert.Equal(1, Fake.Sub(2, 1))"
     }
   ]
 }

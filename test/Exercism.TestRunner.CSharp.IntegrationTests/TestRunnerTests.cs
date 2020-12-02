@@ -94,5 +94,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("SingleTestThatPassesWithDifferentSlug", "Foo");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void TestsInDifferentFormats()
+        {
+            var testRun = TestSolutionRunner.Run("TestsInDifferentFormats");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }

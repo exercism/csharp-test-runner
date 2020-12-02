@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using Microsoft.CodeAnalysis;
+
 namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunParser
     {
-        public static TestRun Parse(Options options)
+        public static TestRun Parse(Options options, SyntaxTree testsSyntaxTree)
         {
             var logLines = File.ReadLines(options.BuildLogFilePath);
             var buildFailed = logLines.Any();
@@ -17,12 +19,12 @@ namespace Exercism.TestRunner.CSharp
                 return TestRunWithError(logLines);
             }
 
-            return TestRunWithoutError(options);
+            return TestRunWithoutError(options, testsSyntaxTree);
         }
 
-        private static TestRun TestRunWithoutError(Options options)
+        private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
         {
-            var testResults = TestResultParser.FromFile(options.TestResultsFilePath);
+            var testResults = TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree);
 
             return new TestRun
             {
@@ -65,7 +67,7 @@ namespace Exercism.TestRunner.CSharp
             var lastDirectorySeparatorIndex = logLine.LastIndexOf(Path.DirectorySeparatorChar, testFileIndex);
             if (lastDirectorySeparatorIndex == -1)
                 return logLine;
-            
+
             return logLine.Substring(lastDirectorySeparatorIndex + 1);
         }
     }
