@@ -29,6 +29,9 @@ namespace Exercism.TestRunner.CSharp
 
     internal class TestRun
     {
+        [JsonPropertyName("version")]
+        public int Version { get; set; } = 2;
+    
         [JsonPropertyName("status")]
         public TestStatus Status { get; set; }
 
