@@ -12,7 +12,6 @@ jobs:
 
     env:
       ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-      DOCKER_IMAGE: ${{ github.event.repository.full_name }}
 
     steps:
       - name: Checkout code
@@ -49,9 +48,9 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_IMAGE }}:latest
-            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-            ${{ env.ECR_REGISTRY }}/${{ env.DOCKER_IMAGE }}:production
-            ${{ env.ECR_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+            ${{ github.event.repository.full_name }}:latest
+            ${{ github.event.repository.full_name }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ github.event.repository.name }}:production
+            ${{ env.ECR_REGISTRY }}/${{ github.event.repository.name }}:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
