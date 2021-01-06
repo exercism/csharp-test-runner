@@ -2,9 +2,9 @@ name: Push Docker images to DockerHub and ECR
 
 on:
   push:
-    branches: [${{ github.event.repository.default_branch }}]
+    branches: [main, master]
   pull_request:
-    branches: [${{ github.event.repository.default_branch }}]
+    branches: [main, master]
 
 jobs:
   multiple-registries:
