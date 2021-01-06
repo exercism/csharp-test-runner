@@ -20,25 +20,50 @@ namespace Exercism.TestRunner.CSharp
             var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
 
             if (result.Results == null)
-            {
                 return Array.Empty<TestResult>();
-            }
 
-            return result.Results.UnitTestResult
-                .Select(selector: testResult => ToTestResult(testResult, testsSyntaxTree))
-                .OrderBy(testResult => testResult.Name)
-                .ToArray();
+            return result.ToTestResults(testsSyntaxTree);
         }
 
-        private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, SyntaxTree testsSyntaxTree) =>
-            new TestResult
+        private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
+        {
+            var methodDeclarations = 
+                testsSyntaxTree
+                    .GetRoot()
+                    .DescendantNodes()
+                    .OfType<MethodDeclarationSyntax>()
+                    .ToArray();
+            
+            var testResults =
+                from unitTestResult in result.Results.UnitTestResult
+                let testMethodDeclaration = unitTestResult.TestMethod(methodDeclarations)
+                orderby testMethodDeclaration.GetLocation().GetLineSpan().StartLinePosition.Line
+                select ToTestResult(unitTestResult, testMethodDeclaration);
+
+            return testResults.ToArray();
+        }
+
+        private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, MethodDeclarationSyntax testMethodDeclaration) =>
+            new()
             {
                 Name = xmlUnitTestResult.Name(),
                 Status = xmlUnitTestResult.Status(),
                 Message = xmlUnitTestResult.Message(),
                 Output = xmlUnitTestResult.Output(),
-                TestCode = xmlUnitTestResult.TestCode(testsSyntaxTree)
+                TestCode = testMethodDeclaration.TestCode()
             };
+
+        private static MethodDeclarationSyntax TestMethod(this XmlUnitTestResult xmlUnitTestResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
+        {
+            var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
+            var className = classAndMethodName[0];
+            var methodName = classAndMethodName[1];
+
+            return methodDeclarations.Single(method =>
+                method.Identifier.Text == methodName &&
+                method.Parent is ClassDeclarationSyntax classDeclaration &&
+                classDeclaration.Identifier.Text == className);
+        }
 
         private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
             xmlUnitTestResult.TestName
@@ -59,23 +84,10 @@ namespace Exercism.TestRunner.CSharp
         private static string Output(this XmlUnitTestResult xmlUnitTestResult) =>
             xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
 
-        private static string TestCode(this XmlUnitTestResult xmlUnitTestResult, SyntaxTree testsSyntaxTree)
+        private static string TestCode(this MethodDeclarationSyntax testMethod)
         {
-            var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
-            var className = classAndMethodName[0];
-            var methodName = classAndMethodName[1];
-
-            var root = testsSyntaxTree.GetRoot();
-            var testMethod = root.DescendantNodes()
-                .OfType<MethodDeclarationSyntax>()
-                .Single(method =>
-                    method.Identifier.Text == methodName &&
-                    method.Parent is ClassDeclarationSyntax classDeclaration &&
-                    classDeclaration.Identifier.Text == className);
-
             if (testMethod.Body != null)
-                return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia()))
-                    .ToString();
+                return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia())).ToString();
 
             return testMethod.ExpressionBody!
                 .Expression

@@ -9,16 +9,16 @@
       "test_code": "Assert.Equal(2, Fake.Add(1, 1))"
     },
     {
+      "name": "Sub should subtract numbers",
+      "status": "pass",
+      "test_code": "Assert.Equal(4, Fake.Sub(7, 3))"
+    },
+    {
       "name": "Mul should multiply numbers",
       "status": "fail",
       "message": "Assert.Equal() Failure\nExpected: 7\nActual:   6",
       "output": "String with params output\nValues used:\n2, True\n-----",
       "test_code": "Assert.Equal(7, Fake.Mul(2, 3))"
-    },
-    {
-      "name": "Sub should subtract numbers",
-      "status": "pass",
-      "test_code": "Assert.Equal(4, Fake.Sub(7, 3))"
     }
   ]
 }
