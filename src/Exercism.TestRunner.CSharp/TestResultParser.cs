@@ -50,6 +50,7 @@ namespace Exercism.TestRunner.CSharp
                 Status = xmlUnitTestResult.Status(),
                 Message = xmlUnitTestResult.Message(),
                 Output = xmlUnitTestResult.Output(),
+                TaskId = testMethodDeclaration.TaskId(),
                 TestCode = testMethodDeclaration.TestCode()
             };
 
@@ -94,6 +95,18 @@ namespace Exercism.TestRunner.CSharp
                 .WithoutLeadingTrivia()
                 .ToString();
         }
+
+        private static int? TaskId(this MethodDeclarationSyntax testMethod) =>
+            testMethod.AttributeLists
+                .SelectMany(attributeList => attributeList.Attributes)
+                .Where(attribute =>
+                    attribute.Name.ToString() == "Task" &&
+                    attribute.ArgumentList != null &&
+                    attribute.ArgumentList.Arguments.Count == 1 &&
+                    attribute.ArgumentList.Arguments[0].Expression.IsKind(SyntaxKind.NumericLiteralExpression))
+                .Select(attribute => (LiteralExpressionSyntax)attribute.ArgumentList.Arguments[0].Expression)
+                .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
+                .FirstOrDefault();
     }
 
     [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]

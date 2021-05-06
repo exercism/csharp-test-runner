@@ -101,5 +101,26 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("TestsInDifferentFormats");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void NoTasks()
+        {
+            var testRun = TestSolutionRunner.Run("NoTasks");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
+
+        [Fact]
+        public void AllTestsWithTask()
+        {
+            var testRun = TestSolutionRunner.Run("AllTestsWithTask");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
+
+        [Fact]
+        public void SomeTestsWithTask()
+        {
+            var testRun = TestSolutionRunner.Run("SomeTestsWithTask");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
