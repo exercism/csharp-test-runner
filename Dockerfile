@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0.101-alpine3.12-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0.202-alpine3.12-amd64 AS build
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -16,7 +16,7 @@ RUN dotnet add package Microsoft.NET.Test.Sdk -v 16.8.3 && \
     dotnet add package Exercism.Tests -v 0.1.0-alpha
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/sdk:5.0.101-alpine3.12-amd64 AS runtime
+FROM mcr.microsoft.com/dotnet/sdk:5.0.202-alpine3.12-amd64 AS runtime
 WORKDIR /opt/test-runner
 
 COPY --from=build /opt/test-runner/ .
