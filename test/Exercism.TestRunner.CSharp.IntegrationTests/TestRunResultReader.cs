@@ -53,6 +53,9 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
 
         private struct TestRunResult
         {
+            [JsonPropertyName("version")]
+            public int Version { get; set; }
+            
             [JsonPropertyName("status")]
             public TestStatus Status { get; set; }
 
@@ -73,6 +76,9 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
 
             [JsonPropertyName("name")]
             public string Name { get; set; }
+        
+            [JsonPropertyName("task_id")]
+            public int? TaskId { get; set; }
 
             [JsonPropertyName("output")]
             public string Output { get; set; }
