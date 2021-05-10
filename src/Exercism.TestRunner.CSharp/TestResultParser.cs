@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
 
 using Humanizer;
 
@@ -13,80 +10,72 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit.Runners;
 
 namespace Exercism.TestRunner.CSharp
-{
+{   
     internal static class TestResultParser
     {
-        private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
+        public static TestResult[] FromTests(List<TestPassedInfo> passedTests, List<TestFailedInfo> failedTests, SyntaxTree testsSyntaxTree)
         {
-            var methodDeclarations = 
+            var testMethods = 
                 testsSyntaxTree
                     .GetRoot()
                     .DescendantNodes()
                     .OfType<MethodDeclarationSyntax>()
                     .ToArray();
-            
-            var testResults =
-                from unitTestResult in result.Results.UnitTestResult
-                let testMethodDeclaration = unitTestResult.TestMethod(methodDeclarations)
-                orderby testMethodDeclaration.GetLocation().GetLineSpan().StartLinePosition.Line
-                select ToTestResult(unitTestResult, testMethodDeclaration);
 
+            var testResults = new List<TestResult>(passedTests.Count + failedTests.Count);
+            testResults.AddRange(passedTests.Select(passedTest => FromPassedTest(passedTest, passedTest.TestMethod(testMethods))));
+            testResults.AddRange(failedTests.Select(failedTest => FromFailedTest(failedTest, failedTest.TestMethod(testMethods))));
+        
             return testResults.ToArray();
         }
 
-        private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, MethodDeclarationSyntax testMethodDeclaration) =>
+        private static TestResult FromFailedTest(TestFailedInfo info, MethodDeclarationSyntax testMethod) =>
             new()
             {
-                Name = xmlUnitTestResult.Name(),
-                Status = xmlUnitTestResult.Status(),
-                Message = xmlUnitTestResult.Message(),
-                Output = xmlUnitTestResult.Output(),
-                TaskId = testMethodDeclaration.TaskId(),
-                TestCode = testMethodDeclaration.TestCode()
+                Name = info.Name(),
+                Status = TestStatus.Fail,
+                Message = info.Message(),
+                Output = info.Output(),
+                TaskId = testMethod.TaskId(),
+                TestCode = testMethod.TestCode()
             };
 
-        private static MethodDeclarationSyntax TestMethod(this XmlUnitTestResult xmlUnitTestResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
-        {
-            var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
-            var className = classAndMethodName[0];
-            var methodName = classAndMethodName[1];
-
-            return methodDeclarations.Single(method =>
-                method.Identifier.Text == methodName &&
-                method.Parent is ClassDeclarationSyntax classDeclaration &&
-                classDeclaration.Identifier.Text == className);
-        }
-
-        private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.TestName
-                .Substring(xmlUnitTestResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
-                .Humanize();
-
-        private static TestStatus Status(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Outcome switch
+        private static TestResult FromPassedTest(TestPassedInfo info, MethodDeclarationSyntax testMethod) =>
+            new()
             {
-                "Passed" => TestStatus.Pass,
-                "Failed" => TestStatus.Fail,
-                _ => TestStatus.Error
+                Name = info.Name(),
+                Status = TestStatus.Pass,
+                Output = info.Output(),
+                TaskId = testMethod.TaskId(),
+                TestCode = testMethod.TestCode()
             };
 
-        private static string Message(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Output?.ErrorInfo?.Message?.UseUnixNewlines()?.Trim();
+        private static MethodDeclarationSyntax TestMethod(this TestInfo testInfo, IEnumerable<MethodDeclarationSyntax> methodDeclarations) =>
+            methodDeclarations.Single(method =>
+                method.Identifier.Text == testInfo.MethodName &&
+                method.Parent is ClassDeclarationSyntax classDeclaration &&
+                classDeclaration.Identifier.Text == testInfo.TypeName);
 
-        private static string Output(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
-
+        private static string Name(this TestInfo testInfo) =>
+            testInfo.MethodName.Humanize();
+        
+        private static string Message(this TestFailedInfo testInfo) =>
+            testInfo.ExceptionMessage.UseUnixNewlines()?.Trim();
+        
+        private static string Output(this TestExecutedInfo testInfo) =>
+            testInfo.Output.UseUnixNewlines().Trim().NullIfEmpty();
+        
         private static string TestCode(this MethodDeclarationSyntax testMethod)
         {
             if (testMethod.Body != null)
                 return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia())).ToString();
-
+        
             return testMethod.ExpressionBody!
                 .Expression
                 .WithoutLeadingTrivia()
                 .ToString();
         }
-
+        
         private static int? TaskId(this MethodDeclarationSyntax testMethod) =>
             testMethod.AttributeLists
                 .SelectMany(attributeList => attributeList.Attributes)
@@ -98,12 +87,5 @@ namespace Exercism.TestRunner.CSharp
                 .Select(attribute => (LiteralExpressionSyntax)attribute.ArgumentList.Arguments[0].Expression)
                 .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
                 .FirstOrDefault();
-
-        public static TestResult FromTestInfo(TestFailedInfo info)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public static TestResult FromTestInfo(TestPassedInfo info)
     }
 }

@@ -12,6 +12,6 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             json.Replace("\r\n", "\n");
 
         private static JsonSerializerSettings CreateJsonSerializerSettings() =>
-            new JsonSerializerSettings { ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() } };
+            new() { ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() } };
     }
 }

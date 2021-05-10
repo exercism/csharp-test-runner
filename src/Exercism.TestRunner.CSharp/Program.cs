@@ -2,8 +2,6 @@ using System;
 
 using CommandLine;
 
-using Microsoft.Build.Locator;
-
 namespace Exercism.TestRunner.CSharp
 {
     public static class Program
@@ -18,7 +16,7 @@ namespace Exercism.TestRunner.CSharp
             Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Running test runner for '{options.Slug}' solution...");
 
             var testSuite = TestSuite.FromOptions(options);
-            var testRun = testSuite.Run();
+            var testRun = testSuite.RunTests();
             testRun.WriteToFile(options.ResultsJsonFilePath);
 
             Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Ran test runner for '{options.Slug}' solution");

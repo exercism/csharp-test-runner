@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -9,31 +8,12 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunParser
     {
-        public static TestRun Parse(Options options, Compilation compilation)
-        {
-            var errors = compilation.GetDiagnostics()
-                .Where(diag => diag.Severity == DiagnosticSeverity.Error)
-                .ToArray();
-
-            if (errors.Any())
-            {
-                return TestRunWithError(errors);
-            }
-
-            return TestRunWithoutError(options, compilation);
-        }
-
-        private static TestRun TestRunWithoutError(Options options, Compilation compilation)
-        {
-            // var testResults = TestResultParser.FromFile(options.TestResultsFilePath, compilation);
-            var testResults = Array.Empty<TestResult>();
-
-            return new TestRun
+        public static TestRun TestRunWithoutError(TestResult[] testResults) =>
+            new()
             {
                 Status = testResults.ToTestStatus(),
                 Tests = testResults
             };
-        }
 
         private static TestStatus ToTestStatus(this TestResult[] tests)
         {
@@ -46,8 +26,8 @@ namespace Exercism.TestRunner.CSharp
             return TestStatus.Error;
         }
 
-        private static TestRun TestRunWithError(Diagnostic[] logLines) =>
-            new TestRun
+        public static TestRun TestRunWithError(Diagnostic[] logLines) =>
+            new()
             {
                 Message = string.Join("\n", logLines.Select(NormalizeLogLine)),
                 Status = TestStatus.Error,
@@ -55,22 +35,10 @@ namespace Exercism.TestRunner.CSharp
             };
 
         private static string NormalizeLogLine(this Diagnostic diagnostic) =>
-            diagnostic.GetMessage().RemoveProjectReference().RemovePath().UseUnixNewlines().Trim();
+            diagnostic.ToString().RemovePath(diagnostic).UseUnixNewlines().Trim();
 
-        private static string RemoveProjectReference(this string logLine) =>
-            logLine[..(logLine.LastIndexOf('[') - 1)];
-
-        private static string RemovePath(this string logLine)
-        {
-            var testFileIndex = logLine.IndexOf(".cs(", StringComparison.Ordinal);
-            if (testFileIndex == -1)
-                return logLine;
-
-            var lastDirectorySeparatorIndex = logLine.LastIndexOf(Path.DirectorySeparatorChar, testFileIndex);
-            if (lastDirectorySeparatorIndex == -1)
-                return logLine;
-
-            return logLine.Substring(lastDirectorySeparatorIndex + 1);
-        }
+        private static string RemovePath(this string logLine, Diagnostic diagnostic) =>
+            logLine.Replace(diagnostic.Location.SourceTree.FilePath,
+                Path.GetFileName(diagnostic.Location.SourceTree.FilePath));
     }
 }

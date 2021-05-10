@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,9 +12,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 using Xunit.Runners;
-using Xunit.Sdk;
-
-using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -31,58 +26,68 @@ namespace Exercism.TestRunner.CSharp
             _options = options;
         }
 
-        public TestRun Run()
+        public TestRun RunTests()
         {
-            RunDotnetTest();
+            var errors = _compilation.GetDiagnostics()
+                .Where(diag => diag.Severity == DiagnosticSeverity.Error)
+                .ToArray();
 
-            return TestRunParser.Parse(_options, _compilation);
+            if (errors.Any())
+            {
+                return TestRunParser.TestRunWithError(errors);
+            }
+
+            var testResults = RunDotnetTest();
+            return TestRunParser.TestRunWithoutError(testResults);
         }
 
-        private void RunDotnetTest()
+        private TestResult[] RunDotnetTest()
         {
-            var emitResult = _compilation.Emit(_compilation.SourceModule.Name);
+            _compilation.Emit(_compilation.SourceModule.Name);
             Assembly.LoadFrom(_compilation.SourceModule.Name);
 
-            var testResults = new List<TestResult>();
+            var testsSyntaxTree = _compilation.SyntaxTrees.First(tree => tree.FilePath == _options.TestsFilePath);
+            
+            var passedTests = new List<TestPassedInfo>();
+            var failedTests = new List<TestFailedInfo>();
             
             var finished = new ManualResetEventSlim();
             var runner = AssemblyRunner.WithoutAppDomain(_compilation.SourceModule.Name);
-            runner.OnTestFailed += info => testResults.Add(TestResultParser.FromTestInfo(info));
-            runner.OnTestPassed += info => testResults.Add(TestResultParser.FromTestInfo(info));
+            runner.OnTestFailed += info => failedTests.Add(info);
+            runner.OnTestPassed += info => passedTests.Add(info);
             runner.OnExecutionComplete += _ => finished.Set();
             
             runner.Start();
             finished.Wait();
 
-
-            // emitResult.Success
-            // var command = "dotnet";
-            // var arguments = $"test --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q";
-            //
-            // var processStartInfo = new ProcessStartInfo(command, arguments)
-            // {
-            //     WorkingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!,
-            //     RedirectStandardInput = true,
-            //     RedirectStandardError = true,
-            //     RedirectStandardOutput = true
-            // };
-            // Process.Start(processStartInfo)?.WaitForExit();
+            return TestResultParser.FromTests(passedTests, failedTests, testsSyntaxTree);
         }
 
         public static TestSuite FromOptions(Options options)
         {
-            var syntaxTrees = Directory.EnumerateFiles(options.InputDirectory, "*.cs", SearchOption.AllDirectories)
-                .Select(file =>
+            SyntaxTree ParseSyntaxTree(string file)
+            {
+                var source = SourceText.From(File.OpenRead(file));
+                var syntaxTree = CSharpSyntaxTree.ParseText(source, path: file);
+                
+                // We need to rewrite the test suite to un-skip all tests as well
+                // as capture any console output
+                if (file == options.TestsFilePath)
                 {
-                    var syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(File.OpenRead(file)));
-                    return file == options.TestsFilePath ? syntaxTree.Rewrite() : syntaxTree;
-                })
+                    return syntaxTree.Rewrite();
+                }
+
+                return syntaxTree;
+            }
+
+            var syntaxTrees = Directory.EnumerateFiles(options.InputDirectory, "*.cs", SearchOption.AllDirectories)
+                .Select(ParseSyntaxTree)
                 .ToArray();
 
-            var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug, allowUnsafe: false);
+            // TODO: check time difference between release and debug
+            var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release);
 
             var trustedAssembliesPaths = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))!.Split(Path.PathSeparator);
-            
             var references = trustedAssembliesPaths
                 .Select(p => MetadataReference.CreateFromFile(p))
                 .Append(MetadataReference.CreateFromFile(typeof(Xunit.FactAttribute).Assembly.Location))
