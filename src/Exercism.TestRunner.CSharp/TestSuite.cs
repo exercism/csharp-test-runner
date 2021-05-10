@@ -86,7 +86,6 @@ namespace Exercism.TestRunner.CSharp
 
             // TODO: check time difference between release and debug
             var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release);
-
             var trustedAssembliesPaths = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))!.Split(Path.PathSeparator);
             var references = trustedAssembliesPaths
                 .Select(p => MetadataReference.CreateFromFile(p))

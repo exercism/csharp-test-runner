@@ -129,34 +129,7 @@ namespace Exercism.TestRunner.CSharp
                                                     ArgumentList(
                                                         SingletonSeparatedList<ArgumentSyntax>(
                                                             Argument(
-                                                                IdentifierName("_stringWriter")))))),
-                                        ExpressionStatement(
-                                            InvocationExpression(
-                                                    MemberAccessExpression(
-                                                        SyntaxKind.SimpleMemberAccessExpression,
-                                                        MemberAccessExpression(
-                                                            SyntaxKind.SimpleMemberAccessExpression,
-                                                            MemberAccessExpression(
-                                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                                MemberAccessExpression(
-                                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                                    IdentifierName("System"),
-                                                                    IdentifierName("Diagnostics")),
-                                                                IdentifierName("Trace")),
-                                                            IdentifierName("Listeners")),
-                                                        IdentifierName("Add")))
-                                                .WithArgumentList(
-                                                    ArgumentList(
-                                                        SingletonSeparatedList<ArgumentSyntax>(
-                                                            Argument(
-                                                                ObjectCreationExpression(
-                                                                        QualifiedName(
-                                                                            QualifiedName(
-                                                                                IdentifierName("System"),
-                                                                                IdentifierName("Diagnostics")),
-                                                                            IdentifierName("ConsoleTraceListener")))
-                                                                    .WithArgumentList(
-                                                                        ArgumentList())))))))),
+                                                                IdentifierName("_stringWriter")))))))),
                             MethodDeclaration(
                                     PredefinedType(
                                         Token(SyntaxKind.VoidKeyword)),
