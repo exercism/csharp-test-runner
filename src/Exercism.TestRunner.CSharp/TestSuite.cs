@@ -43,19 +43,22 @@ namespace Exercism.TestRunner.CSharp
 
         private TestResult[] RunDotnetTest()
         {
-            _compilation.Emit(_compilation.SourceModule.Name);
-            Assembly.LoadFrom(_compilation.SourceModule.Name);
+            var outputPath = Path.Combine(Path.GetTempPath(), _compilation.SourceModule.Name);
+            _compilation.Emit(outputPath);
+            Assembly.LoadFrom(outputPath);
 
             var testsSyntaxTree = _compilation.SyntaxTrees.First(tree => tree.FilePath == _options.TestsFilePath);
-            
+
             var passedTests = new List<TestPassedInfo>();
             var failedTests = new List<TestFailedInfo>();
             
             var finished = new ManualResetEventSlim();
-            var runner = AssemblyRunner.WithoutAppDomain(_compilation.SourceModule.Name);
+            var runner = AssemblyRunner.WithoutAppDomain(outputPath);
             runner.OnTestFailed += info => failedTests.Add(info);
             runner.OnTestPassed += info => passedTests.Add(info);
             runner.OnExecutionComplete += _ => finished.Set();
+            
+            // TODO: sort tests
             
             runner.Start();
             finished.Wait();
