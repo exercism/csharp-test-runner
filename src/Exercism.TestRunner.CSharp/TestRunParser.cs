@@ -9,22 +9,24 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunParser
     {
-        public static TestRun Parse(Options options, SyntaxTree testsSyntaxTree)
+        public static TestRun Parse(Options options, Compilation compilation)
         {
-            var logLines = File.ReadLines(options.BuildLogFilePath);
-            var buildFailed = logLines.Any();
+            var errors = compilation.GetDiagnostics()
+                .Where(diag => diag.Severity == DiagnosticSeverity.Error)
+                .ToArray();
 
-            if (buildFailed)
+            if (errors.Any())
             {
-                return TestRunWithError(logLines);
+                return TestRunWithError(errors);
             }
 
-            return TestRunWithoutError(options, testsSyntaxTree);
+            return TestRunWithoutError(options, compilation);
         }
 
-        private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
+        private static TestRun TestRunWithoutError(Options options, Compilation compilation)
         {
-            var testResults = TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree);
+            // var testResults = TestResultParser.FromFile(options.TestResultsFilePath, compilation);
+            var testResults = Array.Empty<TestResult>();
 
             return new TestRun
             {
@@ -44,7 +46,7 @@ namespace Exercism.TestRunner.CSharp
             return TestStatus.Error;
         }
 
-        private static TestRun TestRunWithError(IEnumerable<string> logLines) =>
+        private static TestRun TestRunWithError(Diagnostic[] logLines) =>
             new TestRun
             {
                 Message = string.Join("\n", logLines.Select(NormalizeLogLine)),
@@ -52,8 +54,8 @@ namespace Exercism.TestRunner.CSharp
                 Tests = Array.Empty<TestResult>()
             };
 
-        private static string NormalizeLogLine(this string logLine) =>
-            logLine.RemoveProjectReference().RemovePath().UseUnixNewlines().Trim();
+        private static string NormalizeLogLine(this Diagnostic diagnostic) =>
+            diagnostic.GetMessage().RemoveProjectReference().RemovePath().UseUnixNewlines().Trim();
 
         private static string RemoveProjectReference(this string logLine) =>
             logLine[..(logLine.LastIndexOf('[') - 1)];

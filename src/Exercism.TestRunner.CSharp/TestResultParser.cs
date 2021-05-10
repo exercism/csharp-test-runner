@@ -10,21 +10,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using Xunit.Runners;
+
 namespace Exercism.TestRunner.CSharp
 {
     internal static class TestResultParser
     {
-        internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree)
-        {
-            using var fileStream = File.OpenRead(logFilePath);
-            var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
-
-            if (result.Results == null)
-                return Array.Empty<TestResult>();
-
-            return result.ToTestResults(testsSyntaxTree);
-        }
-
         private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
         {
             var methodDeclarations = 
@@ -107,51 +98,12 @@ namespace Exercism.TestRunner.CSharp
                 .Select(attribute => (LiteralExpressionSyntax)attribute.ArgumentList.Arguments[0].Expression)
                 .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
                 .FirstOrDefault();
-    }
 
-    [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlOutput
-    {
-        [XmlElement(ElementName = "StdOut", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public string StdOut { get; set; }
-
-        [XmlElement(ElementName = "ErrorInfo",
-            Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public XmlErrorInfo ErrorInfo { get; set; }
-    }
-
-    [XmlRoot(ElementName = "UnitTestResult", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlUnitTestResult
-    {
-        [XmlElement(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public XmlOutput Output { get; set; }
-
-        [XmlAttribute(AttributeName = "testName")]
-        public string TestName { get; set; }
-
-        [XmlAttribute(AttributeName = "outcome")]
-        public string Outcome { get; set; }
-    }
-
-    [XmlRoot(ElementName = "ErrorInfo", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlErrorInfo
-    {
-        [XmlElement(ElementName = "Message", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public string Message { get; set; }
-    }
-
-    [XmlRoot(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlResults
-    {
-        [XmlElement(ElementName = "UnitTestResult",
-            Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public List<XmlUnitTestResult> UnitTestResult { get; set; }
-    }
-
-    [XmlRoot(ElementName = "TestRun", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlTestRun
-    {
-        [XmlElement(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public XmlResults Results { get; set; }
+        public static TestResult FromTestInfo(TestFailedInfo info)
+        {
+            throw new NotImplementedException();
+        }
+        
+        public static TestResult FromTestInfo(TestPassedInfo info)
     }
 }

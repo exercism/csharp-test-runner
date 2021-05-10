@@ -2,6 +2,8 @@ using System;
 
 using CommandLine;
 
+using Microsoft.Build.Locator;
+
 namespace Exercism.TestRunner.CSharp
 {
     public static class Program
