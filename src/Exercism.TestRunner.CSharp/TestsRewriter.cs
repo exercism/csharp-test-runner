@@ -12,8 +12,7 @@ namespace Exercism.TestRunner.CSharp
             tree.WithRootAndOptions(tree.GetRoot().Rewrite(), tree.Options);
 
         private static SyntaxNode Rewrite(this SyntaxNode node) =>
-            node
-                .UnskipTests()
+            node.UnskipTests()
                 .CaptureConsoleOutput();
 
         private static SyntaxNode UnskipTests(this SyntaxNode testsRoot) =>
