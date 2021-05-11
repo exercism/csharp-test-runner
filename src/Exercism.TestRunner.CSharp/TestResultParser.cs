@@ -14,12 +14,12 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestResultParser
     {
-        public static TestResult[] FromTests(IEnumerable<TestInfo> tests, SyntaxTree testsSyntaxTree)
+        public static TestResult[] FromTests(IEnumerable<TestInfo> tests, Compilation compilation, Files files)
         {
             var testMethods =
-                testsSyntaxTree
-                    .GetRoot()
-                    .DescendantNodes()
+                compilation.SyntaxTrees
+                    .Where(tree => files.Test.Contains(tree.FilePath))
+                    .SelectMany(tree => tree.GetRoot().DescendantNodes())
                     .OfType<MethodDeclarationSyntax>()
                     .ToArray();
 

@@ -122,5 +122,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("SomeTestsWithTask");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void WithExample()
+        {
+            var testRun = TestSolutionRunner.Run("WithExample");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }

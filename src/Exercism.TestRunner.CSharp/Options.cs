@@ -1,8 +1,4 @@
-using System.IO;
-
 using CommandLine;
-
-using Humanizer;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -19,9 +15,5 @@ namespace Exercism.TestRunner.CSharp
 
         public Options(string slug, string inputDirectory, string outputDirectory) =>
             (Slug, InputDirectory, OutputDirectory) = (slug, inputDirectory, outputDirectory);
-
-        public string TestsFilePath => Path.Combine(InputDirectory, $"{Exercise}Tests.cs");
-
-        private string Exercise => Slug.Dehumanize().Pascalize();
     }
 }

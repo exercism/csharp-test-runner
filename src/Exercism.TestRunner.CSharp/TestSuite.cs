@@ -8,7 +8,8 @@ namespace Exercism.TestRunner.CSharp
     {
         public static TestRun RunTests(Options options)
         {
-            var compilation = TestCompilation.Compile(options);
+            var files = FilesParser.Parse(options);
+            var compilation = TestCompilation.Compile(options, files);
 
             var errors = compilation.GetDiagnostics()
                 .Where(diag => diag.Severity == DiagnosticSeverity.Error)
@@ -17,7 +18,7 @@ namespace Exercism.TestRunner.CSharp
             if (errors.Any())
                 return TestRunParser.TestRunWithError(errors);
 
-            var testResults = TestRunner.RunTests(compilation, options);
+            var testResults = TestRunner.RunTests(compilation, files);
             return TestRunParser.TestRunWithoutError(testResults);
         }
     }

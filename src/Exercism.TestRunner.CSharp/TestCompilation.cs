@@ -13,27 +13,24 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestCompilation
     {
-        public static Compilation Compile(Options options) =>
-            CSharpCompilation.Create(Guid.NewGuid().ToString("N"), SyntaxTrees(options), References(), CompilationOptions());
+        public static Compilation Compile(Options options, Files files) =>
+            CSharpCompilation.Create(AssemblyName(), SyntaxTrees(options, files), References(), CompilationOptions());
 
-        private static IEnumerable<SyntaxTree> SyntaxTrees(Options options)
+        private static string AssemblyName() => Guid.NewGuid().ToString("N");
+
+        private static IEnumerable<SyntaxTree> SyntaxTrees(Options options, Files files)
         {
-            SyntaxTree ParseSyntaxTree(string file)
-            {
-                var source = SourceText.From(File.OpenRead(file));
-                var syntaxTree = CSharpSyntaxTree.ParseText(source, path: file);
+            var solutionFiles = files.Solution.Select(file => ParseSyntaxTree(file, options));
+            var testFiles = files.Test.Select(file => ParseSyntaxTree(file, options).Rewrite());
 
-                // We need to rewrite the test suite to un-skip all tests and capture any console output
-                if (file == options.TestsFilePath)
-                {
-                    return syntaxTree.Rewrite();
-                }
+            return solutionFiles.Concat(testFiles);
+        }
 
-                return syntaxTree;
-            }
-
-            return Directory.EnumerateFiles(options.InputDirectory, "*.cs", SearchOption.AllDirectories)
-                .Select(ParseSyntaxTree);
+        private static SyntaxTree ParseSyntaxTree(string file, Options options)
+        {
+            var filePath = Path.Combine(options.InputDirectory, file);
+            var source = SourceText.From(File.OpenRead(filePath));
+            return CSharpSyntaxTree.ParseText(source, path: file);
         }
 
         private static CSharpCompilationOptions CompilationOptions() =>
