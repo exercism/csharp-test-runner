@@ -8,7 +8,6 @@
 
   <PropertyGroup>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <InvariantGlobalization>true</InvariantGlobalization>    
   </PropertyGroup>
 
   <ItemGroup>
