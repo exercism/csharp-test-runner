@@ -51,15 +51,15 @@ namespace Exercism.TestRunner.CSharp
 
             var passedTests = new List<TestPassedInfo>();
             var failedTests = new List<TestFailedInfo>();
-            
+
             var finished = new ManualResetEventSlim();
             var runner = AssemblyRunner.WithoutAppDomain(outputPath);
             runner.OnTestFailed += info => failedTests.Add(info);
             runner.OnTestPassed += info => passedTests.Add(info);
             runner.OnExecutionComplete += _ => finished.Set();
-            
+
             // TODO: sort tests
-            
+
             runner.Start();
             finished.Wait();
 
@@ -72,7 +72,7 @@ namespace Exercism.TestRunner.CSharp
             {
                 var source = SourceText.From(File.OpenRead(file));
                 var syntaxTree = CSharpSyntaxTree.ParseText(source, path: file);
-                
+
                 // We need to rewrite the test suite to un-skip all tests as well
                 // as capture any console output
                 if (file == options.TestsFilePath)
@@ -87,7 +87,6 @@ namespace Exercism.TestRunner.CSharp
                 .Select(ParseSyntaxTree)
                 .ToArray();
 
-            // TODO: check time difference between release and debug
             var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release);
             var trustedAssembliesPaths = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))!.Split(Path.PathSeparator);
             var references = trustedAssembliesPaths
@@ -96,8 +95,8 @@ namespace Exercism.TestRunner.CSharp
                 .Append(MetadataReference.CreateFromFile(typeof(Xunit.Assert).Assembly.Location))
                 .Append(MetadataReference.CreateFromFile(typeof(TaskAttribute).Assembly.Location))
                 .ToList();
-            
-            var compilation = CSharpCompilation.Create(Guid.NewGuid().ToString("N"),  syntaxTrees, references, compilationOptions);
+
+            var compilation = CSharpCompilation.Create(Guid.NewGuid().ToString("N"), syntaxTrees, references, compilationOptions);
             return new TestSuite(compilation, options);
         }
     }
