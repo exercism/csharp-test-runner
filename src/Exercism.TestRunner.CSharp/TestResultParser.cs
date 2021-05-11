@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +14,7 @@ namespace Exercism.TestRunner.CSharp
 {   
     internal static class TestResultParser
     {
-        public static TestResult[] FromTests(List<TestPassedInfo> passedTests, List<TestFailedInfo> failedTests, SyntaxTree testsSyntaxTree)
+        public static TestResult[] FromTests(IEnumerable<TestInfo> tests, SyntaxTree testsSyntaxTree)
         {
             var testMethods = 
                 testsSyntaxTree
@@ -21,13 +22,21 @@ namespace Exercism.TestRunner.CSharp
                     .DescendantNodes()
                     .OfType<MethodDeclarationSyntax>()
                     .ToArray();
-
-            var testResults = new List<TestResult>(passedTests.Count + failedTests.Count);
-            testResults.AddRange(passedTests.Select(passedTest => FromPassedTest(passedTest, passedTest.TestMethod(testMethods))));
-            testResults.AddRange(failedTests.Select(failedTest => FromFailedTest(failedTest, failedTest.TestMethod(testMethods))));
-        
-            return testResults.ToArray();
+            
+            return tests
+                    .Select(test => (test: test, testMethod: test.TestMethod(testMethods)))
+                    .OrderBy(testAndMethod => Array.IndexOf(testMethods, testAndMethod.testMethod))
+                    .Select(testAndMethod => FromTest(testAndMethod.test, testAndMethod.testMethod))
+                    .ToArray();
         }
+
+        private static TestResult FromTest(TestInfo test, MethodDeclarationSyntax testMethod) =>
+            test switch
+            {
+                TestFailedInfo failedTest => FromFailedTest(failedTest, testMethod),
+                TestPassedInfo passedTest => FromPassedTest(passedTest, testMethod),
+                _ => throw new ArgumentOutOfRangeException(nameof(test))
+            };
 
         private static TestResult FromFailedTest(TestFailedInfo info, MethodDeclarationSyntax testMethod) =>
             new()
