@@ -22,8 +22,6 @@ namespace Exercism.TestRunner.CSharp
 
         public string TestsFilePath => Path.Combine(InputDirectory, $"{Exercise}Tests.cs");
 
-        public string ResultsJsonFilePath => Path.GetFullPath(Path.Combine(OutputDirectory, "results.json"));
-
         private string Exercise => Slug.Dehumanize().Pascalize();
     }
 }
