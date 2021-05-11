@@ -7,10 +7,10 @@ RUN dotnet restore -r linux-musl-x64
 
 # Copy everything else and build
 COPY src/Exercism.TestRunner.CSharp/ ./
-RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore -p:PublishReadyToRun=true
+RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore --self-contained true -p:PublishReadyToRun=true
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:5.0.5-alpine3.13-amd64 AS runtime
+FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.5-alpine3.13-amd64 AS runtime
 WORKDIR /opt/test-runner
 
 COPY --from=build /opt/test-runner/ .
