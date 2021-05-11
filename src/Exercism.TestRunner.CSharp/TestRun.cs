@@ -16,7 +16,7 @@ namespace Exercism.TestRunner.CSharp
 
         [JsonPropertyName("status")]
         public TestStatus Status { get; set; }
-        
+
         [JsonPropertyName("task_id")]
         public int? TaskId { get; set; }
 
@@ -34,7 +34,7 @@ namespace Exercism.TestRunner.CSharp
     {
         [JsonPropertyName("version")]
         public int Version { get; set; } = 3;
-    
+
         [JsonPropertyName("status")]
         public TestStatus Status { get; set; }
 

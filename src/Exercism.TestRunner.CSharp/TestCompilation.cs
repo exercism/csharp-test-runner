@@ -41,7 +41,7 @@ namespace Exercism.TestRunner.CSharp
 
         private static IEnumerable<PortableExecutableReference> References()
         {
-            var trustedAssembliesPaths = ((string) AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))!.Split(Path.PathSeparator);
+            var trustedAssembliesPaths = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))!.Split(Path.PathSeparator);
             return trustedAssembliesPaths
                 .Select(p => MetadataReference.CreateFromFile(p))
                 .Append(MetadataReference.CreateFromFile(typeof(Xunit.FactAttribute).Assembly.Location))

@@ -11,18 +11,18 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit.Runners;
 
 namespace Exercism.TestRunner.CSharp
-{   
+{
     internal static class TestResultParser
     {
         public static TestResult[] FromTests(IEnumerable<TestInfo> tests, SyntaxTree testsSyntaxTree)
         {
-            var testMethods = 
+            var testMethods =
                 testsSyntaxTree
                     .GetRoot()
                     .DescendantNodes()
                     .OfType<MethodDeclarationSyntax>()
                     .ToArray();
-            
+
             return tests
                     .Select(test => (test: test, testMethod: test.TestMethod(testMethods)))
                     .OrderBy(testAndMethod => Array.IndexOf(testMethods, testAndMethod.testMethod))
@@ -67,24 +67,24 @@ namespace Exercism.TestRunner.CSharp
 
         private static string Name(this TestInfo testInfo) =>
             testInfo.MethodName.Humanize();
-        
+
         private static string Message(this TestFailedInfo testInfo) =>
             testInfo.ExceptionMessage.UseUnixNewlines()?.Trim();
-        
+
         private static string Output(this TestExecutedInfo testInfo) =>
             testInfo.Output.UseUnixNewlines().Trim().NullIfEmpty();
-        
+
         private static string TestCode(this MethodDeclarationSyntax testMethod)
         {
             if (testMethod.Body != null)
                 return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia())).ToString();
-        
+
             return testMethod.ExpressionBody!
                 .Expression
                 .WithoutLeadingTrivia()
                 .ToString();
         }
-        
+
         private static int? TaskId(this MethodDeclarationSyntax testMethod) =>
             testMethod.AttributeLists
                 .SelectMany(attributeList => attributeList.Attributes)

@@ -9,7 +9,7 @@ namespace Exercism.TestRunner.CSharp
         public static TestRun RunTests(Options options)
         {
             var compilation = TestCompilation.Compile(options);
-            
+
             var errors = compilation.GetDiagnostics()
                 .Where(diag => diag.Severity == DiagnosticSeverity.Error)
                 .ToArray();
