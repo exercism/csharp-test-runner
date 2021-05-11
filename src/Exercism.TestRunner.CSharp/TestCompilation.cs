@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Exercism.TestRunner.CSharp
 {
-    internal static class TestProject
+    internal static class TestCompilation
     {
         public static Compilation Compile(Options options) =>
             CSharpCompilation.Create(Guid.NewGuid().ToString("N"), SyntaxTrees(options), References(), CompilationOptions());
