@@ -1,54 +1,24 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.Linq;
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Exercism.TestRunner.CSharp
 {
-    internal class TestSuite
+    internal static class TestSuite
     {
-        private readonly SyntaxTree _originalSyntaxTree;
-        private readonly Options _options;
-
-        private TestSuite(SyntaxTree originalSyntaxTree, Options options)
+        public static TestRun RunTests(Options options)
         {
-            _originalSyntaxTree = originalSyntaxTree;
-            _options = options;
-        }
+            var compilation = TestCompilation.Compile(options);
 
-        public TestRun Run()
-        {
-            Rewrite();
-            RunDotnetTest();
-            UndoRewrite();
+            var errors = compilation.GetDiagnostics()
+                .Where(diag => diag.Severity == DiagnosticSeverity.Error)
+                .ToArray();
 
-            return TestRunParser.Parse(_options, _originalSyntaxTree);
-        }
+            if (errors.Any())
+                return TestRunParser.TestRunWithError(errors);
 
-        private void RunDotnetTest()
-        {
-            var command = "dotnet";
-            var arguments = $"test --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q";
-
-            var processStartInfo = new ProcessStartInfo(command, arguments)
-            {
-                WorkingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!,
-                RedirectStandardInput = true,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
-            Process.Start(processStartInfo)?.WaitForExit();
-        }
-
-        private void Rewrite() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.Rewrite().ToString());
-
-        private void UndoRewrite() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.ToString());
-
-        public static TestSuite FromOptions(Options options)
-        {
-            var originalSyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(options.TestsFilePath));
-            return new TestSuite(originalSyntaxTree, options);
+            var testResults = TestRunner.RunTests(compilation, options);
+            return TestRunParser.TestRunWithoutError(testResults);
         }
     }
 }

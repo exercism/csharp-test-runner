@@ -5,7 +5,7 @@
     {
       "name": "Add should add numbers",
       "status": "fail",
-      "message": "System.NotImplementedException : Please implement the Fake.Add method",
+      "message": "Please implement the Fake.Add method",
       "test_code": "Assert.Equal(3, Fake.Add(1, 1))"
     }
   ]

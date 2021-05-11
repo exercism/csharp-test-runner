@@ -12,8 +12,7 @@ namespace Exercism.TestRunner.CSharp
             tree.WithRootAndOptions(tree.GetRoot().Rewrite(), tree.Options);
 
         private static SyntaxNode Rewrite(this SyntaxNode node) =>
-            node
-                .UnskipTests()
+            node.UnskipTests()
                 .CaptureConsoleOutput();
 
         private static SyntaxNode UnskipTests(this SyntaxNode testsRoot) =>
@@ -130,34 +129,7 @@ namespace Exercism.TestRunner.CSharp
                                                     ArgumentList(
                                                         SingletonSeparatedList<ArgumentSyntax>(
                                                             Argument(
-                                                                IdentifierName("_stringWriter")))))),
-                                        ExpressionStatement(
-                                            InvocationExpression(
-                                                    MemberAccessExpression(
-                                                        SyntaxKind.SimpleMemberAccessExpression,
-                                                        MemberAccessExpression(
-                                                            SyntaxKind.SimpleMemberAccessExpression,
-                                                            MemberAccessExpression(
-                                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                                MemberAccessExpression(
-                                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                                    IdentifierName("System"),
-                                                                    IdentifierName("Diagnostics")),
-                                                                IdentifierName("Trace")),
-                                                            IdentifierName("Listeners")),
-                                                        IdentifierName("Add")))
-                                                .WithArgumentList(
-                                                    ArgumentList(
-                                                        SingletonSeparatedList<ArgumentSyntax>(
-                                                            Argument(
-                                                                ObjectCreationExpression(
-                                                                        QualifiedName(
-                                                                            QualifiedName(
-                                                                                IdentifierName("System"),
-                                                                                IdentifierName("Diagnostics")),
-                                                                            IdentifierName("ConsoleTraceListener")))
-                                                                    .WithArgumentList(
-                                                                        ArgumentList())))))))),
+                                                                IdentifierName("_stringWriter")))))))),
                             MethodDeclaration(
                                     PredefinedType(
                                         Token(SyntaxKind.VoidKeyword)),
