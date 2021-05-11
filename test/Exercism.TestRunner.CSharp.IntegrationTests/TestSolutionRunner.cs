@@ -21,7 +21,20 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         }
 
         private static void RunTestRunnerUsingDocker(TestSolution testSolution) =>
-            Process.Start("docker", $"run -v {testSolution.DirectoryFullPath}:/solution -v {testSolution.DirectoryFullPath}:/results exercism/csharp-test-runner {testSolution.Slug} /solution /results")!.WaitForExit();
+            Process.Start("docker",
+                new[]
+                {
+                    "run",
+                    "--network", "none",
+                    "--read-only",
+                    "--mount", $"type=bind,src={testSolution.DirectoryFullPath},dst=/solution",
+                    "--mount", $"type=bind,src={testSolution.DirectoryFullPath},dst=/output",
+                    "--mount", "type=tmpfs,dst=/tmp",
+                    "exercism/csharp-test-runner",
+                    testSolution.Slug,
+                    "/solution",
+                    "/output"
+                })!.WaitForExit();
 
         private static void RunTestRunnerWithoutDocker(TestSolution testSolution) =>
             Program.Main(new[] { testSolution.Slug, testSolution.DirectoryFullPath, testSolution.DirectoryFullPath });
