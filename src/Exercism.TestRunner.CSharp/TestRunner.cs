@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -14,7 +11,7 @@ namespace Exercism.TestRunner.CSharp
 {
     internal static class TestRunner
     {
-        public static TestResult[] RunTests(Compilation compilation, Options options)
+        public static TestResult[] RunTests(Compilation compilation, Files files)
         {
             var outputPath = Path.Combine(Path.GetTempPath(), compilation.SourceModule.Name);
             compilation.Emit(outputPath);
@@ -30,8 +27,7 @@ namespace Exercism.TestRunner.CSharp
             runner.Start();
             finished.Wait();
 
-            var testsSyntaxTree = compilation.SyntaxTrees.First(tree => tree.FilePath == options.TestsFilePath);
-            return TestResultParser.FromTests(tests, testsSyntaxTree);
+            return TestResultParser.FromTests(tests, compilation, files);
         }
     }
 }
