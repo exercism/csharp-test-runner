@@ -129,5 +129,19 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("WithExample");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void WithConstructor()
+        {
+            var testRun = TestSolutionRunner.Run("WithConstructor");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
+
+        [Fact]
+        public void WithDisposable()
+        {
+            var testRun = TestSolutionRunner.Run("WithDisposable");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
