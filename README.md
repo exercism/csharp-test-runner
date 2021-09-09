@@ -28,4 +28,4 @@ To run a solution's tests using a Docker container, follow these steps:
 
 The scripts in this repository are written in PowerShell. As PowerShell is cross-platform nowadays, you can also install it on [Linux](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-6) and [macOS](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-6).
 
-[test-runner-interface]: https://github.com/exercism/automated-tests/blob/master/docs/interface.md
+[test-runner-interface]: https://exercism.org/docs/building/tooling/test-runners/interface
