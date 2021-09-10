@@ -143,5 +143,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("WithDisposable");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void UseCultureAttribute()
+        {
+            var testRun = TestSolutionRunner.Run("UseCultureAttribute");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
