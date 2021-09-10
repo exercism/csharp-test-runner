@@ -150,5 +150,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("UseCultureAttribute");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void DownloadedSolution()
+        {
+            var testRun = TestSolutionRunner.Run("DownloadedSolution");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
