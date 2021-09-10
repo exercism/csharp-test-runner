@@ -96,7 +96,7 @@ namespace Exercism.TestRunner.CSharp
                                                 Argument(
                                                     IdentifierName("_stringWriter"))))))));
 
-            public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+            public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
             {
                 if (node.Identifier.Text == "Dispose")
                     return base.VisitMethodDeclaration(
