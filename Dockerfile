@@ -11,6 +11,11 @@ RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.5-alpine3.13-amd64 AS runtime
+
+# Enable globalization as some exercises use it
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+RUN apk add --no-cache icu-libs
+
 WORKDIR /opt/test-runner
 
 COPY --from=build /opt/test-runner/ .
