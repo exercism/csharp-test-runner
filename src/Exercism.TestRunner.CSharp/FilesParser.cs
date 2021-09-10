@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -16,7 +17,11 @@ namespace Exercism.TestRunner.CSharp
             File.ReadAllText(options.ConfigJsonPath());
 
         private static string ConfigJsonPath(this Options options) =>
-            Path.Combine(options.InputDirectory, ".meta", "config.json");
+            new[]
+            {
+                Path.Combine(options.InputDirectory, ".meta", "config.json"),
+                Path.Combine(options.InputDirectory, ".exercism", "config.json")
+            }.First(File.Exists);
     }
     
     internal class Files
