@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -27,10 +28,13 @@ namespace Exercism.TestRunner.CSharp
     internal class Files
     {
         [JsonPropertyName("solution")]
-        public string[] Solution { get; set; }
+        public string[] Solution { get; set; } = Array.Empty<string>();
 
         [JsonPropertyName("test")]
-        public string[] Test { get; set; }
+        public string[] Test { get; set; } = Array.Empty<string>();
+
+        [JsonPropertyName("editor")]
+        public string[] Editor { get; set; } = Array.Empty<string>();
     }
 
     internal class Configuration

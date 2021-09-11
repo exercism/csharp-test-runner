@@ -164,5 +164,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("WithNonTestClasses");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void EditorFiles()
+        {
+            var testRun = TestSolutionRunner.Run("EditorFiles");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
