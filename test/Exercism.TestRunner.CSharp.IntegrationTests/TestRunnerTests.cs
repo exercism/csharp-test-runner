@@ -173,13 +173,6 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         }
 
         [Fact]
-        public void WithPrivateDisposableClasses()
-        {
-            var testRun = TestSolutionRunner.Run("WithPrivateDisposableClasses");
-            Assert.Equal(testRun.Expected, testRun.Actual);
-        }
-        
-        [Fact]
         public void EditorFiles()
         {
             var testRun = TestSolutionRunner.Run("EditorFiles");
