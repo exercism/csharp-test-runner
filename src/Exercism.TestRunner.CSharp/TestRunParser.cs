@@ -38,7 +38,9 @@ namespace Exercism.TestRunner.CSharp
             diagnostic.ToString().RemovePath(diagnostic).UseUnixNewlines().Trim();
 
         private static string RemovePath(this string logLine, Diagnostic diagnostic) =>
-            logLine.Replace(diagnostic.Location.SourceTree.FilePath,
+            diagnostic.Location == Location.None
+                ? logLine
+                : logLine.Replace(diagnostic.Location.SourceTree!.FilePath,
                 Path.GetFileName(diagnostic.Location.SourceTree.FilePath));
     }
 }

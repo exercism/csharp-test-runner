@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "status": "error",
+  "message": "error CS8805: Program using top-level statements must be an executable.",
+  "tests": []
+}
