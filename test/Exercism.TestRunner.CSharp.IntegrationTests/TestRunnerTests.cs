@@ -159,6 +159,13 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         }
 
         [Fact]
+        public void CompileErrorWithoutLocation()
+        {
+            var testRun = TestSolutionRunner.Run("CompileErrorWithoutLocation");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
+
+        [Fact]
         public void WithNonTestClasses()
         {
             var testRun = TestSolutionRunner.Run("WithNonTestClasses");
