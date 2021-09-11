@@ -1,0 +1,8 @@
+{
+  "files": {
+    "solution": ["Fake.cs"],
+    "test": ["FakeTests.cs"],
+    "editor": ["FakeTestsHelper.cs"],
+    "example": [".meta/Example.cs"]
+  }
+}
