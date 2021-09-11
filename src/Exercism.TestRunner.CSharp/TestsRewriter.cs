@@ -26,80 +26,76 @@ namespace Exercism.TestRunner.CSharp
 
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
-            public override SyntaxNode VisitAttribute(AttributeSyntax node)
-            {
-                if (node.Name.ToString() == "Fact")
-                {
-                    return base.VisitAttribute(node.WithArgumentList(null));
-                }
-
-                return base.VisitAttribute(node);
-            }
+            public override SyntaxNode VisitAttribute(AttributeSyntax node) =>
+                base.VisitAttribute(node.Name.ToString() == "Fact" ? node.WithArgumentList(null) : node);
         }
 
         private class CaptureConsoleOutputRewriter : CSharpSyntaxRewriter
         {
+            private bool _visitingTestClass;
+            
             public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax node) =>
-                base.VisitConstructorDeclaration(
-                    node.AddParameterListParameters(
-                        Parameter(Identifier("testOutput"))
-                            .WithType(
-                                QualifiedName(
+                _visitingTestClass ?
+                    base.VisitConstructorDeclaration(
+                        node.AddParameterListParameters(
+                            Parameter(Identifier("testOutput"))
+                                .WithType(
                                     QualifiedName(
-                                        IdentifierName("Xunit"),
-                                        IdentifierName("Abstractions")),
-                                    IdentifierName("ITestOutputHelper"))))
-                        .AddBodyStatements(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    IdentifierName("_testOutput"),
-                                    IdentifierName("testOutput"))),
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    IdentifierName("_stringWriter"),
-                                    ObjectCreationExpression(
-                                            QualifiedName(
+                                        QualifiedName(
+                                            IdentifierName("Xunit"),
+                                            IdentifierName("Abstractions")),
+                                        IdentifierName("ITestOutputHelper"))))
+                            .AddBodyStatements(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName("_testOutput"),
+                                        IdentifierName("testOutput"))),
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName("_stringWriter"),
+                                        ObjectCreationExpression(
                                                 QualifiedName(
+                                                    QualifiedName(
+                                                        IdentifierName("System"),
+                                                        IdentifierName("IO")),
+                                                    IdentifierName("StringWriter")))
+                                            .WithArgumentList(
+                                                ArgumentList()))),
+                                ExpressionStatement(
+                                    InvocationExpression(
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
                                                     IdentifierName("System"),
-                                                    IdentifierName("IO")),
-                                                IdentifierName("StringWriter")))
+                                                    IdentifierName("Console")),
+                                                IdentifierName("SetOut")))
                                         .WithArgumentList(
-                                            ArgumentList()))),
-                            ExpressionStatement(
-                                InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            ArgumentList(
+                                                SingletonSeparatedList(
+                                                    Argument(
+                                                        IdentifierName("_stringWriter")))))),
+                                ExpressionStatement(
+                                    InvocationExpression(
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName("System"),
-                                                IdentifierName("Console")),
-                                            IdentifierName("SetOut")))
-                                    .WithArgumentList(
-                                        ArgumentList(
-                                            SingletonSeparatedList(
-                                                Argument(
-                                                    IdentifierName("_stringWriter")))))),
-                            ExpressionStatement(
-                                InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName("System"),
-                                                IdentifierName("Console")),
-                                            IdentifierName("SetError")))
-                                    .WithArgumentList(
-                                        ArgumentList(
-                                            SingletonSeparatedList(
-                                                Argument(
-                                                    IdentifierName("_stringWriter"))))))));
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    IdentifierName("System"),
+                                                    IdentifierName("Console")),
+                                                IdentifierName("SetError")))
+                                        .WithArgumentList(
+                                            ArgumentList(
+                                                SingletonSeparatedList(
+                                                    Argument(
+                                                        IdentifierName("_stringWriter"))))))))
+                    : base.VisitConstructorDeclaration(node);
 
-            public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
-            {
-                if (node.Identifier.Text == "Dispose")
-                    return base.VisitMethodDeclaration(
+            public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node) =>
+                _visitingTestClass && node.Identifier.Text == "Dispose" 
+                    ? base.VisitMethodDeclaration(
                         node.AddBodyStatements(LocalDeclarationStatement(
                                 VariableDeclaration(
                                         IdentifierName("var"))
@@ -171,14 +167,27 @@ namespace Exercism.TestRunner.CSharp
                                                 Argument(
                                                     IdentifierName("output"))))))
 
-                        ));
-                                        
-                
-                return base.VisitMethodDeclaration(node);
-            }
+                        ))
+                    : base.VisitMethodDeclaration(node);
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
             {
+                var oldVisitingTestClass = _visitingTestClass;
+                
+                _visitingTestClass = node
+                    .DescendantNodes()
+                    .OfType<AttributeSyntax>()
+                    .Any(attribute => attribute.Name.ToString() == "Fact" ||
+                                      attribute.Name.ToString() == "Theory" ||
+                                      attribute.Name.ToString() == "Diamond");
+
+                if (!_visitingTestClass)
+                {
+                    var visitedClassDeclaration = base.VisitClassDeclaration(node);
+                    _visitingTestClass = oldVisitingTestClass;
+                    return visitedClassDeclaration;
+                }
+
                 // TODO: refactor to method
                 if (!node.DescendantNodes().OfType<ConstructorDeclarationSyntax>().Any())
                     node = node.AddMembers(
@@ -195,14 +204,14 @@ namespace Exercism.TestRunner.CSharp
                                 IdentifierName("IDisposable"))));
 
                 // TODO: refactor to method
-                if (node.DescendantNodes().OfType<MethodDeclarationSyntax>().All(method => method.Identifier.Text != "Dispose"))
+                if (node.DescendantNodes().Where(n => n.Parent?.Equals(node) ?? false).OfType<MethodDeclarationSyntax>().All(method => method.Identifier.Text != "Dispose"))
                     node = node.AddMembers(
                         MethodDeclaration(
                                 PredefinedType(Token(SyntaxKind.VoidKeyword)),
                                 Identifier("Dispose"))
                             .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword))));
-                
-                return base.VisitClassDeclaration( 
+
+                var rewrittenClassDeclaration = base.VisitClassDeclaration( 
                     node
                         .AddMembers(
                             FieldDeclaration(
@@ -226,6 +235,10 @@ namespace Exercism.TestRunner.CSharp
                                         SingletonSeparatedList(
                                             VariableDeclarator(
                                                 Identifier("_stringWriter")))))));
+                
+                _visitingTestClass = oldVisitingTestClass;
+
+                return rewrittenClassDeclaration;
             }
         }
     }

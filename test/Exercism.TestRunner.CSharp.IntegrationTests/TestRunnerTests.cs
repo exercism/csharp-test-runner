@@ -157,5 +157,19 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("DownloadedSolution");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void WithNonTestClasses()
+        {
+            var testRun = TestSolutionRunner.Run("WithNonTestClasses");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
+
+        [Fact]
+        public void WithPrivateDisposableClasses()
+        {
+            var testRun = TestSolutionRunner.Run("WithPrivateDisposableClasses");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
