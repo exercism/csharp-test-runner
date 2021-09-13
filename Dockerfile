@@ -15,6 +15,7 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:5.0.5-alpine3.13-amd64 AS runtime
 # Enable globalization as some exercises use it
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 RUN apk add --no-cache icu-libs
+RUN apk add --no-cache tzdata
 
 WORKDIR /opt/test-runner
 
