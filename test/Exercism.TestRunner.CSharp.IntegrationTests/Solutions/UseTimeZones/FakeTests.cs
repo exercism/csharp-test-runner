@@ -6,7 +6,7 @@ public class FakeTests
 {
     public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public static string LondonTimeZone => IsWindows ? "GMT Standard Time" : "Europe/London";
-    public static string NewYorkTimeZone => IsWindows ? "Eastern Standard Time" : "America/NewYork";
+    public static string NewYorkTimeZone => IsWindows ? "Eastern Standard Time" : "America/New_York";
     public static string ParisTimeZone => IsWindows ? "W. Europe Standard Time" : "Europe/Paris";
 
     [Fact]
