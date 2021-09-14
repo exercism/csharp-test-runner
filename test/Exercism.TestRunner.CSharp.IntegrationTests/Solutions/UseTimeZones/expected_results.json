@@ -1,0 +1,22 @@
+{
+  "version": 3,
+  "status": "Pass",
+  "tests": [
+    {
+      "status": "Pass",
+      "name": "Can Get TimeZones"
+    },
+    {
+      "status": "Pass",
+      "name": "Has London TimeZone"
+    },
+    {
+      "status": "Pass",
+      "name": "Has NewYork TimeZone"
+    },
+    {
+      "status": "Pass",
+      "name": "Has Paris TimeZone"
+    }
+  ]
+}
