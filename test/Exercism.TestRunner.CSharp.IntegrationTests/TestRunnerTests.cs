@@ -185,5 +185,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("WithPrivateDisposableClasses");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void UseTimeZones()
+        {
+            var testRun = TestSolutionRunner.Run("UseTimeZones");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
