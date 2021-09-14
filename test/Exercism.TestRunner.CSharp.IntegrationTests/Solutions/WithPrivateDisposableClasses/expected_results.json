@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "status": "pass",
+  "tests": [
+    {
+      "name": "Disposable objects are disposed when throwing an exception",
+      "status": "pass",
+      "test_code": "var disposableResource = new DisposableResource();\\r\\nAssert.Throws\\u003CException\\u003E(() =\\u003E Fake.DisposableResourcesAreDisposedWhenExceptionIsThrown(disposableResource));\\r\\nAssert.True(disposableResource.IsDisposed);"
+    }
+  ]
+}

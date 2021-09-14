@@ -204,7 +204,7 @@ namespace Exercism.TestRunner.CSharp
                                 IdentifierName("IDisposable"))));
 
                 // TODO: refactor to method
-                if (node.DescendantNodes().OfType<MethodDeclarationSyntax>().All(method => method.Identifier.Text != "Dispose"))
+                if (node.ChildNodes().OfType<MethodDeclarationSyntax>().All(method => method.Identifier.Text != "Dispose"))
                     node = node.AddMembers(
                         MethodDeclaration(
                                 PredefinedType(Token(SyntaxKind.VoidKeyword)),

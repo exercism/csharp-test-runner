@@ -178,5 +178,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("EditorFiles");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void WithPrivateDisposableClasses()
+        {
+            var testRun = TestSolutionRunner.Run("WithPrivateDisposableClasses");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }
