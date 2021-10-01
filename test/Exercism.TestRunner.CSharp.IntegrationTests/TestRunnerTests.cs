@@ -192,5 +192,12 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
             var testRun = TestSolutionRunner.Run("UseTimeZones");
             Assert.Equal(testRun.Expected, testRun.Actual);
         }
+
+        [Fact]
+        public void DifferentTypesOfTests()
+        {
+            var testRun = TestSolutionRunner.Run("DifferentTypesOfTests");
+            Assert.Equal(testRun.Expected, testRun.Actual);
+        }
     }
 }

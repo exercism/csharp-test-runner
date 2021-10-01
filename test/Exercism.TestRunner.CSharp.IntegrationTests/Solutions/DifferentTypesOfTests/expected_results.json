@@ -1,0 +1,33 @@
+{
+  "version": 3,
+  "status": "pass",
+  "tests": [
+    {
+      "name": "Identity",
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Fake.Identity(2))"
+    },
+    {
+      "name": "Add should add numbers",
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Fake.Add(1, 1))"
+    },
+    {
+      "name": "Sub should subtract numbers",
+      "status": "pass",
+      "test_code": "Assert.Equal(expected, Fake.Sub(x, y))"
+    },
+    {
+      "name": "Mul should multiply numbers",
+      "status": "pass",
+      "output": "Ok, passed 100 tests.",
+      "test_code": "Assert.Equal(x * y, Fake.Mul(x, y))"
+    },
+    {
+      "name": "Div should divide numbers",
+      "status": "pass",
+      "output": "Ok, passed 100 tests.",
+      "test_code": "Prop.Throws\u003CDivideByZeroException, int\u003E(new Lazy\u003Cint\u003E(() =\u003E x / 0))"
+    }
+  ]
+}
