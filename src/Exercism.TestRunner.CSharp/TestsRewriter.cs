@@ -26,8 +26,8 @@ namespace Exercism.TestRunner.CSharp
 
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
-            public override SyntaxNode VisitAttribute(AttributeSyntax node) =>
-                base.VisitAttribute(node.Name.ToString() == "Fact" ? node.WithArgumentList(null) : node);
+            public override SyntaxNode VisitAttributeArgument(AttributeArgumentSyntax node) =>
+                node.NameEquals?.Name.Identifier.Text == "Skip" ? null : base.VisitAttributeArgument(node);
         }
 
         private class CaptureConsoleOutputRewriter : CSharpSyntaxRewriter
