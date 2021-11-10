@@ -1,0 +1,7 @@
+{
+    "files": {
+      "solution": ["Fake.cs"],
+      "test": ["FakeTests.cs"],
+      "example": [".meta/Example.cs"]
+    }
+}
