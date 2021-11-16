@@ -63,3 +63,5 @@ if ($UseDocker.IsPresent) {
 $Env:USE_DOCKER = $UseDocker.IsPresent
 
 dotnet test
+
+exit $LastExitCode
