@@ -9,7 +9,7 @@ public class FakeTests : IDisposable
     
     public FakeTests()
     {
-        _file = File.Open("tmp.txt", FileMode.Create);
+        _file = File.Open(Path.GetTempFileName(), FileMode.Create);
     }
     
     [Fact]
