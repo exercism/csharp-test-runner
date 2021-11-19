@@ -8,3 +8,4 @@ src/Exercism.TestRunner.CSharp/bin
 src/Exercism.TestRunner.CSharp/obj
 .appends
 .git
+.github
