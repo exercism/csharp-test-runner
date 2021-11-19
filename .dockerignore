@@ -10,3 +10,4 @@ src/Exercism.TestRunner.CSharp/obj
 .git
 .github
 .gitignore
+.gitattributes
