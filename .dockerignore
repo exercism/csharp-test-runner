@@ -6,3 +6,10 @@
 !src/Exercism.TestRunner.CSharp/AdditionalFiles
 src/Exercism.TestRunner.CSharp/bin
 src/Exercism.TestRunner.CSharp/obj
+.appends
+.git
+.github
+.gitignore
+.gitattributes
+.dockerignore
+Dockerfile
