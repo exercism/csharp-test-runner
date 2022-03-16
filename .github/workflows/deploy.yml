@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-and-push-image:
-    uses: exercism/github-actions/.github/workflows/docker-build-push-image.yml@main
+    uses: exercism/github-actions/.github/workflows/docker-build-push-image.yml@docker-workflow-conditional-on-dockerfile
     secrets:
       AWS_ACCOUNT_ID: ${{secrets.AWS_ACCOUNT_ID}}
       AWS_REGION: ${{secrets.AWS_REGION}}
