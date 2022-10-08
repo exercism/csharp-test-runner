@@ -40,7 +40,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
         {
             var options = new JsonSerializerOptions
             {
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 PropertyNamingPolicy = null
             };
             options.Converters.Add(new JsonStringEnumConverter());
