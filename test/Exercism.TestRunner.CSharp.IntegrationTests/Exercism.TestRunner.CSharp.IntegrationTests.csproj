@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SolutionFiles Include="Solutions\**" />
+    <SolutionFiles Include="..\tests\**" />
     <Compile Remove="@(SolutionFiles)" />
   </ItemGroup>
 
