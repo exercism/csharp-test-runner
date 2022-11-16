@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "status": "fail",
+  "status": "pass",
   "tests": [
     {
       "name": "Use invariant culture",
@@ -9,8 +9,7 @@
     },
     {
       "name": "Use dutch culture",
-      "status": "fail",
-      "message": "Assert.Equal() Failure\n           \u2193 (pos 1)\nExpected: \u20AC 1.000,00\nActual:   \u20AC1,000.00\n           \u2191 (pos 1)",
+      "status": "pass",
       "test_code": "Assert.Equal(\u0022\u20AC 1.000,00\u0022, Fake.Format(1000))"
     },
     {
