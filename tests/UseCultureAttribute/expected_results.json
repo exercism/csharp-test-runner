@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "status": "pass",
+  "tests": [
+    {
+      "name": "Use invariant culture",
+      "status": "pass",
+      "test_code": "Assert.Equal(\u0022\u00A41,000.00\u0022, Fake.Format(1000))"
+    },
+    {
+      "name": "Use dutch culture",
+      "status": "pass",
+      "test_code": "Assert.Equal(\u0022\u20AC 1.000,00\u0022, Fake.Format(1000))"
+    },
+    {
+      "name": "Use us culture",
+      "status": "pass",
+      "test_code": "Assert.Equal(\u0022$1,000.00\u0022, Fake.Format(1000))"
+    }
+  ]
+}

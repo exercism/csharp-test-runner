@@ -6,7 +6,7 @@ namespace Exercism.TestRunner.CSharp.IntegrationTests
     {
         public string Slug { get; }
         public string Directory { get; }
-        public string DirectoryFullPath => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(TestSolution).Assembly.Location)!, "Solutions", Directory));
+        public string DirectoryFullPath => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(TestSolution).Assembly.Location)!, "tests", Directory));
 
         public TestSolution(string slug, string directory)
         {

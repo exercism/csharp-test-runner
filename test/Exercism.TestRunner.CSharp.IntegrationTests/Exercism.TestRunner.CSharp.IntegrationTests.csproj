@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -12,17 +12,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SolutionFiles Include="Solutions\**" />
-    <Compile Remove="@(SolutionFiles)" />
+    <TestFiles Include="..\..\tests\**" />
+    <Compile Remove="@(TestFiles)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Exercism.TestRunner.CSharp\Exercism.TestRunner.CSharp.csproj" />
   </ItemGroup>
 
-  <Target Name="CopySolutions" AfterTargets="Build">
-    <RemoveDir Directories="$(OutputPath)\Solutions" />
-    <Copy SourceFiles="@(SolutionFiles)" DestinationFolder="$(OutputPath)\Solutions\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  <Target Name="CopyTests" AfterTargets="Build">
+    <RemoveDir Directories="$(OutputPath)\tests" />
+    <Copy SourceFiles="@(TestFiles)" DestinationFolder="$(OutputPath)\tests\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>
