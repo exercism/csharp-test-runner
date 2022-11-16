@@ -14,7 +14,7 @@
 exit_code=0
 
 # Iterate over all test directories
-for test_dir in tests/Solutions/*; do
+for test_dir in tests/*; do
     test_dir_name=$(basename "${test_dir}")
     test_dir_path=$(realpath "${test_dir}")
     results_file_path="${test_dir_path}/results.json"

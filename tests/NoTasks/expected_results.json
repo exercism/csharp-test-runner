@@ -10,12 +10,12 @@
     {
       "name": "Sub should subtract numbers",
       "status": "pass",
-      "test_code": "Assert.Equal(1, Fake.Sub(2, 1))"
+      "test_code": "Assert.Equal(4, Fake.Sub(7, 3))"
     },
     {
       "name": "Mul should multiply numbers",
       "status": "pass",
-      "test_code": "Assert.Equal(5, Fake.Mul(2, 3))"
+      "test_code": "Assert.Equal(6, Fake.Mul(2, 3))"
     }
   ]
 }

@@ -5,7 +5,7 @@
     {
       "name": "Add should add numbers",
       "status": "pass",
-      "test_code": "Assert.Equal(2, Fake.Add(1, 1))"
+      "test_code": "_numberComparer.Compare(2, FakeHelper.AddOne(1))"
     }
   ]
 }
