@@ -10,7 +10,7 @@ COPY src/Exercism.TestRunner.CSharp/ ./
 RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore --self-contained true
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:7.0.0-alpine3.16-amd64 AS runtime
+FROM mcr.microsoft.com/dotnet/runtime:7.0.1-alpine3.16-amd64 AS runtime
 
 # Enable globalization as some exercises use it
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
