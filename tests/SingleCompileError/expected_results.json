@@ -1,6 +1,5 @@
 {
   "version": 3,
   "status": "error",
-  "message": "Fake.cs(3,49): error CS1002: ; expected",
-  "tests": []
+  "message": "Fake.cs(3,49): error CS1002: ; expected"
 }

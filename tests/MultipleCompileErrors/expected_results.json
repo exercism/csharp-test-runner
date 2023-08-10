@@ -1,6 +1,5 @@
 {
   "version": 3,
   "status": "error",
-  "message": "FakeTests.cs(6,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Add\u0027\nFakeTests.cs(8,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Sub\u0027",
-  "tests": []
+  "message": "FakeTests.cs(6,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Add\u0027\nFakeTests.cs(8,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Sub\u0027"
 }
