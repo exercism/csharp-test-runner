@@ -35,6 +35,9 @@ namespace Exercism.TestRunner.CSharp
 
         [JsonPropertyName("editor")]
         public string[] Editor { get; set; } = Array.Empty<string>();
+
+        [JsonIgnore]
+        public string[] Additional { get; set; } = Array.Empty<string>();
     }
 
     internal class Configuration

@@ -21,10 +21,11 @@ namespace Exercism.TestRunner.CSharp
         private static IEnumerable<SyntaxTree> SyntaxTrees(Options options, Files files)
         {
             var solutionFiles = files.Solution.Select(file => ParseSyntaxTree(file, options));
-            var editorFiles = files.Editor.Select(file => ParseSyntaxTree(file, options));
+            var editorFiles = files.Editor.Select(file => ParseSyntaxTree(file, options));            
             var testFiles = files.Test.Select(file => ParseSyntaxTree(file, options).Rewrite());
+            var additionalFiles = files.Solution.Select(file => ParseSyntaxTree(file, options));
 
-            return solutionFiles.Concat(editorFiles).Concat(testFiles);
+            return solutionFiles.Concat(editorFiles).Concat(testFiles).Concat(additionalFiles);
         }
 
         private static SyntaxTree ParseSyntaxTree(string file, Options options)
