@@ -22,6 +22,8 @@ namespace Exercism.TestRunner.CSharp
                 .Except(configuration.Files.Solution)
                 .Except(configuration.Files.Editor)
                 .Except(configuration.Files.Test)
+                .Except(configuration.Files.Example)
+                .Except(configuration.Files.Exemplar)
                 .ToArray();
 
         private static string ConfigJson(Options options) =>
@@ -45,6 +47,12 @@ namespace Exercism.TestRunner.CSharp
 
         [JsonPropertyName("editor")]
         public string[] Editor { get; set; } = Array.Empty<string>();
+
+        [JsonPropertyName("example")]
+        public string[] Example { get; set; } = Array.Empty<string>();
+
+        [JsonPropertyName("exemplar")]
+        public string[] Exemplar { get; set; } = Array.Empty<string>();
 
         [JsonIgnore]
         public string[] Additional { get; set; } = Array.Empty<string>();
