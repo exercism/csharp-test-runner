@@ -18,12 +18,14 @@ namespace Exercism.TestRunner.CSharp
 
         private static string[] GetAdditionalFiles(Options options, Configuration configuration) =>
             Directory.EnumerateFiles(options.InputDirectory, "*.cs", SearchOption.AllDirectories)
-                .Select(path => Path.GetFullPath(path)[(options.InputDirectory.Length + 1)..])
+                .Select(Path.GetFullPath)
+                .Select(path => path[options.InputDirectory.Length..].TrimStart(Path.DirectorySeparatorChar))
                 .Except(configuration.Files.Solution)
                 .Except(configuration.Files.Editor)
                 .Except(configuration.Files.Test)
                 .Except(configuration.Files.Example)
                 .Except(configuration.Files.Exemplar)
+                .Where(path => !Path.GetDirectoryName(path)!.StartsWith('.'))
                 .ToArray();
 
         private static string ConfigJson(Options options) =>
