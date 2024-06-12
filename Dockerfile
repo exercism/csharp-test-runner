@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.204-alpine3.19-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.302-alpine3.19-amd64 AS build
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
