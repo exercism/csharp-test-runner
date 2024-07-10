@@ -15,7 +15,7 @@
     {
       "name": "Mul should multiply numbers",
       "status": "fail",
-      "message": "Assert.Equal() Failure\nExpected: 5\nActual:   6",
+      "message": "Assert.Equal() Failure: Values differ\nExpected: 5\nActual:   6",
       "test_code": "Assert.Equal(5, Fake.Mul(2, 3))"
     }
   ]
