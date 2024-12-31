@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.402-alpine3.19-amd64 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.20-amd64 AS build
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY src/Exercism.TestRunner.CSharp/ ./
 RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore --self-contained true
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:8.0.8-alpine3.19-amd64 AS runtime
+FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine3.20-amd64 AS runtime
 
 # Enable globalization as some exercises use it
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
