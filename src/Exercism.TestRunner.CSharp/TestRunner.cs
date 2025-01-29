@@ -24,7 +24,7 @@ namespace Exercism.TestRunner.CSharp
             runner.OnTestPassed += info => tests.Push(info);
             runner.OnExecutionComplete += _ => finished.Set();
 
-            runner.Start();
+            runner.Start(new AssemblyRunnerStartOptions());
             finished.Wait();
 
             return TestResultParser.FromTests(tests, compilation, files);
