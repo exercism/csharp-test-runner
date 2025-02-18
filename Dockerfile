@@ -23,6 +23,9 @@ RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore
 FROM mcr.microsoft.com/dotnet/sdk:9.0.200-alpine3.21-amd64 AS runtime
 WORKDIR /opt/test-runner
 
+# Enable rolling forward the .NET SDK used to be backwards-compatible
+ENV DOTNET_ROLL_FORWARD Major
+
 COPY --from=build /opt/test-runner/ .
 COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /root/.nuget/packages/ /root/.nuget/packages/

@@ -28,12 +28,16 @@ namespace Exercism.TestRunner.CSharp
 
         private void RunDotnetTest()
         {
-            var command = "dotnet";
-            var arguments = $"test --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q";
+            var workingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!;
+            RunProcess("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
+            RunProcess("dotnet", $"test --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q", workingDirectory);            
+        }
 
+        private static void RunProcess(string command, string arguments, string workingDirectory)
+        {
             var processStartInfo = new ProcessStartInfo(command, arguments)
             {
-                WorkingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!,
+                WorkingDirectory = workingDirectory,
                 RedirectStandardInput = true,
                 RedirectStandardError = true,
                 RedirectStandardOutput = true
