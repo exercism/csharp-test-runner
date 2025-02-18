@@ -15,8 +15,9 @@ namespace Exercism.TestRunner.CSharp
         {
             Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Running test runner for '{options.Slug}' solution...");
 
-            var testRun = TestSuite.RunTests(options);
-            testRun.WriteToFile(options);
+            var testSuite = TestSuite.FromOptions(options);
+            var testRun = testSuite.Run();
+            testRun.WriteToFile(options.ResultsJsonFilePath);
 
             Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Ran test runner for '{options.Slug}' solution");
         }
