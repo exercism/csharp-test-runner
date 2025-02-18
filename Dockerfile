@@ -4,9 +4,9 @@ WORKDIR /tmp
 
 # Pre-install packages for offline usage
 RUN dotnet new console && \
-    dotnet add package Microsoft.NET.Test.Sdk -v 16.8.3 && \
-    dotnet add package xunit -v 2.4.1 && \
-    dotnet add package xunit.runner.visualstudio -v 2.4.3 && \
+    dotnet add package Microsoft.NET.Test.Sdk -v 17.12.0 && \
+    dotnet add package xunit -v 2.8.1 && \
+    dotnet add package xunit.runner.visualstudio -v 3.0.1 && \
     dotnet add package Exercism.Tests -v 0.1.0-alpha
 
 WORKDIR /app
