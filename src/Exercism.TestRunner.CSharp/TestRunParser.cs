@@ -50,8 +50,11 @@ namespace Exercism.TestRunner.CSharp
         private static string NormalizeLogLine(this string logLine) =>
             logLine.RemoveProjectReference().RemovePath().UseUnixNewlines().Trim();
 
-        private static string RemoveProjectReference(this string logLine) =>
-            logLine[..(logLine.LastIndexOf('[') - 1)];
+        private static string RemoveProjectReference(this string logLine)
+        {
+            var bracketIndex = logLine.LastIndexOf('[');
+            return bracketIndex == -1 ? logLine : logLine[..(bracketIndex - 1)];
+        }
 
         private static string RemovePath(this string logLine)
         {
