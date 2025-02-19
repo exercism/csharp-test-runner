@@ -12,7 +12,7 @@ RUN dotnet new console && \
     dotnet add package Microsoft.Reactive.Testing --version 5.0.0 && \
     dotnet add package Sprache --version 2.3.1 && \
     dotnet add package xunit --version 2.8.1 && \
-    dotnet add package xunit.runner.visualstudio --version 3.0.1 && \
+    dotnet add package xunit.runner.visualstudio --version 3.0.1
 
 WORKDIR /app
 
