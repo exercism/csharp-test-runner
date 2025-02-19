@@ -1,5 +1,3 @@
-using System.IO;
-
 using CommandLine;
 
 using Humanizer;

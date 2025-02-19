@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Exercism.TestRunner.CSharp
@@ -10,7 +9,7 @@ namespace Exercism.TestRunner.CSharp
             File.WriteAllText(resultsJsonFilePath, testRun.ToJson());
 
         private static string ToJson(this TestRun testRun) =>
-            JsonSerializer.Serialize(testRun, CreateJsonSerializerOptions());
+            JsonSerializer.Serialize(testRun, CreateJsonSerializerOptions()).TrimEnd() + Environment.NewLine;
 
         private static JsonSerializerOptions CreateJsonSerializerOptions()
         {
