@@ -4,13 +4,15 @@ WORKDIR /tmp
 
 # Pre-install packages for offline usage
 RUN dotnet new console && \
-    dotnet add package Microsoft.NET.Test.Sdk -v 17.12.0 && \
-    dotnet add package xunit -v 2.8.1 && \
-    dotnet add package xunit.runner.visualstudio -v 3.0.1 && \
-    dotnet add package Exercism.Tests -v 0.1.0-alpha && \
-    dotnet add package Exercism.Tests -v 0.1.0-beta && \
-    dotnet add package FsCheck -v 2.16.3 && \
-    dotnet add package FsCheck.Xunit -v 2.16.3
+    dotnet add package Exercism.Tests --version 0.1.0-beta1 && \
+    dotnet add package FakeItEasy --version 6.2.1 && \
+    dotnet add package FsCheck --version 2.14.4 && \
+    dotnet add package FsCheck.Xunit --version 2.14.4 && \
+    dotnet add package Microsoft.NET.Test.Sdk --version 17.12.0 && \
+    dotnet add package Microsoft.Reactive.Testing --version 5.0.0 && \
+    dotnet add package Sprache --version 2.3.1 && \
+    dotnet add package xunit --version 2.8.1 && \
+    dotnet add package xunit.runner.visualstudio --version 3.0.1 && \
 
 WORKDIR /app
 
