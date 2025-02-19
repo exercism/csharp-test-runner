@@ -7,7 +7,10 @@ RUN dotnet new console && \
     dotnet add package Microsoft.NET.Test.Sdk -v 17.12.0 && \
     dotnet add package xunit -v 2.8.1 && \
     dotnet add package xunit.runner.visualstudio -v 3.0.1 && \
-    dotnet add package Exercism.Tests -v 0.1.0-alpha
+    dotnet add package Exercism.Tests -v 0.1.0-alpha && \
+    dotnet add package Exercism.Tests -v 0.1.0-beta && \
+    dotnet add package FsCheck -v 2.16.3 && \
+    dotnet add package FsCheck.Xunit -v 2.16.3
 
 WORKDIR /app
 
@@ -24,7 +27,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0.200-alpine3.21-amd64 AS runtime
 WORKDIR /opt/test-runner
 
 # Enable rolling forward the .NET SDK used to be backwards-compatible
-ENV DOTNET_ROLL_FORWARD Major
+ENV DOTNET_ROLL_FORWARD=Major
 
 COPY --from=build /opt/test-runner/ .
 COPY --from=build /usr/local/bin/ /usr/local/bin/
