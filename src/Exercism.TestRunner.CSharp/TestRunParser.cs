@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Text.RegularExpressions;
+
+using Microsoft.CodeAnalysis;
 
 namespace Exercism.TestRunner.CSharp
 {
@@ -7,7 +9,7 @@ namespace Exercism.TestRunner.CSharp
         public static TestRun Parse(Options options, SyntaxTree testsSyntaxTree)
         {
             var logLines = File.ReadLines(options.BuildLogFilePath);
-            var buildFailed = logLines.Any();
+            var buildFailed = logLines.Where(IsError).Any();
 
             if (buildFailed)
             {
@@ -16,6 +18,8 @@ namespace Exercism.TestRunner.CSharp
 
             return TestRunWithoutError(options, testsSyntaxTree);
         }
+
+        private static bool IsError(string arg) => Regex.IsMatch(arg, @"error CS\d{4}:");
 
         private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
         {
