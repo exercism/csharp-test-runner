@@ -54,7 +54,7 @@ namespace Exercism.TestRunner.CSharp
         {
             var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
             var className = classAndMethodName[0];
-            var methodName = classAndMethodName[1];
+            var methodName = classAndMethodName[1].Split('(')[0];
 
             return methodDeclarations.Single(method =>
                 method.Identifier.Text == methodName &&
