@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
