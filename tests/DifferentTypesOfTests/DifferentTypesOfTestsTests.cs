@@ -19,15 +19,15 @@ public class FakeTests
     public void Sub_should_subtract_numbers(int expected, int x, int y) =>
         Assert.Equal(expected, Fake.Sub(x, y));
     
-    [CustomPropertyAttribute(Skip = "Remove this Skip property to run this test")]
-    public void Mul_should_multiply_numbers(int x, int y) =>
-        Assert.Equal(x * y, Fake.Mul(x, y));
-    
-    [Property(Skip = "Remove this Skip property to run this test")]
-    public Property Div_should_divide_numbers(int x) =>
-        Prop.Throws<DivideByZeroException, int>(new Lazy<int>(() => x / 0));
+    // [CustomPropertyAttribute(Skip = "Remove this Skip property to run this test")]
+    // public void Mul_should_multiply_numbers(int x, int y) =>
+    //     Assert.Equal(x * y, Fake.Mul(x, y));
+    //
+    // [Property(Skip = "Remove this Skip property to run this test")]
+    // public Property Div_should_divide_numbers(int x) =>
+    //     Prop.Throws<DivideByZeroException, int>(new Lazy<int>(() => x / 0));
 }
 
-public class CustomPropertyAttribute : PropertyAttribute
-{
-}
+// public class CustomPropertyAttribute : PropertyAttribute
+// {
+// }
