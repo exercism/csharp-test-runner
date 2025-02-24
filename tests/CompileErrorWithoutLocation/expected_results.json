@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "status": "error",
-  "message": "CompileErrorWithoutLocationTests.cs(30,8): error CS0116: A namespace cannot directly contain members such as fields, methods or statements\nCompileErrorWithoutLocationTests.cs(31,1): error CS8803: Top-level statements must precede namespace and type declarations.",
-  "tests": []
-}
