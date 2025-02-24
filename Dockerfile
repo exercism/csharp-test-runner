@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.21 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG TARGETARCH
 
 WORKDIR /tmp
@@ -6,6 +6,7 @@ WORKDIR /tmp
 # Pre-install packages for offline usage
 RUN dotnet new console && \
     dotnet add package Exercism.Tests --version 0.1.0-beta1 && \
+    dotnet add package Exercism.Tests.xunit.v3 --version 0.1.0-beta1 && \
     dotnet add package FakeItEasy --version 6.2.1 && \
     dotnet add package FsCheck --version 2.14.4 && \
     dotnet add package FsCheck --version 3.1.0 && \
@@ -28,15 +29,15 @@ COPY src/Exercism.TestRunner.CSharp/ ./
 RUN dotnet publish -a $TARGETARCH -c Release -o /opt/test-runner --no-restore
 
 # Build runtime image
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.21 AS runtime
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS runtime
 
-# Enable globalization as some exercises use it
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-RUN apk add --no-cache icu-libs icu-data-full tzdata
-WORKDIR /opt/test-runner
-
-# Enable rolling forward the .NET SDK used to be backwards-compatible
 ENV DOTNET_ROLL_FORWARD=Major
+ENV DOTNET_NOLOGO=true
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=true
+
+# RUN apk add --no-cache icu-libs icu-data-full tzdata
+WORKDIR /opt/test-runner
 
 COPY --from=build /opt/test-runner/ .
 COPY --from=build /usr/local/bin/ /usr/local/bin/
