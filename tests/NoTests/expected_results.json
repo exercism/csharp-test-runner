@@ -1,4 +1,5 @@
 {
   "version": 3,
-  "status": "error"
+  "status": "error",
+  "tests": []
 }

@@ -1,25 +1,82 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Exercism.TestRunner.CSharp
 {
-    internal static class TestSuite
+    internal class TestSuite
     {
-        public static TestRun RunTests(Options options)
+        private readonly SyntaxTree _originalSyntaxTree;
+        private readonly string _originalProjectFile;
+        private readonly Options _options;
+
+        private TestSuite(SyntaxTree originalSyntaxTree, string originalProjectFile, Options options)
         {
-            var files = FilesParser.Parse(options);
-            var compilation = TestCompilation.Compile(options, files);
+            _originalSyntaxTree = originalSyntaxTree;
+            _originalProjectFile = originalProjectFile;
+            _options = options;
+        }
 
-            var errors = compilation.GetDiagnostics()
-                .Where(diag => diag.Severity == DiagnosticSeverity.Error)
-                .ToArray();
+        public TestRun Run()
+        {
+            Rewrite();
+            RunDotnetTest();
+            UndoRewrite();
 
-            if (errors.Any())
-                return TestRunParser.TestRunWithError(errors);
+            return TestRunParser.Parse(_options, _originalSyntaxTree);
+        }
 
-            var testResults = TestRunner.RunTests(compilation, files);
-            return TestRunParser.TestRunWithoutError(testResults);
+        private void RunDotnetTest()
+        {
+            var workingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!;
+            RunProcess("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
+            RunProcess("dotnet", $"test --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q", workingDirectory);            
+        }
+
+        private static void RunProcess(string command, string arguments, string workingDirectory)
+        {
+            var processStartInfo = new ProcessStartInfo(command, arguments)
+            {
+                WorkingDirectory = workingDirectory,
+                RedirectStandardInput = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
+            Process.Start(processStartInfo)?.WaitForExit();
+        }
+
+        private void Rewrite()
+        {
+            RewriteProjectFile();
+            RewriteTestsFile();
+        }
+
+        private void RewriteProjectFile() =>
+            File.WriteAllText(_options.ProjectFilePath,
+                _originalProjectFile
+                    .Replace("net5.0", "net8.0")
+                    .Replace("net6.0", "net8.0")
+                    .Replace("net7.0", "net8.0")
+                    .Replace("net8.0", "net9.0"));
+
+        private void RewriteTestsFile() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.Rewrite().ToString());
+
+        private void UndoRewrite()
+        {
+            UndoRewriteProjectFile();
+            UndoRewriteTestsFile();
+        }
+
+        private void UndoRewriteProjectFile() => File.WriteAllText(_options.ProjectFilePath, _originalProjectFile);
+
+        private void UndoRewriteTestsFile() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.ToString());
+
+        public static TestSuite FromOptions(Options options)
+        {
+            var originalSyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(options.TestsFilePath));
+            var originalProjectFile = File.ReadAllText(options.ProjectFilePath);
+            return new TestSuite(originalSyntaxTree, originalProjectFile, options);
         }
     }
 }

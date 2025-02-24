@@ -1,7 +1,0 @@
-{
-  "files": {
-    "solution": ["Foo.cs"],
-    "test": ["FooTests.cs"],
-    "example": [".meta/Example.cs"]
-  }
-}

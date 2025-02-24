@@ -15,17 +15,17 @@
     {
       "name": "Single assertion with non assertion statement block",
       "status": "pass",
-      "test_code": "var x = Fake.Sub(7, 3);\r\nAssert.Equal(4, x);"
+      "test_code": "var x = Fake.Sub(7, 3);\nAssert.Equal(4, x);"
     },
     {
       "name": "Multiple assertions as block",
       "status": "pass",
-      "test_code": "Assert.Equal(6, Fake.Mul(2, 3));\r\nAssert.Equal(8, Fake.Mul(2, 4));"
+      "test_code": "Assert.Equal(6, Fake.Mul(2, 3));\nAssert.Equal(8, Fake.Mul(2, 4));"
     },
     {
       "name": "Multiple assertions with non assertion statements block",
       "status": "pass",
-      "test_code": "var x = Fake.Mul(2, 3);\r\nvar y = Fake.Mul(2, 4);\r\nAssert.Equal(6, x);\r\nAssert.Equal(8, y);"
+      "test_code": "var x = Fake.Mul(2, 3);\nvar y = Fake.Mul(2, 4);\nAssert.Equal(6, x);\nAssert.Equal(8, y);"
     }
   ]
 }

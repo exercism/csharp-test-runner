@@ -1,5 +1,6 @@
 {
   "version": 3,
   "status": "error",
-  "message": "FakeTests.cs(31,1): error CS8805: Program using top-level statements must be an executable."
+  "message": "CompileErrorWithoutLocationTests.cs(30,8): error CS0116: A namespace cannot directly contain members such as fields, methods or statements\nCompileErrorWithoutLocationTests.cs(31,1): error CS8803: Top-level statements must precede namespace and type declarations.",
+  "tests": []
 }
