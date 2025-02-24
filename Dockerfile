@@ -1,16 +1,17 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.20-amd64 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0-alpine3.20 AS build
+ARG TARGETARCH
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
 COPY src/Exercism.TestRunner.CSharp/Exercism.TestRunner.CSharp.csproj ./
-RUN dotnet restore -r linux-musl-x64
+RUN dotnet restore -a $TARGETARCH
 
 # Copy everything else and build
 COPY src/Exercism.TestRunner.CSharp/ ./
-RUN dotnet publish -r linux-musl-x64 -c Release -o /opt/test-runner --no-restore --self-contained true
+RUN dotnet publish -a $TARGETARCH -c Release -o /opt/test-runner --no-restore --self-contained true
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine3.20-amd64 AS runtime
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/runtime:9.0-alpine3.20 AS runtime
 
 # Enable globalization as some exercises use it
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
