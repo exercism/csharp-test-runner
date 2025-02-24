@@ -1,6 +1,6 @@
 {
   "version": 3,
   "status": "error",
-  "message": "MultipleCompileErrorsTests.cs(6,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Add\u0027\nMultipleCompileErrorsTests.cs(8,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Sub\u0027",
+  "message": "MultipleCompileErrorsTests.cs(4,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Add\u0027\nMultipleCompileErrorsTests.cs(6,66): error CS0117: \u0027Fake\u0027 does not contain a definition for \u0027Sub\u0027",
   "tests": []
 }
