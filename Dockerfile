@@ -38,7 +38,7 @@ ENV DOTNET_ROLL_FORWARD=Major
 
 COPY --from=build /opt/test-runner/ .
 COPY --from=build /usr/local/bin/ /usr/local/bin/
-COPY --from=build /root/.nuget/packages/ /root/.nuget/packages/
+COPY --from=build /root/.nuget/ /root/.nuget/
 
 COPY run.sh bin/
 
