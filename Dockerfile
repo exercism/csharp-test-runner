@@ -10,7 +10,6 @@ RUN dotnet new console && \
     dotnet add package FsCheck --version 2.14.4 && \
     dotnet add package FsCheck --version 3.1.0 && \
     dotnet add package FsCheck.Xunit --version 2.14.4 && \
-    dotnet add package FsCheck.Xunit --version 3.1.0 && \
     dotnet add package Microsoft.NET.Test.Sdk --version 17.12.0 && \
     dotnet add package Microsoft.Reactive.Testing --version 5.0.0 && \
     dotnet add package Sprache --version 2.3.1 && \

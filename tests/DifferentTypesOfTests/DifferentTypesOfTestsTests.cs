@@ -1,8 +1,6 @@
-using System;
-
 using Xunit;
-// using FsCheck.Xunit;
-// using FsCheck;
+using FsCheck;
+using FsCheck.Fluent;
 
 public class FakeTests
 {
@@ -14,15 +12,8 @@ public class FakeTests
     public void Add_should_add_numbers() =>
         Assert.Equal(2, Fake.Add(1, 1));
     
-    // [CustomPropertyAttribute(Skip = "Remove this Skip property to run this test")]
-    // public void Mul_should_multiply_numbers(int x, int y) =>
-    //     Assert.Equal(x * y, Fake.Mul(x, y));
-    
-    // [Property(Skip = "Remove this Skip property to run this test")]
-    // public Property Div_should_divide_numbers(int x) =>
-    //     Prop.Throws<DivideByZeroException, int>(new Lazy<int>(() => x / 0));
+    [Fact(Skip = "Remove this Skip property to run this test")]
+    public void Div_should_divide_numbers() =>
+        Prop.ForAll<PositiveInt>(i => Fake.Div(i.Get, i.Get) == 1)
+            .QuickCheckThrowOnFailure();
 }
-
-// public class CustomPropertyAttribute : PropertyAttribute
-// {
-// }
