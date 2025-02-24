@@ -1,4 +1,3 @@
-using Xunit;
 using FsCheck;
 using FsCheck.Fluent;
 
