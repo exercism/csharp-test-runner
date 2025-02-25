@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "status": "pass",
+  "tests": [
+    {
+      "name": "Identity",
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Fake.Identity(2))"
+    },
+    {
+      "name": "Add should add numbers",
+      "status": "pass",
+      "test_code": "Assert.Equal(2, Fake.Add(1, 1))"
+    },
+    {
+      "name": "Div should divide numbers",
+      "status": "pass",
+      "test_code": "Prop.ForAll\u003CPositiveInt\u003E(i =\u003E Fake.Div(i.Get, i.Get) == 1)\n            .QuickCheckThrowOnFailure()"
+    }
+  ]
+}
