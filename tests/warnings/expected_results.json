@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "status": "pass",
+  "tests": [
+    {
+      "name": "Add should add numbers",
+      "status": "pass",
+      "test_code": "if (1 is int)\n        {\n            Assert.Equal(2, Fake.Add(1, 1));    \n        }"
+    }
+  ]
+}
