@@ -31,7 +31,7 @@ namespace Exercism.TestRunner.CSharp
         {
             var workingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!;
             RunProcess("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
-            RunProcess("dotnet", $"test -c release --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:v=q", workingDirectory);            
+            RunProcess("dotnet", $"test -c release --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:verbosity=quiet;errorsOnly=true", workingDirectory);            
         }
 
         private static void RunProcess(string command, string arguments, string workingDirectory)
