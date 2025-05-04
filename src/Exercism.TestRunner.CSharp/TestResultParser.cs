@@ -5,6 +5,7 @@ using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Win32.SafeHandles;
 
 namespace Exercism.TestRunner.CSharp;
 
@@ -15,10 +16,7 @@ internal static class TestResultParser
         using var fileStream = File.OpenRead(logFilePath);
         var result = new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream) as XmlTestRun;
 
-        if (result?.Results == null)
-            return [];
-
-        return result.ToTestResults(testsSyntaxTree);
+        return result?.Results is null ? [] : result.ToTestResults(testsSyntaxTree);
     }
 
     private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
@@ -83,7 +81,7 @@ internal static class TestResultParser
 
     private static string TestCode(this MethodDeclarationSyntax testMethod)
     {
-        if (testMethod.Body != null)
+        if (testMethod.Body is not null)
             return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia())).ToString();
 
         return testMethod.ExpressionBody!
