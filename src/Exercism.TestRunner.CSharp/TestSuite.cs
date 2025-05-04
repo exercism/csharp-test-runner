@@ -55,9 +55,9 @@ namespace Exercism.TestRunner.CSharp
         private void RewriteProjectFile() =>
             File.WriteAllText(_options.ProjectFilePath,
                 _originalProjectFile
-                    .Replace("net5.0", "net8.0")
-                    .Replace("net6.0", "net8.0")
-                    .Replace("net7.0", "net8.0")
+                    .Replace("net5.0", "net9.0")
+                    .Replace("net6.0", "net9.0")
+                    .Replace("net7.0", "net9.0")
                     .Replace("net8.0", "net9.0"));
 
         private void RewriteTestsFile() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.Rewrite().ToString());
