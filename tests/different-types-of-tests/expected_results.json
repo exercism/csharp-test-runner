@@ -15,6 +15,7 @@
     {
       "name": "Div should divide numbers",
       "status": "pass",
+      "output": "Ok, passed 100 tests.",
       "test_code": "Prop.ForAll\u003CPositiveInt\u003E(i =\u003E Fake.Div(i.Get, i.Get) == 1)\n            .QuickCheckThrowOnFailure()"
     }
   ]
