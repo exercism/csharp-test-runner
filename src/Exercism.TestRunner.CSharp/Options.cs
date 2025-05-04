@@ -4,7 +4,7 @@ using Humanizer;
 
 namespace Exercism.TestRunner.CSharp;
 
-internal class Options
+internal sealed class Options
 {
     [Value(0, Required = true, HelpText = "The solution's exercise")]
     public string Slug { get; }

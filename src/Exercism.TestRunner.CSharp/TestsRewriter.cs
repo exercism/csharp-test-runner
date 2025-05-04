@@ -15,7 +15,7 @@ internal static class TestsRewriter
     private static SyntaxNode UnskipTests(this SyntaxNode testsRoot) =>
         new UnskipTestsRewriter().Visit(testsRoot);
 
-    private class UnskipTestsRewriter : CSharpSyntaxRewriter
+    private sealed class UnskipTestsRewriter : CSharpSyntaxRewriter
     {
         public override SyntaxNode? VisitAttributeArgument(AttributeArgumentSyntax node) =>
             node.NameEquals?.Name.Identifier.Text == "Skip" ? null : base.VisitAttributeArgument(node);

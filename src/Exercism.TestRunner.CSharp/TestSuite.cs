@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Exercism.TestRunner.CSharp;
 
-internal class TestSuite
+internal sealed class TestSuite
 {
     private const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
 

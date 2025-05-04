@@ -9,7 +9,7 @@ internal enum TestStatus
     Error
 }
 
-internal class TestResult
+internal sealed class TestResult
 {
     [JsonPropertyName("name")]
     public string Name { get; set; }
@@ -30,7 +30,7 @@ internal class TestResult
     public string TestCode { get; set; }
 }
 
-internal class TestRun
+internal sealed class TestRun
 {
     [JsonPropertyName("version")]
     public int Version { get; set; } = 3;

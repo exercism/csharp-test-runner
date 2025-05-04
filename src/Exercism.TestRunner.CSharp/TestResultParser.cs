@@ -106,7 +106,7 @@ internal static class TestResultParser
 }
 
 [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public class XmlOutput
+public sealed class XmlOutput
 {
     [XmlElement(ElementName = "StdOut", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
     public string StdOut { get; set; }
@@ -117,7 +117,7 @@ public class XmlOutput
 }
 
 [XmlRoot(ElementName = "UnitTestResult", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public class XmlUnitTestResult
+public sealed class XmlUnitTestResult
 {
     [XmlElement(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
     public XmlOutput Output { get; set; }
@@ -130,14 +130,14 @@ public class XmlUnitTestResult
 }
 
 [XmlRoot(ElementName = "ErrorInfo", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public class XmlErrorInfo
+public sealed class XmlErrorInfo
 {
     [XmlElement(ElementName = "Message", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
     public string Message { get; set; }
 }
 
 [XmlRoot(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public class XmlResults
+public sealed class XmlResults
 {
     [XmlElement(ElementName = "UnitTestResult",
         Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
@@ -145,7 +145,7 @@ public class XmlResults
 }
 
 [XmlRoot(ElementName = "TestRun", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public class XmlTestRun
+public sealed class XmlTestRun
 {
     [XmlElement(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
     public XmlResults Results { get; set; }
