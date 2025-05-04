@@ -12,22 +12,22 @@ internal enum TestStatus
 internal sealed class TestResult
 {
     [JsonPropertyName("name")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [JsonPropertyName("status")]
-    public TestStatus Status { get; set; }
+    public required TestStatus Status { get; set; }
         
     [JsonPropertyName("task_id")]
     public int? TaskId { get; set; }
 
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public string? Message { get; set; }
 
     [JsonPropertyName("output")]
-    public string Output { get; set; }
+    public string? Output { get; set; }
 
     [JsonPropertyName("test_code")]
-    public string TestCode { get; set; }
+    public required string TestCode { get; set; }
 }
 
 internal sealed class TestRun
@@ -36,11 +36,11 @@ internal sealed class TestRun
     public int Version { get; set; } = 3;
     
     [JsonPropertyName("status")]
-    public TestStatus Status { get; set; }
+    public required TestStatus Status { get; set; }
 
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public string? Message { get; set; }
 
     [JsonPropertyName("tests")]
-    public TestResult[] Tests { get; set; }
+    public required TestResult[] Tests { get; set; }
 }
