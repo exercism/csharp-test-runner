@@ -5,20 +5,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Exercism.TestRunner.CSharp;
 
-internal sealed class TestSuite
+internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalProjectFile, Options options)
 {
     private const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
-
-    private readonly SyntaxTree _originalSyntaxTree;
-    private readonly string _originalProjectFile;
-    private readonly Options _options;
-
-    private TestSuite(SyntaxTree originalSyntaxTree, string originalProjectFile, Options options)
-    {
-        _originalSyntaxTree = originalSyntaxTree;
-        _originalProjectFile = originalProjectFile;
-        _options = options;
-    }
 
     public TestRun Run()
     {
@@ -26,14 +15,14 @@ internal sealed class TestSuite
         RunTests();
         AfterTests();
 
-        return TestRunParser.Parse(_options, _originalSyntaxTree);
+        return TestRunParser.Parse(options, originalSyntaxTree);
     }
 
     private void RunTests()
     {
-        var workingDirectory = Path.GetDirectoryName(_options.TestsFilePath)!;
+        var workingDirectory = Path.GetDirectoryName(options.TestsFilePath)!;
         RunProcess("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
-        RunProcess("dotnet", $"test -c release --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(_options.TestResultsFilePath)}\" /flp:verbosity=quiet;errorsOnly=true", workingDirectory);            
+        RunProcess("dotnet", $"test -c release --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(options.TestResultsFilePath)}\" /flp:verbosity=quiet;errorsOnly=true", workingDirectory);            
     }
 
     private static void RunProcess(string command, string arguments, string workingDirectory)
@@ -54,22 +43,22 @@ internal sealed class TestSuite
         RewriteTestsFile();
             
         if (CaptureOutput)
-            AddCaptureOuputAssemblyAttributes();
+            AddCaptureOutputAssemblyAttributes();
     }
 
     private void RewriteProjectFile() =>
-        File.WriteAllText(_options.ProjectFilePath,
-            _originalProjectFile
+        File.WriteAllText(options.ProjectFilePath,
+            originalProjectFile
                 .Replace("net5.0", "net9.0")
                 .Replace("net6.0", "net9.0")
                 .Replace("net7.0", "net9.0")
                 .Replace("net8.0", "net9.0"));
 
     private void RewriteTestsFile() =>
-        File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.Rewrite().ToString());
+        File.WriteAllText(options.TestsFilePath, originalSyntaxTree.Rewrite().ToString());
         
-    private void AddCaptureOuputAssemblyAttributes() =>
-        File.WriteAllText(_options.AssemblyInfoFilePath, AssemblyInfo);
+    private void AddCaptureOutputAssemblyAttributes() =>
+        File.WriteAllText(options.AssemblyInfoFilePath, AssemblyInfo);
 
     private void AfterTests()
     {
@@ -77,16 +66,16 @@ internal sealed class TestSuite
         UndoRewriteTestsFile();
             
         if (CaptureOutput)
-            UndoAddCaptureOuputAssemblyAttributes();
+            UndoAddCaptureOutputAssemblyAttributes();
     }
 
-    private void UndoRewriteProjectFile() => File.WriteAllText(_options.ProjectFilePath, _originalProjectFile);
+    private void UndoRewriteProjectFile() => File.WriteAllText(options.ProjectFilePath, originalProjectFile);
 
-    private void UndoRewriteTestsFile() => File.WriteAllText(_options.TestsFilePath, _originalSyntaxTree.ToString());
+    private void UndoRewriteTestsFile() => File.WriteAllText(options.TestsFilePath, originalSyntaxTree.ToString());
 
-    private void UndoAddCaptureOuputAssemblyAttributes() => File.Delete(_options.AssemblyInfoFilePath);
+    private void UndoAddCaptureOutputAssemblyAttributes() => File.Delete(options.AssemblyInfoFilePath);
 
-    private bool CaptureOutput => _originalProjectFile.Contains("xunit.v3");
+    private bool CaptureOutput => originalProjectFile.Contains("xunit.v3");
 
     public static TestSuite FromOptions(Options options)
     {

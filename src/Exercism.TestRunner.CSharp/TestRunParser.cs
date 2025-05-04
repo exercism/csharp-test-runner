@@ -6,15 +6,12 @@ internal static class TestRunParser
 {
     public static TestRun Parse(Options options, SyntaxTree testsSyntaxTree)
     {
-        var logLines = File.ReadLines(options.BuildLogFilePath);
-        var buildFailed = logLines.Any();
+        var logLines = File.ReadAllLines(options.BuildLogFilePath);
+        var buildFailed = logLines.Length > 0;
 
-        if (buildFailed)
-        {
-            return TestRunWithError(logLines);
-        }
-
-        return TestRunWithoutError(options, testsSyntaxTree);
+        return buildFailed 
+            ? TestRunWithError(logLines)
+            : TestRunWithoutError(options, testsSyntaxTree);
     }
 
     private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
@@ -40,11 +37,11 @@ internal static class TestRunParser
     }
 
     private static TestRun TestRunWithError(IEnumerable<string> logLines) =>
-        new TestRun
+        new()
         {
             Message = string.Join("\n", logLines.Select(NormalizeLogLine)),
             Status = TestStatus.Error,
-            Tests = Array.Empty<TestResult>()
+            Tests = []
         };
 
     private static string NormalizeLogLine(this string logLine) =>
@@ -66,6 +63,6 @@ internal static class TestRunParser
         if (lastDirectorySeparatorIndex == -1)
             return logLine;
 
-        return logLine.Substring(lastDirectorySeparatorIndex + 1);
+        return logLine[(lastDirectorySeparatorIndex + 1)..];
     }
 }
