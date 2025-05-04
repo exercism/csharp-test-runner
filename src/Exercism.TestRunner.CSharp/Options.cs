@@ -2,34 +2,33 @@ using CommandLine;
 
 using Humanizer;
 
-namespace Exercism.TestRunner.CSharp
+namespace Exercism.TestRunner.CSharp;
+
+internal class Options
 {
-    internal class Options
-    {
-        [Value(0, Required = true, HelpText = "The solution's exercise")]
-        public string Slug { get; }
+    [Value(0, Required = true, HelpText = "The solution's exercise")]
+    public string Slug { get; }
 
-        [Value(1, Required = true, HelpText = "The directory containing the solution")]
-        public string InputDirectory { get; }
+    [Value(1, Required = true, HelpText = "The directory containing the solution")]
+    public string InputDirectory { get; }
 
-        [Value(2, Required = true, HelpText = "The directory to which the results will be written")]
-        public string OutputDirectory { get; }
+    [Value(2, Required = true, HelpText = "The directory to which the results will be written")]
+    public string OutputDirectory { get; }
 
-        public Options(string slug, string inputDirectory, string outputDirectory) =>
-            (Slug, InputDirectory, OutputDirectory) = (slug, inputDirectory, outputDirectory);
+    public Options(string slug, string inputDirectory, string outputDirectory) =>
+        (Slug, InputDirectory, OutputDirectory) = (slug, inputDirectory, outputDirectory);
 
-        public string TestsFilePath => Path.Combine(InputDirectory, $"{Exercise}Tests.cs");
+    public string TestsFilePath => Path.Combine(InputDirectory, $"{Exercise}Tests.cs");
         
-        public string ProjectFilePath => Path.Combine(InputDirectory, $"{Exercise}.csproj");
+    public string ProjectFilePath => Path.Combine(InputDirectory, $"{Exercise}.csproj");
         
-        public string AssemblyInfoFilePath => Path.Combine(InputDirectory, "AssemblyInfo.cs");
+    public string AssemblyInfoFilePath => Path.Combine(InputDirectory, "AssemblyInfo.cs");
 
-        public string BuildLogFilePath => Path.Combine(InputDirectory, "msbuild.log");
+    public string BuildLogFilePath => Path.Combine(InputDirectory, "msbuild.log");
 
-        public string TestResultsFilePath => Path.Combine(InputDirectory, "TestResults", "tests.trx");
+    public string TestResultsFilePath => Path.Combine(InputDirectory, "TestResults", "tests.trx");
 
-        public string ResultsJsonFilePath => Path.GetFullPath(Path.Combine(OutputDirectory, "results.json"));
+    public string ResultsJsonFilePath => Path.GetFullPath(Path.Combine(OutputDirectory, "results.json"));
 
-        private string Exercise => Slug.Dehumanize().Pascalize();
-    }
+    private string Exercise => Slug.Dehumanize().Pascalize();
 }
