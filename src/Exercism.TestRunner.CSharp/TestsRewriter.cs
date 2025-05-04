@@ -20,7 +20,7 @@ namespace Exercism.TestRunner.CSharp
 
         private class UnskipTestsRewriter : CSharpSyntaxRewriter
         {
-            public override SyntaxNode VisitAttributeArgument(AttributeArgumentSyntax node) =>
+            public override SyntaxNode? VisitAttributeArgument(AttributeArgumentSyntax node) =>
                 node.NameEquals?.Name.Identifier.Text == "Skip" ? null : base.VisitAttributeArgument(node);
         }
     }
