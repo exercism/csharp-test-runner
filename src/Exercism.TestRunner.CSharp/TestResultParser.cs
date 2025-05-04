@@ -5,149 +5,146 @@ using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Win32.SafeHandles;
 
-namespace Exercism.TestRunner.CSharp
+namespace Exercism.TestRunner.CSharp;
+
+internal static class TestResultParser
 {
-    internal static class TestResultParser
+    internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree)
     {
-        internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree)
-        {
-            using var fileStream = File.OpenRead(logFilePath);
-            var result = (XmlTestRun)new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream);
+        using var fileStream = File.OpenRead(logFilePath);
+        var result = new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream) as XmlTestRun;
 
-            if (result.Results == null)
-                return Array.Empty<TestResult>();
+        return result?.Results is null ? [] : result.ToTestResults(testsSyntaxTree);
+    }
 
-            return result.ToTestResults(testsSyntaxTree);
-        }
-
-        private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
-        {
-            var methodDeclarations = 
-                testsSyntaxTree
-                    .GetRoot()
-                    .DescendantNodes()
-                    .OfType<MethodDeclarationSyntax>()
-                    .ToArray();
+    private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
+    {
+        var methodDeclarations = 
+            testsSyntaxTree
+                .GetRoot()
+                .DescendantNodes()
+                .OfType<MethodDeclarationSyntax>()
+                .ToArray();
             
-            var testResults =
-                from unitTestResult in result.Results.UnitTestResult
-                let testMethodDeclaration = unitTestResult.TestMethod(methodDeclarations)
-                orderby testMethodDeclaration.GetLocation().GetLineSpan().StartLinePosition.Line
-                select ToTestResult(unitTestResult, testMethodDeclaration);
+        var testResults =
+            from unitTestResult in result.Results.UnitTestResult
+            let testMethodDeclaration = unitTestResult.TestMethod(methodDeclarations)
+            orderby testMethodDeclaration.GetLocation().GetLineSpan().StartLinePosition.Line
+            select ToTestResult(unitTestResult, testMethodDeclaration);
 
-            return testResults.ToArray();
-        }
+        return testResults.ToArray();
+    }
 
-        private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, MethodDeclarationSyntax testMethodDeclaration) =>
-            new()
-            {
-                Name = xmlUnitTestResult.Name(),
-                Status = xmlUnitTestResult.Status(),
-                Message = xmlUnitTestResult.Message(),
-                Output = xmlUnitTestResult.Output(),
-                TaskId = testMethodDeclaration.TaskId(),
-                TestCode = testMethodDeclaration.TestCode()
-            };
-
-        private static MethodDeclarationSyntax TestMethod(this XmlUnitTestResult xmlUnitTestResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
+    private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, MethodDeclarationSyntax testMethodDeclaration) =>
+        new()
         {
-            var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
-            var className = classAndMethodName[0];
-            var methodName = classAndMethodName[1].Split('(')[0];
+            Name = xmlUnitTestResult.Name(),
+            Status = xmlUnitTestResult.Status(),
+            Message = xmlUnitTestResult.Message(),
+            Output = xmlUnitTestResult.Output(),
+            TaskId = testMethodDeclaration.TaskId(),
+            TestCode = testMethodDeclaration.TestCode()
+        };
 
-            return methodDeclarations.Single(method =>
-                method.Identifier.Text == methodName &&
-                method.Parent is ClassDeclarationSyntax classDeclaration &&
-                classDeclaration.Identifier.Text == className);
-        }
+    private static MethodDeclarationSyntax TestMethod(this XmlUnitTestResult xmlUnitTestResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
+    {
+        var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
+        var className = classAndMethodName[0];
+        var methodName = classAndMethodName[1].Split('(')[0];
 
-        private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.TestName
-                .Substring(xmlUnitTestResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
-                .Humanize();
+        return methodDeclarations.Single(method =>
+            method.Identifier.Text == methodName &&
+            method.Parent is ClassDeclarationSyntax classDeclaration &&
+            classDeclaration.Identifier.Text == className);
+    }
 
-        private static TestStatus Status(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Outcome switch
-            {
-                "Passed" => TestStatus.Pass,
-                "Failed" => TestStatus.Fail,
-                _ => TestStatus.Error
-            };
+    private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
+        xmlUnitTestResult.TestName
+            .Substring(xmlUnitTestResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
+            .Humanize();
 
-        private static string Message(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Output?.ErrorInfo?.Message?.UseUnixNewlines()?.Trim();
-
-        private static string Output(this XmlUnitTestResult xmlUnitTestResult) =>
-            xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
-
-        private static string TestCode(this MethodDeclarationSyntax testMethod)
+    private static TestStatus Status(this XmlUnitTestResult xmlUnitTestResult) =>
+        xmlUnitTestResult.Outcome switch
         {
-            if (testMethod.Body != null)
-                return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia())).ToString();
+            "Passed" => TestStatus.Pass,
+            "Failed" => TestStatus.Fail,
+            _ => TestStatus.Error
+        };
 
-            return testMethod.ExpressionBody!
-                .Expression
-                .WithoutLeadingTrivia()
-                .ToString();
-        }
+    private static string? Message(this XmlUnitTestResult xmlUnitTestResult) =>
+        xmlUnitTestResult.Output?.ErrorInfo?.Message?.UseUnixNewlines()?.Trim();
 
-        private static int? TaskId(this MethodDeclarationSyntax testMethod) =>
-            testMethod.AttributeLists
-                .SelectMany(attributeList => attributeList.Attributes)
-                .Where(attribute =>
-                    attribute.Name.ToString() == "Task" &&
-                    attribute.ArgumentList != null &&
-                    attribute.ArgumentList.Arguments.Count == 1 &&
-                    attribute.ArgumentList.Arguments[0].Expression.IsKind(SyntaxKind.NumericLiteralExpression))
-                .Select(attribute => (LiteralExpressionSyntax)attribute.ArgumentList.Arguments[0].Expression)
-                .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
-                .FirstOrDefault();
-    }
+    private static string? Output(this XmlUnitTestResult xmlUnitTestResult) =>
+        xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
 
-    [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlOutput
+    private static string TestCode(this MethodDeclarationSyntax testMethod)
     {
-        [XmlElement(ElementName = "StdOut", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public string StdOut { get; set; }
+        if (testMethod.Body is not null)
+            return SyntaxFactory.List(testMethod.Body.Statements.Select(statement => statement.WithoutLeadingTrivia())).ToString();
 
-        [XmlElement(ElementName = "ErrorInfo",
-            Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public XmlErrorInfo ErrorInfo { get; set; }
+        return testMethod.ExpressionBody!
+            .Expression
+            .WithoutLeadingTrivia()
+            .ToString();
     }
 
-    [XmlRoot(ElementName = "UnitTestResult", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlUnitTestResult
-    {
-        [XmlElement(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public XmlOutput Output { get; set; }
+    private static int? TaskId(this MethodDeclarationSyntax testMethod) =>
+        testMethod.AttributeLists
+            .SelectMany(attributeList => attributeList.Attributes)
+            .Where(attribute =>
+                attribute.Name.ToString() == "Task" &&
+                attribute.ArgumentList != null &&
+                attribute.ArgumentList.Arguments.Count == 1 &&
+                attribute.ArgumentList.Arguments[0].Expression.IsKind(SyntaxKind.NumericLiteralExpression))
+            .Select(attribute => (LiteralExpressionSyntax)attribute.ArgumentList!.Arguments[0].Expression)
+            .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
+            .FirstOrDefault();
+}
 
-        [XmlAttribute(AttributeName = "testName")]
-        public string TestName { get; set; }
+[XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+public sealed class XmlOutput
+{
+    [XmlElement(ElementName = "StdOut", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+    public string? StdOut { get; set; }
 
-        [XmlAttribute(AttributeName = "outcome")]
-        public string Outcome { get; set; }
-    }
+    [XmlElement(ElementName = "ErrorInfo",
+        Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+    public XmlErrorInfo? ErrorInfo { get; set; }
+}
 
-    [XmlRoot(ElementName = "ErrorInfo", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlErrorInfo
-    {
-        [XmlElement(ElementName = "Message", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public string Message { get; set; }
-    }
+[XmlRoot(ElementName = "UnitTestResult", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+public sealed class XmlUnitTestResult
+{
+    [XmlElement(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+    public XmlOutput? Output { get; set; }
 
-    [XmlRoot(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlResults
-    {
-        [XmlElement(ElementName = "UnitTestResult",
-            Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public List<XmlUnitTestResult> UnitTestResult { get; set; }
-    }
+    [XmlAttribute(AttributeName = "testName")]
+    public required string TestName { get; set; }
 
-    [XmlRoot(ElementName = "TestRun", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public class XmlTestRun
-    {
-        [XmlElement(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-        public XmlResults Results { get; set; }
-    }
+    [XmlAttribute(AttributeName = "outcome")]
+    public required string Outcome { get; set; }
+}
+
+[XmlRoot(ElementName = "ErrorInfo", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+public sealed class XmlErrorInfo
+{
+    [XmlElement(ElementName = "Message", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+    public string? Message { get; set; }
+}
+
+[XmlRoot(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+public sealed class XmlResults
+{
+    [XmlElement(ElementName = "UnitTestResult",
+        Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+    public List<XmlUnitTestResult>? UnitTestResult { get; set; }
+}
+
+[XmlRoot(ElementName = "TestRun", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+public sealed class XmlTestRun
+{
+    [XmlElement(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+    public required XmlResults Results { get; set; }
 }
