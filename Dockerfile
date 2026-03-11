@@ -18,6 +18,7 @@ RUN dotnet new console && \
     dotnet add package xunit.v3 --version 1.1.0 && \
     dotnet add package xunit.v3 --version 3.2.2 && \
     dotnet add package xunit.runner.visualstudio --version 3.0.1 && \
+    dotnet add package xunit.runner.visualstudio --version 3.1.5 && \
     dotnet add package BenchmarkDotNet --version 0.14.0 && \
     dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 9.2.0
 
