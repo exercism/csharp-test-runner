@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.103-alpine3.23 AS build
 ARG TARGETARCH
 
 WORKDIR /tmp
@@ -10,13 +10,18 @@ RUN dotnet new console && \
     dotnet add package FakeItEasy --version 6.2.1 && \
     dotnet add package FsCheck --version 2.14.4 && \
     dotnet add package FsCheck --version 3.1.0 && \
+    dotnet add package FsCheck --version 3.3.2 && \
     dotnet add package FsCheck.Xunit --version 2.14.4 && \
+    dotnet add package FsCheck.Xunit.v3 --version 3.3.2 && \
     dotnet add package Microsoft.NET.Test.Sdk --version 17.12.0 && \
+    dotnet add package Microsoft.NET.Test.Sdk --version 18.3.0 && \
     dotnet add package Microsoft.Reactive.Testing --version 5.0.0 && \
     dotnet add package Sprache --version 2.3.1 && \
     dotnet add package xunit --version 2.8.1 && \
     dotnet add package xunit.v3 --version 1.1.0 && \
+    dotnet add package xunit.v3 --version 3.2.2 && \
     dotnet add package xunit.runner.visualstudio --version 3.0.1 && \
+    dotnet add package xunit.runner.visualstudio --version 3.1.5 && \
     dotnet add package BenchmarkDotNet --version 0.14.0 && \
     dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 9.2.0
 
@@ -28,10 +33,10 @@ RUN dotnet restore -a $TARGETARCH
 
 # Copy everything else and build
 COPY src/Exercism.TestRunner.CSharp/ ./
-RUN dotnet publish -a $TARGETARCH -c Release -o /opt/test-runner --no-restore
+RUN dotnet publish -a $TARGETARCH --output /opt/test-runner --no-restore
 
 # Build runtime image
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS runtime
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.103-alpine3.23 AS runtime
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV DOTNET_ROLL_FORWARD=Major
