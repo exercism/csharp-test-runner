@@ -11,6 +11,15 @@
           "xunit.v3.extensibility.core": "1.1.0"
         }
       },
+      "FsCheck": {
+        "type": "Direct",
+        "requested": "[3.3.2, )",
+        "resolved": "3.3.2",
+        "contentHash": "JlK719ZlP/ofbsN0qXYrfqbe2SCgp4D1BEyJynkzyurMI2JqUkWgZHXgEu0pXVdj35zU/GWsXrGYA68sSdAmHQ==",
+        "dependencies": {
+          "FSharp.Core": "5.0.2"
+        }
+      },
       "FsCheck.Xunit.v3": {
         "type": "Direct",
         "requested": "[3.3.2, )",
