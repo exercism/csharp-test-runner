@@ -30,5 +30,6 @@ internal sealed class Options
 
     public string ResultsJsonFilePath => Path.GetFullPath(Path.Combine(OutputDirectory, "results.json"));
 
-    private string Exercise => Slug.Dehumanize().Pascalize();
+    // Work around a regression bug: https://github.com/Humanizr/Humanizer/issues/1668
+    private string Exercise => Slug.Pascalize().Replace("-", "");
 }
