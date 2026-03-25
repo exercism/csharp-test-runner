@@ -17,6 +17,7 @@ RUN dotnet new console && \
     dotnet add package Microsoft.NET.Test.Sdk --version 18.3.0 && \
     dotnet add package Microsoft.Reactive.Testing --version 5.0.0 && \
     dotnet add package Sprache --version 2.3.1 && \
+    dotnet add package Superpower --version 3.1.0 && \
     dotnet add package xunit --version 2.8.1 && \
     dotnet add package xunit.v3 --version 1.1.0 && \
     dotnet add package xunit.v3 --version 3.2.2 && \
