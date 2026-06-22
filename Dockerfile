@@ -36,6 +36,14 @@ RUN dotnet restore -a $TARGETARCH
 COPY src/Exercism.TestRunner.CSharp/ ./
 RUN dotnet publish -a $TARGETARCH --output /opt/test-runner --no-restore
 
+# Slim the pre-installed NuGet cache before it is copied into the runtime image.
+# Restore from the global packages folder uses the extracted files, so the .nupkg
+# archives, foreign-platform Capstone natives (a BenchmarkDotNet disassembly
+# dependency) and the build-only crossgen2 tool are all redundant.
+RUN find /root/.nuget/packages -type f \( -name '*.nupkg' -o -name '*.snupkg' \) -delete && \
+    find /root/.nuget/packages/gee.external.capstone -type d \( -name 'win-*' -o -name 'osx-*' -o -name 'linux-x86' -o -name 'linux-arm' \) -prune -exec rm -rf {} + && \
+    rm -rf /root/.nuget/packages/microsoft.netcore.app.crossgen2.*
+
 # Build runtime image
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.300-alpine3.23 AS runtime
 
