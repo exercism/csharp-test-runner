@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.301-alpine3.23 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.302-alpine3.23 AS build
 ARG TARGETARCH
 
 WORKDIR /tmp
@@ -45,7 +45,7 @@ RUN find /root/.nuget/packages -type f \( -name '*.nupkg' -o -name '*.snupkg' \)
     rm -rf /root/.nuget/packages/microsoft.netcore.app.crossgen2.*
 
 # Build runtime image
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.301-alpine3.23 AS runtime
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.302-alpine3.23 AS runtime
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV DOTNET_ROLL_FORWARD=Major
