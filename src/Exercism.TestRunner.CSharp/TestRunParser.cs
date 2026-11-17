@@ -14,10 +14,19 @@ internal static class TestRunParser
             : TestRunWithoutError(options, testsSyntaxTree);
     }
 
-    private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
-    {
-        var testResults = TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree);
+    public static TestRun FromBuildLog(string[] logLines) => TestRunWithError(logLines);
 
+    public static bool BuildFailed(Options options) =>
+        File.Exists(options.BuildLogFilePath) && new FileInfo(options.BuildLogFilePath).Length > 0;
+
+    public static TestRun FromRawResults(IEnumerable<RawTestResult> rawResults, SyntaxTree testsSyntaxTree) =>
+        FromTestResults(TestResultParser.ToTestResults(rawResults, testsSyntaxTree));
+
+    private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree) =>
+        FromTestResults(TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree));
+
+    private static TestRun FromTestResults(TestResult[] testResults)
+    {
         return new TestRun
         {
             Status = testResults.ToTestStatus(),

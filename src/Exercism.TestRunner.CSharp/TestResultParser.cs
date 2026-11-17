@@ -16,10 +16,15 @@ internal static class TestResultParser
         using var fileStream = File.OpenRead(logFilePath);
         var result = new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream) as XmlTestRun;
 
-        return result?.Results is null ? [] : result.ToTestResults(testsSyntaxTree);
+        if (result?.Results?.UnitTestResult is null)
+            return [];
+
+        var rawResults = result.Results.UnitTestResult.Select(unitTestResult =>
+            new RawTestResult(unitTestResult.TestName, unitTestResult.Outcome, unitTestResult.Output?.StdOut, unitTestResult.Output?.ErrorInfo?.Message));
+        return ToTestResults(rawResults, testsSyntaxTree);
     }
 
-    private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
+    internal static TestResult[] ToTestResults(IEnumerable<RawTestResult> rawResults, SyntaxTree testsSyntaxTree)
     {
         var methodDeclarations = 
             testsSyntaxTree
@@ -29,7 +34,7 @@ internal static class TestResultParser
                 .ToArray();
             
         var testResults =
-            from unitTestResult in result.Results.UnitTestResult
+            from unitTestResult in rawResults
             let testMethodDeclaration = unitTestResult.TestMethod(methodDeclarations)
             orderby testMethodDeclaration.GetLocation().GetLineSpan().StartLinePosition.Line
             select ToTestResult(unitTestResult, testMethodDeclaration);
@@ -37,20 +42,20 @@ internal static class TestResultParser
         return testResults.ToArray();
     }
 
-    private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, MethodDeclarationSyntax testMethodDeclaration) =>
+    private static TestResult ToTestResult(RawTestResult rawResult, MethodDeclarationSyntax testMethodDeclaration) =>
         new()
         {
-            Name = xmlUnitTestResult.Name(),
-            Status = xmlUnitTestResult.Status(),
-            Message = xmlUnitTestResult.Message(),
-            Output = xmlUnitTestResult.Output(),
+            Name = rawResult.Name(),
+            Status = rawResult.Status(),
+            Message = rawResult.Message(),
+            Output = rawResult.Output(),
             TaskId = testMethodDeclaration.TaskId(),
             TestCode = testMethodDeclaration.TestCode()
         };
 
-    private static MethodDeclarationSyntax TestMethod(this XmlUnitTestResult xmlUnitTestResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
+    private static MethodDeclarationSyntax TestMethod(this RawTestResult rawResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
     {
-        var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
+        var classAndMethodName = rawResult.TestName.Split(".");
         var className = classAndMethodName[0];
         var methodName = classAndMethodName[1].Split('(')[0];
 
@@ -60,24 +65,24 @@ internal static class TestResultParser
             classDeclaration.Identifier.Text == className);
     }
 
-    private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.TestName
-            .Substring(xmlUnitTestResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
+    private static string Name(this RawTestResult rawResult) =>
+        rawResult.TestName
+            .Substring(rawResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
             .Humanize();
 
-    private static TestStatus Status(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.Outcome switch
+    private static TestStatus Status(this RawTestResult rawResult) =>
+        rawResult.Outcome switch
         {
             "Passed" => TestStatus.Pass,
             "Failed" => TestStatus.Fail,
             _ => TestStatus.Error
         };
 
-    private static string? Message(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.Output?.ErrorInfo?.Message?.UseUnixNewlines()?.Trim();
+    private static string? Message(this RawTestResult rawResult) =>
+        rawResult.FailureMessage?.UseUnixNewlines()?.Trim();
 
-    private static string? Output(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
+    private static string? Output(this RawTestResult rawResult) =>
+        rawResult.StdOut?.UseUnixNewlines()?.Trim();
 
     private static string TestCode(this MethodDeclarationSyntax testMethod)
     {
@@ -102,6 +107,9 @@ internal static class TestResultParser
             .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
             .FirstOrDefault();
 }
+
+/// <summary>One test's result as read from a TRX file or an xUnit XML report.</summary>
+internal sealed record RawTestResult(string TestName, string Outcome, string? StdOut, string? FailureMessage);
 
 [XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
 public sealed class XmlOutput
