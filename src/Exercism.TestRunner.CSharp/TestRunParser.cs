@@ -11,14 +11,14 @@ internal static class TestRunParser
 
         return buildFailed 
             ? TestRunWithError(logLines)
-            : TestRunWithoutError(options, testsSyntaxTree);
+            : TestRunWithoutError(options.TestResultsFilePath, testsSyntaxTree);
     }
 
-    private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
+    public static TestRun TestRunWithoutError(string testResultsFilePath, SyntaxTree testsSyntaxTree)
     {
         try
         {
-            var testResults = TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree);
+            var testResults = TestResultParser.FromFile(testResultsFilePath, testsSyntaxTree);
 
             return new TestRun
             {
@@ -48,7 +48,7 @@ internal static class TestRunParser
         return TestStatus.Error;
     }
 
-    private static TestRun TestRunWithError(IEnumerable<string> logLines) =>
+    public static TestRun TestRunWithError(IEnumerable<string> logLines) =>
         new()
         {
             Message = string.Join("\n", logLines.Select(NormalizeLogLine)),
