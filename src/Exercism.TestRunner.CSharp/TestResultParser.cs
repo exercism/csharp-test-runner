@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.Xml;
 using System.Xml.Linq;
 
 using Humanizer;
@@ -64,7 +63,7 @@ internal static partial class TestResultParser
             .Humanize();
 
     private static TestStatus Status(this XElement test) =>
-        (string?)test.Attribute("result") switch
+        test.Attribute("result")?.Value switch
         {
             "Pass" => TestStatus.Pass,
             "Fail" => TestStatus.Fail,
@@ -77,7 +76,7 @@ internal static partial class TestResultParser
     private static string? Output(this XElement test) =>
         test.Element("output")?.Value.UseUnixNewlines().Trim();
 
-    private static string TestName(this XElement test) => (string)test.Attribute("name")!;
+    private static string TestName(this XElement test) => test.Attribute("name")!.Value;
 
     // xUnit's XML report escapes some characters in failure messages with a backslash, such as \n for a
     // newline and \x01 for other control characters. This turns them back into the original characters.
@@ -93,7 +92,7 @@ internal static partial class TestResultParser
             "f" => "\f",
             "v" => "\v",
             "\\" or "\"" => match.Groups[1].Value,
-            var hex when hex.Length == 3 => ((char)Convert.ToInt32(hex[1..], 16)).ToString(),
+            { Length: 3 } hex => ((char)Convert.ToInt32(hex[1..], 16)).ToString(),
             _ => match.Value
         });
 
