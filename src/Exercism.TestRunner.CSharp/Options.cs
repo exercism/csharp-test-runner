@@ -26,7 +26,9 @@ internal sealed class Options
 
     public string BuildLogFilePath => Path.Combine(InputDirectory, "msbuild.log");
 
-    public string TestResultsFilePath => Path.Combine(InputDirectory, "TestResults", "tests.trx");
+    public string AssemblyFilePath => Path.Combine(InputDirectory, "bin", "release", "net10.0", $"{Exercise}.dll");
+
+    public string TestResultsFilePath => Path.Combine(InputDirectory, "bin", "release", "net10.0", "tests.xml");
 
     public string ResultsJsonFilePath => Path.GetFullPath(Path.Combine(OutputDirectory, "results.json"));
 

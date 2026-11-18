@@ -1,25 +1,22 @@
-using System.Xml.Serialization;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 using Humanizer;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Win32.SafeHandles;
 
 namespace Exercism.TestRunner.CSharp;
 
-internal static class TestResultParser
+internal static partial class TestResultParser
 {
-    internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree)
-    {
-        using var fileStream = File.OpenRead(logFilePath);
-        var result = new XmlSerializer(typeof(XmlTestRun)).Deserialize(fileStream) as XmlTestRun;
+    internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree) =>
+        XDocument.Load(logFilePath)
+            .Descendants("test")
+            .ToTestResults(testsSyntaxTree);
 
-        return result?.Results is null ? [] : result.ToTestResults(testsSyntaxTree);
-    }
-
-    private static TestResult[] ToTestResults(this XmlTestRun result, SyntaxTree testsSyntaxTree)
+    private static TestResult[] ToTestResults(this IEnumerable<XElement> tests, SyntaxTree testsSyntaxTree)
     {
         var methodDeclarations = 
             testsSyntaxTree
@@ -29,28 +26,28 @@ internal static class TestResultParser
                 .ToArray();
             
         var testResults =
-            from unitTestResult in result.Results.UnitTestResult
-            let testMethodDeclaration = unitTestResult.TestMethod(methodDeclarations)
+            from test in tests
+            let testMethodDeclaration = test.TestMethod(methodDeclarations)
             orderby testMethodDeclaration.GetLocation().GetLineSpan().StartLinePosition.Line
-            select ToTestResult(unitTestResult, testMethodDeclaration);
+            select ToTestResult(test, testMethodDeclaration);
 
         return testResults.ToArray();
     }
 
-    private static TestResult ToTestResult(XmlUnitTestResult xmlUnitTestResult, MethodDeclarationSyntax testMethodDeclaration) =>
+    private static TestResult ToTestResult(XElement test, MethodDeclarationSyntax testMethodDeclaration) =>
         new()
         {
-            Name = xmlUnitTestResult.Name(),
-            Status = xmlUnitTestResult.Status(),
-            Message = xmlUnitTestResult.Message(),
-            Output = xmlUnitTestResult.Output(),
+            Name = test.Name(),
+            Status = test.Status(),
+            Message = test.Message(),
+            Output = test.Output(),
             TaskId = testMethodDeclaration.TaskId(),
             TestCode = testMethodDeclaration.TestCode()
         };
 
-    private static MethodDeclarationSyntax TestMethod(this XmlUnitTestResult xmlUnitTestResult, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
+    private static MethodDeclarationSyntax TestMethod(this XElement test, IEnumerable<MethodDeclarationSyntax> methodDeclarations)
     {
-        var classAndMethodName = xmlUnitTestResult.TestName.Split(".");
+        var classAndMethodName = test.TestName().Split(".");
         var className = classAndMethodName[0];
         var methodName = classAndMethodName[1].Split('(')[0];
 
@@ -60,24 +57,47 @@ internal static class TestResultParser
             classDeclaration.Identifier.Text == className);
     }
 
-    private static string Name(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.TestName
-            .Substring(xmlUnitTestResult.TestName.LastIndexOf(".", StringComparison.Ordinal) + 1)
+    private static string Name(this XElement test) =>
+        test.TestName()
+            .Substring(test.TestName().LastIndexOf(".", StringComparison.Ordinal) + 1)
             .Humanize();
 
-    private static TestStatus Status(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.Outcome switch
+    private static TestStatus Status(this XElement test) =>
+        test.Attribute("result")?.Value switch
         {
-            "Passed" => TestStatus.Pass,
-            "Failed" => TestStatus.Fail,
+            "Pass" => TestStatus.Pass,
+            "Fail" => TestStatus.Fail,
             _ => TestStatus.Error
         };
 
-    private static string? Message(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.Output?.ErrorInfo?.Message?.UseUnixNewlines()?.Trim();
+    private static string? Message(this XElement test) =>
+        test.Element("failure")?.Element("message")?.Value.Unescape().UseUnixNewlines().Trim();
 
-    private static string? Output(this XmlUnitTestResult xmlUnitTestResult) =>
-        xmlUnitTestResult.Output?.StdOut?.UseUnixNewlines()?.Trim();
+    private static string? Output(this XElement test) =>
+        test.Element("output")?.Value.UseUnixNewlines().Trim();
+
+    private static string TestName(this XElement test) => test.Attribute("name")!.Value;
+
+    // xUnit's XML report escapes some characters in failure messages with a backslash, such as \n for a
+    // newline and \x01 for other control characters. This turns them back into the original characters.
+    private static string Unescape(this string message) =>
+        EscapedCharacter().Replace(message, match => match.Groups[1].Value switch
+        {
+            "n" => "\n",
+            "r" => "\r",
+            "t" => "\t",
+            "0" => "\0",
+            "a" => "\a",
+            "b" => "\b",
+            "f" => "\f",
+            "v" => "\v",
+            "\\" or "\"" => match.Groups[1].Value,
+            { Length: 3 } hex => ((char)Convert.ToInt32(hex[1..], 16)).ToString(),
+            _ => match.Value
+        });
+
+    [GeneratedRegex(@"\\(x[01][0-9a-f]|.)")]
+    private static partial Regex EscapedCharacter();
 
     private static string TestCode(this MethodDeclarationSyntax testMethod)
     {
@@ -101,50 +121,4 @@ internal static class TestResultParser
             .Select(attribute => (LiteralExpressionSyntax)attribute.ArgumentList!.Arguments[0].Expression)
             .Select(taskNumberExpression => (int?)taskNumberExpression.Token.Value!)
             .FirstOrDefault();
-}
-
-[XmlRoot(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public sealed class XmlOutput
-{
-    [XmlElement(ElementName = "StdOut", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public string? StdOut { get; set; }
-
-    [XmlElement(ElementName = "ErrorInfo",
-        Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public XmlErrorInfo? ErrorInfo { get; set; }
-}
-
-[XmlRoot(ElementName = "UnitTestResult", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public sealed class XmlUnitTestResult
-{
-    [XmlElement(ElementName = "Output", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public XmlOutput? Output { get; set; }
-
-    [XmlAttribute(AttributeName = "testName")]
-    public required string TestName { get; set; }
-
-    [XmlAttribute(AttributeName = "outcome")]
-    public required string Outcome { get; set; }
-}
-
-[XmlRoot(ElementName = "ErrorInfo", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public sealed class XmlErrorInfo
-{
-    [XmlElement(ElementName = "Message", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public string? Message { get; set; }
-}
-
-[XmlRoot(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public sealed class XmlResults
-{
-    [XmlElement(ElementName = "UnitTestResult",
-        Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public List<XmlUnitTestResult>? UnitTestResult { get; set; }
-}
-
-[XmlRoot(ElementName = "TestRun", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-public sealed class XmlTestRun
-{
-    [XmlElement(ElementName = "Results", Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
-    public required XmlResults Results { get; set; }
 }

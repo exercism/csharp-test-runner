@@ -16,13 +16,25 @@ internal static class TestRunParser
 
     private static TestRun TestRunWithoutError(Options options, SyntaxTree testsSyntaxTree)
     {
-        var testResults = TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree);
-
-        return new TestRun
+        try
         {
-            Status = testResults.ToTestStatus(),
-            Tests = testResults
-        };
+            var testResults = TestResultParser.FromFile(options.TestResultsFilePath, testsSyntaxTree);
+
+            return new TestRun
+            {
+                Status = testResults.ToTestStatus(),
+                Tests = testResults
+            };
+        }
+        catch (Exception exception)
+        {
+            return new TestRun
+            {
+                Status = TestStatus.Error,
+                Message = exception.Message,
+                Tests = []
+            };
+        }
     }
 
     private static TestStatus ToTestStatus(this TestResult[] tests)
