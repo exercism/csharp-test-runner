@@ -4,10 +4,16 @@ namespace Exercism.TestRunner.CSharp;
 
 public static class Program
 {
-    public static void Main(string[] args) =>
+    public static int Main(string[] args)
+    {
+        if (args is ["--prepare-shape", var shapeDirectory])
+            return FastPath.PrepareShape(shapeDirectory);
+
         Parser.Default
             .ParseArguments<Options>(args)
             .WithParsed(CreateTestResults);
+        return 0;
+    }
 
     private static void CreateTestResults(Options options)
     {

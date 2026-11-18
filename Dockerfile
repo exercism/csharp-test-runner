@@ -35,11 +35,12 @@ RUN dotnet publish -a $TARGETARCH --output /opt/test-runner --no-restore
 
 # Slim the pre-installed NuGet cache before it is copied into the runtime image.
 # Restore from the global packages folder uses the extracted files, so the .nupkg
-# archives, foreign-platform Capstone natives (a BenchmarkDotNet disassembly
-# dependency) and the build-only crossgen2 tool are all redundant.
+# archives and foreign-platform Capstone natives (a BenchmarkDotNet disassembly
+# dependency) are redundant. The build-only crossgen2 tool moves out of the cache,
+# so that only the shape build below sees it.
 RUN find /root/.nuget/packages -type f \( -name '*.nupkg' -o -name '*.snupkg' \) -delete && \
     find /root/.nuget/packages/gee.external.capstone -type d \( -name 'win-*' -o -name 'osx-*' -o -name 'linux-x86' -o -name 'linux-arm' \) -prune -exec rm -rf {} + && \
-    rm -rf /root/.nuget/packages/microsoft.netcore.app.crossgen2.*
+    mkdir /crossgen2 && mv /root/.nuget/packages/microsoft.netcore.app.crossgen2.* /crossgen2/
 
 # Build runtime image
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.401-alpine3.23 AS runtime
@@ -57,5 +58,10 @@ COPY --from=build /usr/local/bin/ /usr/local/bin/
 COPY --from=build /root/.nuget/packages/ /root/.nuget/packages/
 
 COPY run.sh bin/
+
+# Build a template project for each known project shape, for the runner's fast path
+COPY shapes/ shapes/
+COPY bin/build-shapes.sh bin/
+RUN --mount=type=bind,from=build,source=/crossgen2,target=/crossgen2 sh bin/build-shapes.sh
 
 ENTRYPOINT ["sh", "/opt/test-runner/bin/run.sh"]
