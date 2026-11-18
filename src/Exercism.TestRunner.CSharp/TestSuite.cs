@@ -27,12 +27,8 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
         RunProcess("dotnet", "build -c release --no-restore --verbosity=quiet -nologo /flp:verbosity=quiet;errorsOnly=true", workingDirectory);
 
         if (File.Exists(options.AssemblyFilePath))
-            RunTestExecutable(options.AssemblyFilePath, options.TestResultsFilePath);
+            RunProcess("dotnet", $"exec \"{options.AssemblyFilePath}\" -xml \"{options.TestResultsFilePath}\" -noLogo -noColor", Path.GetDirectoryName(options.AssemblyFilePath)!);
     }
-
-    // The test executable writes xUnit's XML report to reportFilePath.
-    public static void RunTestExecutable(string assemblyFilePath, string reportFilePath) =>
-        RunProcess("dotnet", $"exec \"{assemblyFilePath}\" -xml \"{reportFilePath}\" -noLogo -noColor", Path.GetDirectoryName(assemblyFilePath)!);
 
     private static void RunProcess(string command, string arguments, string workingDirectory)
     {
