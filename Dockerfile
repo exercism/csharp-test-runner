@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.401-alpine3.23 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:11.0.100-alpine3.24 AS build
 ARG TARGETARCH
 
 WORKDIR /tmp
@@ -15,14 +15,17 @@ RUN dotnet new console && \
     dotnet add package FsCheck.Xunit.v3 --version 3.3.2 && \
     dotnet add package Microsoft.NET.Test.Sdk --version 17.12.0 && \
     dotnet add package Microsoft.NET.Test.Sdk --version 18.3.0 && \
+    dotnet add package Microsoft.NET.Test.Sdk --version 18.11.1 && \
     dotnet add package Microsoft.Reactive.Testing --version 5.0.0 && \
     dotnet add package Sprache --version 2.3.1 && \
     dotnet add package Superpower --version 3.1.0 && \
     dotnet add package xunit --version 2.8.1 && \
     dotnet add package xunit.v3 --version 1.1.0 && \
     dotnet add package xunit.v3 --version 3.2.2 && \
+    dotnet add package xunit.v3.mtp-off --version 4.0.3 && \
     dotnet add package xunit.runner.visualstudio --version 3.0.1 && \
     dotnet add package xunit.runner.visualstudio --version 3.1.5 && \
+    dotnet add package xunit.runner.visualstudio --version 4.0.1 && \
     dotnet add package BenchmarkDotNet --version 0.14.0 && \
     dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 9.2.0
 
@@ -45,7 +48,7 @@ RUN find /root/.nuget/packages -type f \( -name '*.nupkg' -o -name '*.snupkg' \)
     rm -rf /root/.nuget/packages/microsoft.netcore.app.crossgen2.*
 
 # Build runtime image
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0.401-alpine3.23 AS runtime
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:11.0.100-alpine3.24 AS runtime
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV DOTNET_ROLL_FORWARD=Major
