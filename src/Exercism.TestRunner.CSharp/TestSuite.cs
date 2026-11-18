@@ -18,12 +18,21 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
         return TestRunParser.Parse(options, originalSyntaxTree);
     }
 
+    // We build the project, then run the xUnit v3 test executable directly. This is faster than
+    // `dotnet test`, which would also start VSTest and a test host to run the same executable.
     private void RunTests()
     {
         var workingDirectory = Path.GetDirectoryName(options.TestsFilePath)!;
         RunProcess("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
-        RunProcess("dotnet", $"test -c release --no-restore --verbosity=quiet --logger \"trx;LogFileName={Path.GetFileName(options.TestResultsFilePath)}\" /flp:verbosity=quiet;errorsOnly=true", workingDirectory);            
+        RunProcess("dotnet", "build -c release --no-restore --verbosity=quiet -nologo /flp:verbosity=quiet;errorsOnly=true", workingDirectory);
+
+        if (File.Exists(options.AssemblyFilePath))
+            RunTestExecutable(options.AssemblyFilePath, options.TestResultsFilePath);
     }
+
+    // The test executable writes xUnit's XML report to reportFilePath.
+    public static void RunTestExecutable(string assemblyFilePath, string reportFilePath) =>
+        RunProcess("dotnet", $"exec \"{assemblyFilePath}\" -xml \"{reportFilePath}\" -noLogo -noColor", Path.GetDirectoryName(assemblyFilePath)!);
 
     private static void RunProcess(string command, string arguments, string workingDirectory)
     {
@@ -34,16 +43,20 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
             RedirectStandardError = true,
             RedirectStandardOutput = true
         };
-        Process.Start(processStartInfo)?.WaitForExit();
+        using var process = Process.Start(processStartInfo)!;
+        // Read both streams, so that a process with a lot of output can't block on a full pipe.
+        process.OutputDataReceived += (_, _) => { };
+        process.ErrorDataReceived += (_, _) => { };
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        process.WaitForExit();
     }
 
     private void BeforeTests()
     {
         RewriteProjectFile();
         RewriteTestsFile();
-            
-        if (CaptureOutput)
-            AddCaptureOutputAssemblyAttributes();
+        AddCaptureOutputAssemblyAttributes();
     }
 
     private void RewriteProjectFile() =>
@@ -60,9 +73,7 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
     {
         UndoRewriteProjectFile();
         UndoRewriteTestsFile();
-            
-        if (CaptureOutput)
-            UndoAddCaptureOutputAssemblyAttributes();
+        UndoAddCaptureOutputAssemblyAttributes();
     }
 
     private void UndoRewriteProjectFile() => File.WriteAllText(options.ProjectFilePath, originalProjectFile);
@@ -70,8 +81,6 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
     private void UndoRewriteTestsFile() => File.WriteAllText(options.TestsFilePath, originalSyntaxTree.ToString());
 
     private void UndoAddCaptureOutputAssemblyAttributes() => File.Delete(options.AssemblyInfoFilePath);
-
-    private bool CaptureOutput => originalProjectFile.Contains("xunit.v3");
 
     public static TestSuite FromOptions(Options options)
     {
