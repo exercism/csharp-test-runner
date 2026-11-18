@@ -12,18 +12,10 @@ namespace Exercism.TestRunner.CSharp;
 
 internal static partial class TestResultParser
 {
-    internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree)
-    {
-        // The report will be missing if the test executable crashed, and unreadable if xUnit failed while writing it.
-        try
-        {
-            return XDocument.Load(logFilePath).Descendants("test").ToTestResults(testsSyntaxTree);
-        }
-        catch (Exception exception) when (exception is IOException or XmlException)
-        {
-            return [];
-        }
-    }
+    internal static TestResult[] FromFile(string logFilePath, SyntaxTree testsSyntaxTree) =>
+        XDocument.Load(logFilePath)
+            .Descendants("test")
+            .ToTestResults(testsSyntaxTree);
 
     private static TestResult[] ToTestResults(this IEnumerable<XElement> tests, SyntaxTree testsSyntaxTree)
     {
