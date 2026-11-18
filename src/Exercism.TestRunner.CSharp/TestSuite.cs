@@ -48,7 +48,7 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
 
     private void RewriteProjectFile() =>
         File.WriteAllText(options.ProjectFilePath,
-            originalProjectFile.Replace("net9.0", "net10.0"));
+            originalProjectFile.Replace("net9.0", "net11.0").Replace("net10.0", "net11.0"));
 
     private void RewriteTestsFile() =>
         File.WriteAllText(options.TestsFilePath, originalSyntaxTree.Rewrite().ToString());
