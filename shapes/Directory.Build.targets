@@ -1,0 +1,14 @@
+<Project>
+  <!-- MSBuild imports this file into every template project in the shapes/ folder (see bin/build-shapes.sh). -->
+
+  <!-- Every template compiles the same two placeholder files, kept in this folder. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ExercismShape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExercismShapeTests.cs" />
+  </ItemGroup>
+
+  <!-- This target writes the compiler arguments to csc.rsp after MSBuild has compiled the project. -->
+  <Target Name="ExercismCaptureCompilerArguments" AfterTargets="CoreCompile">
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)/csc.rsp" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+  </Target>
+</Project>

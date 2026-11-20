@@ -10,7 +10,11 @@
 # - publish/: every dependency, precompiled with ReadyToRun, so that the test executable spends
 #   less time in the JIT compiler on each run.
 # - shape.key: the key that identifies the shape (written by the runner's --prepare-shape option).
+# The runner's --prepare-shape option then removes everything else from the shape's folder.
 # If a shape fails to build, this script removes it, and solutions with that shape use MSBuild.
+#
+# Every template also uses shapes/Directory.Build.targets, which adds the two placeholder source
+# files in shapes/ and writes csc.rsp.
 
 # The Dockerfile mounts the ReadyToRun compiler package at /crossgen2 for this script only.
 for package in /crossgen2/*; do
@@ -19,21 +23,17 @@ done
 
 for dir in /opt/test-runner/shapes/*/; do
     cd "${dir}" || exit 1
-    # The runner fills in each solution's root namespace, so the template uses the default one (its own name).
-    sed -i '/<RootNamespace>/d' ExercismShape.csproj
-    printf 'public static class ExercismShapeStub\n{\n}\n' > ExercismShape.cs
-    printf 'public class ExercismShapeTests\n{\n    [Fact]\n    public void Passes()\n    {\n    }\n}\n' > ExercismShapeTests.cs
-    # This target writes the compiler arguments to csc.rsp after MSBuild has compiled the project.
-    cat > Directory.Build.targets <<'TARGETS'
-<Project>
-  <Target Name="ExercismCaptureCompilerArguments" AfterTargets="CoreCompile" Condition="'$(ExercismCaptureCompilerArguments)' == 'true'">
-    <WriteLinesToFile File="$(MSBuildProjectDirectory)/csc.rsp" Lines="@(CscCommandLineArgs)" Overwrite="true" />
-  </Target>
-</Project>
-TARGETS
-
-    if dotnet build -c release --source /root/.nuget/packages/ -p:ProvideCommandLineArgs=true -p:ExercismCaptureCompilerArguments=true -nologo -v q &&
-       dotnet publish -c release --source /root/.nuget/packages/ --use-current-runtime --self-contained false -p:PublishReadyToRun=true -o publish -nologo -v q &&
+    # One publish both compiles the project (writing csc.rsp) and precompiles its dependencies.
+    # - The configuration is lowercase "release", so that the generated files sit in
+    #   obj/release/net10.0, as they do for a solution built with `dotnet build -c release`.
+    # - The runtime identifier is needed for ReadyToRun. AppendRuntimeIdentifierToOutputPath=false
+    #   keeps it out of the obj/ paths, and PlatformTarget=AnyCPU keeps the compiler's platform the
+    #   same as for a solution built without one.
+    # - The runner fills in each solution's root namespace, so the template uses its own name.
+    if dotnet publish --configuration release --source /root/.nuget/packages/ --use-current-runtime --self-contained false \
+           --property:PublishReadyToRun=true --property:AppendRuntimeIdentifierToOutputPath=false \
+           --property:PlatformTarget=AnyCPU --property:ProvideCommandLineArgs=true \
+           --property:RootNamespace=ExercismShape --output publish --nologo --verbosity quiet &&
        /opt/test-runner/Exercism.TestRunner.CSharp --prepare-shape "${dir%/}"; then
         echo "Built shape ${dir}"
     else
@@ -41,6 +41,9 @@ TARGETS
         rm -rf "${dir}"
     fi
 done
+
+# The shared template files are only needed for the builds above.
+rm /opt/test-runner/shapes/Directory.Build.targets /opt/test-runner/shapes/ExercismShape.cs /opt/test-runner/shapes/ExercismShapeTests.cs
 
 # Many shapes share the same dependency files. Hard links keep one copy of each in the image.
 find /opt/test-runner/shapes -type f -path '*/publish/*' -exec sha256sum {} + | sort | awk '
