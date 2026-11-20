@@ -7,10 +7,20 @@ namespace Exercism.TestRunner.CSharp;
 
 internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalProjectFile, Options options)
 {
-    private const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
+    public const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
 
+    // The fast path (see FastPath) compiles the solution with Roslyn inside this process and runs the
+    // tests, without MSBuild. If the solution has anything it doesn't handle, we build and run the tests
+    // with MSBuild instead. Setting EXERCISM_FAST_PATH=off turns the fast path off, to compare the results.
     public TestRun Run()
     {
+        if (Environment.GetEnvironmentVariable("EXERCISM_FAST_PATH") != "off")
+        {
+            var testRun = new FastPath(options, originalSyntaxTree, RewrittenProjectFile).TryRun();
+            if (testRun is not null)
+                return testRun;
+        }
+
         BeforeTests();
         RunTests();
         AfterTests();
@@ -30,7 +40,7 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
             RunProcess("dotnet", $"exec \"{options.AssemblyFilePath}\" -xml \"{options.TestResultsFilePath}\" -noLogo -noColor", Path.GetDirectoryName(options.AssemblyFilePath)!);
     }
 
-    private static void RunProcess(string command, string arguments, string workingDirectory)
+    internal static void RunProcess(string command, string arguments, string workingDirectory)
     {
         var processStartInfo = new ProcessStartInfo(command, arguments)
         {
@@ -55,9 +65,10 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
         AddCaptureOutputAssemblyAttributes();
     }
 
+    private string RewrittenProjectFile => originalProjectFile.Replace("net9.0", "net10.0");
+
     private void RewriteProjectFile() =>
-        File.WriteAllText(options.ProjectFilePath,
-            originalProjectFile.Replace("net9.0", "net10.0"));
+        File.WriteAllText(options.ProjectFilePath, RewrittenProjectFile);
 
     private void RewriteTestsFile() =>
         File.WriteAllText(options.TestsFilePath, originalSyntaxTree.Rewrite().ToString());
