@@ -59,9 +59,12 @@ COPY --from=build /root/.nuget/packages/ /root/.nuget/packages/
 
 COPY run.sh bin/
 
-# Build a template project for each known project shape, for the runner's fast path
-COPY shapes/ shapes/
-COPY bin/build-shapes.sh bin/
-RUN --mount=type=bind,from=build,source=/crossgen2,target=/crossgen2 sh bin/build-shapes.sh
+# Build a template project for each known project shape, for the runner's fast path.
+# The shapes and the build script are mounted for this step only, so that the image keeps
+# just what the fast path needs from each build.
+RUN --mount=type=bind,from=build,source=/crossgen2,target=/crossgen2 \
+    --mount=type=bind,source=shapes,target=/tmp/shapes \
+    --mount=type=bind,source=bin/build-shapes.sh,target=/tmp/build-shapes.sh \
+    cp -R /tmp/shapes shapes && sh /tmp/build-shapes.sh
 
 ENTRYPOINT ["sh", "/opt/test-runner/bin/run.sh"]
