@@ -26,14 +26,21 @@ for dir in /opt/test-runner/shapes/*/; do
     # One publish both compiles the project (writing csc.rsp) and precompiles its dependencies.
     # - The configuration is lowercase "release", so that the generated files sit in
     #   obj/release/net10.0, as they do for a solution built with `dotnet build -c release`.
-    # - The runtime identifier is needed for ReadyToRun. AppendRuntimeIdentifierToOutputPath=false
-    #   keeps it out of the obj/ paths, and PlatformTarget=AnyCPU keeps the compiler's platform the
-    #   same as for a solution built without one.
-    # - The runner fills in each solution's root namespace, so the template uses its own name.
-    if dotnet publish --configuration release --source /root/.nuget/packages/ --use-current-runtime --self-contained false \
+    # - --source limits the build to the packages installed in the image. Without it, a template that
+    #   needs another package would download it into the image.
+    # - PublishReadyToRun precompiles the dependencies, and makes the SDK build for the current runtime
+    #   identifier. AppendRuntimeIdentifierToOutputPath=false keeps that identifier out of the obj/
+    #   paths, and PlatformTarget=AnyCPU keeps the compiler's platform the same as for a solution
+    #   built without one.
+    # - ProvideCommandLineArgs makes MSBuild pass the compiler arguments to the target in
+    #   shapes/Directory.Build.targets, which writes them to csc.rsp.
+    # - Some templates set their own root namespace. The runner replaces ExercismShape with each
+    #   solution's root namespace, so every template uses that name.
+    # - The runner reads the dependencies from publish/.
+    if dotnet publish --configuration release --source /root/.nuget/packages/ \
            --property:PublishReadyToRun=true --property:AppendRuntimeIdentifierToOutputPath=false \
            --property:PlatformTarget=AnyCPU --property:ProvideCommandLineArgs=true \
-           --property:RootNamespace=ExercismShape --output publish --nologo --verbosity quiet &&
+           --property:RootNamespace=ExercismShape --output publish &&
        /opt/test-runner/Exercism.TestRunner.CSharp --prepare-shape "${dir%/}"; then
         echo "Built shape ${dir}"
     else
