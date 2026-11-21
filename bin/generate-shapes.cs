@@ -1,3 +1,9 @@
+#!/usr/bin/env dotnet
+
+// File-based apps turn on native AOT by default, which makes restore download the AOT compiler and
+// runtime packs. This app only runs with `dotnet run`, so turning AOT off lets it run offline.
+#:property PublishAot=false
+
 // Writes the numbered folders in shapes/ from the history of the exercism/csharp track repo.
 //
 // A shape is a distinct xUnit v3 project file, ignoring the project name and the settings that do not
@@ -9,8 +15,8 @@
 // The grouping here is close to ProjectShape.Key in the runner. If the two ever disagree, the worst
 // case will be a duplicate template, or a project file with no matching template, which uses MSBuild.
 //
-// Usage, from the repo root:
-//   dotnet run --project tools/GenerateShapes -- shapes [path to the exercism/csharp repo, default ../csharp]
+// This is a file-based app, so it needs no project file. Usage, from the repo root:
+//   bin/generate-shapes.cs shapes [path to the exercism/csharp repo, default ../csharp]
 
 using System.Diagnostics;
 using System.Text;
@@ -18,7 +24,7 @@ using System.Xml.Linq;
 
 if (args.Length is < 1 or > 2)
 {
-    Console.Error.WriteLine("usage: dotnet run --project tools/GenerateShapes -- <out_dir> [path to the exercism/csharp repo]");
+    Console.Error.WriteLine("usage: bin/generate-shapes.cs <out_dir> [path to the exercism/csharp repo]");
     return 1;
 }
 
