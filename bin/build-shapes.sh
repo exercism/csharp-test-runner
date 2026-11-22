@@ -13,8 +13,9 @@
 # The runner's --prepare-shape option then removes everything else from the shape's folder.
 # If a shape fails to build, this script removes it, and solutions with that shape use MSBuild.
 #
-# Every template also uses shapes/Directory.Build.targets, which adds the two placeholder source
-# files in shapes/ and writes csc.rsp.
+# Every template also uses shapes/Directory.Build.props, which sets the build options, and
+# shapes/Directory.Build.targets, which adds the two placeholder source files in shapes/ and
+# writes csc.rsp.
 
 # The Dockerfile mounts the ReadyToRun compiler package at /crossgen2 for this script only.
 for package in /crossgen2/*; do
@@ -24,23 +25,10 @@ done
 for dir in /opt/test-runner/shapes/*/; do
     cd "${dir}" || exit 1
     # One publish both compiles the project (writing csc.rsp) and precompiles its dependencies.
-    # - The configuration is lowercase "release", so that the generated files sit in
-    #   obj/release/net10.0, as they do for a solution built with `dotnet build -c release`.
-    # - --source limits the build to the packages installed in the image. Without it, a template that
-    #   needs another package would download it into the image.
-    # - PublishReadyToRun precompiles the dependencies, and makes the SDK build for the current runtime
-    #   identifier. AppendRuntimeIdentifierToOutputPath=false keeps that identifier out of the obj/
-    #   paths, and PlatformTarget=AnyCPU keeps the compiler's platform the same as for a solution
-    #   built without one.
-    # - ProvideCommandLineArgs makes MSBuild pass the compiler arguments to the target in
-    #   shapes/Directory.Build.targets, which writes them to csc.rsp.
-    # - Some templates set their own root namespace. The runner replaces ExercismShape with each
-    #   solution's root namespace, so every template uses that name.
-    # - The runner reads the dependencies from publish/.
-    if dotnet publish --configuration release --source /root/.nuget/packages/ \
-           --property:PublishReadyToRun=true --property:AppendRuntimeIdentifierToOutputPath=false \
-           --property:PlatformTarget=AnyCPU --property:ProvideCommandLineArgs=true \
-           --property:RootNamespace=ExercismShape --output publish &&
+    # shapes/Directory.Build.props sets the other options. Without --configuration, publish will use
+    # "Release", even if a project file sets a configuration. Lowercase "release" keeps the compiler
+    # arguments and generated files the same as for a solution built with `dotnet build -c release`.
+    if dotnet publish --configuration release &&
        /opt/test-runner/Exercism.TestRunner.CSharp --prepare-shape "${dir%/}"; then
         echo "Built shape ${dir}"
     else
@@ -50,7 +38,7 @@ for dir in /opt/test-runner/shapes/*/; do
 done
 
 # The shared template files are only needed for the builds above.
-rm /opt/test-runner/shapes/Directory.Build.targets /opt/test-runner/shapes/ExercismShape.cs /opt/test-runner/shapes/ExercismShapeTests.cs
+rm /opt/test-runner/shapes/Directory.Build.props /opt/test-runner/shapes/Directory.Build.targets /opt/test-runner/shapes/ExercismShape.cs /opt/test-runner/shapes/ExercismShapeTests.cs
 
 # Many shapes share the same dependency files. Hard links keep one copy of each in the image.
 find /opt/test-runner/shapes -type f -path '*/publish/*' -exec sha256sum {} + | sort | awk '
