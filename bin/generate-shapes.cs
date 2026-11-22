@@ -3,6 +3,7 @@
 // File-based apps turn on native AOT by default, which makes restore download the AOT compiler and
 // runtime packs. This app only runs with `dotnet run`, so turning AOT off lets it run offline.
 #:property PublishAot=false
+#:package LibGit2Sharp@0.32.0
 
 // Writes the numbered folders in shapes/ from the history of the exercism/csharp track repo.
 //
@@ -18,9 +19,9 @@
 // This is a file-based app, so it needs no project file. Usage, from the repo root:
 //   bin/generate-shapes.cs shapes [path to the exercism/csharp repo, default ../csharp]
 
-using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
+using LibGit2Sharp;
 
 if (args.Length is < 1 or > 2)
 {
@@ -32,26 +33,26 @@ var outDirectory = args[0];
 var trackDirectory = args.Length > 1 ? args[1] : "../csharp";
 HashSet<string> ignoredProperties = ["RestorePackagesWithLockFile", "IsPackable", "IsTestProject"];
 
-// The track switched to xUnit v3 on this date.
-var commits = Git("log", "--format=%H", "--since=2025-02-24", "--", "exercises")
-    .Split((char[])['\n', ' '], StringSplitOptions.RemoveEmptyEntries)
-    .Append("HEAD");
-
 // Each shape keeps the first project file found for it, and the exercises that use it.
 // The list keeps the shapes in the order they were first found.
 var shapes = new List<(string Key, string Text, HashSet<string> Exercises)>();
 var shapesByKey = new Dictionary<string, int>();
 
-using (var catFile = new GitCatFile(trackDirectory))
+using (var repository = new Repository(trackDirectory))
 {
+    // Read the commits since the track switched to xUnit v3, newest first. Commits that leave the
+    // exercises folder as it was would find the same files again, so they are skipped.
+    var since = new DateTimeOffset(new DateTime(2025, 2, 24));
+    var commits = repository.Commits
+        .QueryBy(new CommitFilter { SortBy = CommitSortStrategies.Topological | CommitSortStrategies.Time })
+        .TakeWhile(commit => commit.Committer.When >= since)
+        .DistinctBy(commit => commit["exercises"].Target.Id);
+
     foreach (var commit in commits)
     {
-        foreach (var path in Git("ls-tree", "-r", "--name-only", commit, "exercises").Split('\n'))
+        foreach (var (path, blob) in ProjectFiles((Tree)commit["exercises"].Target, "exercises"))
         {
-            if (!path.EndsWith(".csproj", StringComparison.Ordinal))
-                continue;
-
-            var text = catFile.Read($"{commit}:{path}");
+            var text = Text(blob);
             if (!text.Contains("xunit.v3", StringComparison.Ordinal))
                 continue;
 
@@ -119,72 +120,29 @@ string Key(string text)
 static string LeadingText(XElement element) =>
     string.Concat(element.Nodes().TakeWhile(node => node is not XElement).OfType<XText>().Select(text => text.Value)).Trim();
 
-string Git(params string[] arguments)
+// Every .csproj file in the tree and its subfolders, in the order `git ls-tree -r` lists them.
+static IEnumerable<(string Path, Blob Blob)> ProjectFiles(Tree tree, string path)
 {
-    var startInfo = new ProcessStartInfo("git") { RedirectStandardOutput = true };
-    startInfo.ArgumentList.Add("-C");
-    startInfo.ArgumentList.Add(trackDirectory);
-    foreach (var argument in arguments)
-        startInfo.ArgumentList.Add(argument);
-
-    using var process = Process.Start(startInfo)!;
-    var output = process.StandardOutput.ReadToEnd();
-    process.WaitForExit();
-    if (process.ExitCode != 0)
-        throw new InvalidOperationException($"git {string.Join(' ', arguments)} failed with exit code {process.ExitCode}");
-    return output;
+    foreach (var entry in tree)
+    {
+        var entryPath = $"{path}/{entry.Name}";
+        if (entry.Target is Tree subtree)
+        {
+            foreach (var file in ProjectFiles(subtree, entryPath))
+                yield return file;
+        }
+        else if (entry.Target is Blob blob && entry.Name.EndsWith(".csproj", StringComparison.Ordinal))
+            yield return (entryPath, blob);
+    }
 }
 
-// Reads files from the track repo through one long-running `git cat-file --batch` process,
-// which is much faster than starting `git show` for every file in every commit.
-sealed class GitCatFile : IDisposable
+// Returns the file as text, with Windows and old Mac line endings turned into \n. A byte order
+// mark at the start stays in the text, so that it is written back out with the file.
+static string Text(Blob blob)
 {
-    private readonly Process process;
-
-    public GitCatFile(string trackDirectory)
-    {
-        var startInfo = new ProcessStartInfo("git") { RedirectStandardInput = true, RedirectStandardOutput = true };
-        foreach (var argument in new[] { "-C", trackDirectory, "cat-file", "--batch" })
-            startInfo.ArgumentList.Add(argument);
-        process = Process.Start(startInfo)!;
-    }
-
-    // Returns the file as text, with Windows and old Mac line endings turned into \n. A byte order
-    // mark at the start stays in the text, so that it is written back out with the file.
-    public string Read(string objectName)
-    {
-        process.StandardInput.Write(objectName + "\n");
-        process.StandardInput.Flush();
-
-        var output = process.StandardOutput.BaseStream;
-        var header = ReadLine(output).Split(' ');
-        if (header.Length != 3)
-            throw new InvalidOperationException($"git cat-file could not read {objectName}");
-
-        var content = new byte[int.Parse(header[2])];
-        output.ReadExactly(content);
-        output.ReadByte(); // The newline after the content.
-
-        var text = new UTF8Encoding(false, true).GetString(content);
-        return text.Replace("\r\n", "\n").Replace('\r', '\n');
-    }
-
-    private static string ReadLine(Stream stream)
-    {
-        var bytes = new List<byte>();
-        for (var b = stream.ReadByte(); b != '\n'; b = stream.ReadByte())
-        {
-            if (b == -1)
-                throw new EndOfStreamException();
-            bytes.Add((byte)b);
-        }
-        return Encoding.UTF8.GetString(bytes.ToArray());
-    }
-
-    public void Dispose()
-    {
-        process.StandardInput.Close();
-        process.WaitForExit();
-        process.Dispose();
-    }
+    using var stream = blob.GetContentStream();
+    using var memory = new MemoryStream();
+    stream.CopyTo(memory);
+    var text = new UTF8Encoding(false, true).GetString(memory.ToArray());
+    return text.Replace("\r\n", "\n").Replace('\r', '\n');
 }
