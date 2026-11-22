@@ -4,6 +4,13 @@
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- When the Dockerfile publishes the runner for a runtime, precompile the runner, Roslyn and the .NET
+         libraries together into one ReadyToRun image. If each assembly is precompiled on its own, generic code
+         that crosses assemblies (such as ImmutableArray<T> or Dictionary<TKey, TValue> over Roslyn's types)
+         is left out, and every run spends about 0.4s compiling over 4,000 such methods with the JIT.
+         Compiling them together needs the runner to carry its own copy of the .NET runtime. -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <PublishReadyToRunComposite Condition="'$(RuntimeIdentifier)' != ''">true</PublishReadyToRunComposite>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
