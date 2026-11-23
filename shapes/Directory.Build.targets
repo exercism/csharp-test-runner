@@ -1,0 +1,20 @@
+<Project>
+  <!-- MSBuild imports this file into every template project in the shapes/ folder (see bin/build-shapes.sh). -->
+
+  <!-- Some templates set their own root namespace. The runner replaces ExercismShape with each
+       solution's root namespace, so every template uses that name. -->
+  <PropertyGroup>
+    <RootNamespace>ExercismShape</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Every template compiles the same two placeholder files, kept in this folder. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ExercismShape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExercismShapeTests.cs" />
+  </ItemGroup>
+
+  <!-- This target writes the compiler arguments to csc.rsp after MSBuild has compiled the project. -->
+  <Target Name="ExercismCaptureCompilerArguments" AfterTargets="CoreCompile">
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)/csc.rsp" Lines="@(CscCommandLineArgs)" Overwrite="true" />
+  </Target>
+</Project>

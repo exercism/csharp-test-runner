@@ -1,0 +1,16 @@
+<Project>
+  <!-- MSBuild imports this file into every template project in the shapes/ folder (see bin/build-shapes.sh). -->
+  <PropertyGroup>
+    <!-- Restore only from the packages installed in the image, so that a template never downloads a package. -->
+    <RestoreSources>/root/.nuget/packages/</RestoreSources>
+    <!-- Precompile the dependencies into publish/, where the runner reads them. -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishDir>publish/</PublishDir>
+    <!-- ReadyToRun makes the SDK build for the current runtime identifier. These two keep the obj/ paths
+         and the compiler's platform the same as for a solution built without one. -->
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <!-- Pass the compiler arguments to the target in Directory.Build.targets, which writes them to csc.rsp. -->
+    <ProvideCommandLineArgs>true</ProvideCommandLineArgs>
+  </PropertyGroup>
+</Project>

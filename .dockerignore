@@ -1,6 +1,8 @@
 *
 !run.sh
 !run.ps1
+!shapes
+!bin/build-shapes.sh
 
 !src/Exercism.TestRunner.CSharp
 !src/Exercism.TestRunner.CSharp/AdditionalFiles
