@@ -1,29 +1,24 @@
 ﻿using System.Diagnostics;
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Exercism.TestRunner.CSharp;
 
-internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalProjectFile, Options options)
+/// <summary>
+/// Builds the solution with MSBuild and runs its tests. This works for every solution, and is the runner
+/// used when <see cref="InMemoryCompiledTestRunner"/> can't handle the solution or is turned off.
+/// </summary>
+internal sealed class MSBuildTestrunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile) : ITestRunner
 {
     public const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
 
     /// <summary>
-    /// Builds the solution and runs its tests. The fast path (see <see cref="FastPath"/>) compiles the solution
-    /// with Roslyn inside this process and runs the tests, without MSBuild. If the solution has anything it
-    /// doesn't handle, we build and run the tests with MSBuild instead. Setting EXERCISM_FAST_PATH=off turns
-    /// the fast path off, to compare the results.
+    /// Builds the solution and runs its tests. It temporarily rewrites the solution's files for the build,
+    /// and puts them back afterwards.
     /// </summary>
+    /// <returns>The test run, which is never null.</returns>
     public TestRun Run()
     {
-        if (Environment.GetEnvironmentVariable("EXERCISM_FAST_PATH") != "off")
-        {
-            var testRun = new FastPath(options, originalSyntaxTree, RewrittenProjectFile).TryRun();
-            if (testRun is not null)
-                return testRun;
-        }
-
         BeforeTests();
         RunTests();
         AfterTests();
@@ -68,10 +63,13 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
         AddCaptureOutputAssemblyAttributes();
     }
 
-    private string RewrittenProjectFile => originalProjectFile.Replace("net9.0", "net10.0");
+    /// <summary>
+    /// Moves a project file onto the .NET version installed in the image.
+    /// </summary>
+    internal static string RewriteProjectFileText(string projectFileText) => projectFileText.Replace("net9.0", "net10.0");
 
     private void RewriteProjectFile() =>
-        File.WriteAllText(options.ProjectFilePath, RewrittenProjectFile);
+        File.WriteAllText(options.ProjectFilePath, RewriteProjectFileText(originalProjectFile));
 
     private void RewriteTestsFile() =>
         File.WriteAllText(options.TestsFilePath, originalSyntaxTree.Rewrite().ToString());
@@ -91,11 +89,4 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
     private void UndoRewriteTestsFile() => File.WriteAllText(options.TestsFilePath, originalSyntaxTree.ToString());
 
     private void UndoAddCaptureOutputAssemblyAttributes() => File.Delete(options.AssemblyInfoFilePath);
-
-    public static TestSuite FromOptions(Options options)
-    {
-        var originalSyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(options.TestsFilePath));
-        var originalProjectFile = File.ReadAllText(options.ProjectFilePath);
-        return new TestSuite(originalSyntaxTree, originalProjectFile, options);
-    }
 }

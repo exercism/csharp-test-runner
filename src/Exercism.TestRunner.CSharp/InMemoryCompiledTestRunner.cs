@@ -31,9 +31,9 @@ namespace Exercism.TestRunner.CSharp;
 /// the test executable's report is read by the same code as on the MSBuild path (<see cref="TestResultParser"/>).
 ///
 /// The fast path never writes into the solution folder. It returns null whenever it meets something it
-/// does not fully understand, and the caller then runs the normal MSBuild path.
+/// does not fully understand, and the caller then runs the tests with <see cref="MSBuildTestrunner"/>.
 /// </summary>
-internal sealed partial class FastPath(Options options, SyntaxTree originalSyntaxTree, string projectFileText)
+internal sealed partial class InMemoryCompiledTestRunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile) : ITestRunner
 {
     public const string ShapesDirectory = "/opt/test-runner/shapes";
     /// <summary>
@@ -61,6 +61,11 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
     private static readonly string[] DisallowedExtensions =
         [".props", ".targets", ".sln", ".slnx", ".resx", ".globalconfig", ".csproj", ".fsproj", ".vbproj", ".proj"];
 
+    /// <summary>
+    /// The project file as MSBuild would build it, after <see cref="MSBuildTestrunner"/> rewrites it.
+    /// </summary>
+    private readonly string projectFileText = MSBuildTestrunner.RewriteProjectFileText(originalProjectFile);
+
     private string ProjectName => Path.GetFileNameWithoutExtension(options.ProjectFilePath);
 
     /// <summary>
@@ -75,7 +80,7 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
     /// to the console.
     /// </summary>
     /// <returns>The test run, or null if the caller should use the MSBuild path instead.</returns>
-    public TestRun? TryRun()
+    public TestRun? Run()
     {
         var shapeDirectory = FindShapeDirectory();
         if (shapeDirectory is null)
@@ -230,7 +235,7 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
             trees.Add(CSharpSyntaxTree.ParseText(text, parseOptions, fullPath));
         }
 
-        trees.Add(CSharpSyntaxTree.ParseText(SourceText.From(TestSuite.AssemblyInfo, Encoding.UTF8), parseOptions, Path.Combine(SolutionDirectory, "AssemblyInfo.cs")));
+        trees.Add(CSharpSyntaxTree.ParseText(SourceText.From(MSBuildTestrunner.AssemblyInfo, Encoding.UTF8), parseOptions, Path.Combine(SolutionDirectory, "AssemblyInfo.cs")));
 
         // The template's two placeholder files (in the shapes folder itself) are on the command line too, and we
         // leave them out. The rest are generated files, which we move to where MSBuild would have put them for
@@ -356,7 +361,7 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
     {
         var reportPath = Path.Combine(runDirectory, "tests.xml");
         var assemblyPath = Path.Combine(runDirectory, $"{ProjectName}.dll");
-        TestSuite.RunProcess("dotnet", $"exec \"{assemblyPath}\" -xml \"{reportPath}\" -noLogo -noColor", runDirectory);
+        MSBuildTestrunner.RunProcess("dotnet", $"exec \"{assemblyPath}\" -xml \"{reportPath}\" -noLogo -noColor", runDirectory);
         return TestRunParser.TestRunWithoutError(reportPath, originalSyntaxTree);
     }
 
