@@ -36,14 +36,22 @@ namespace Exercism.TestRunner.CSharp;
 internal sealed partial class FastPath(Options options, SyntaxTree originalSyntaxTree, string projectFileText)
 {
     public const string ShapesDirectory = "/opt/test-runner/shapes";
-    // The template project's name. We replace it with the solution's project name wherever it appears.
+    /// <summary>
+    /// The template project's name. We replace it with the solution's project name wherever it appears.
+    /// </summary>
     private const string Token = "ExercismShape";
-    // The template's ReadyToRun publish folder, which holds every dependency.
+
+    /// <summary>
+    /// The template's ReadyToRun publish folder, which holds every dependency.
+    /// </summary>
     private const string OutputSubdirectory = "publish";
+
     private const string IntermediateSubdirectory = "obj/release/net10.0";
 
-    // Files that could change how MSBuild builds the project. If the solution folder has any of them,
-    // the fast path will not run.
+    /// <summary>
+    /// Files that could change how MSBuild builds the project. If the solution folder has any of them,
+    /// the fast path will not run.
+    /// </summary>
     private static readonly string[] DisallowedFileNames =
     [
         "directory.build.props", "directory.build.targets", "directory.packages.props", "directory.solution.props",
@@ -55,26 +63,40 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
 
     private string ProjectName => Path.GetFileNameWithoutExtension(options.ProjectFilePath);
 
-    // MSBuild uses the project name when the project file sets no RootNamespace.
+    /// <summary>
+    /// The project's root namespace. MSBuild uses the project name when the project file sets no RootNamespace.
+    /// </summary>
     private string RootNamespace => ProjectShape.RootNamespace(projectFileText) ?? ProjectName;
 
     private string SolutionDirectory => Path.GetDirectoryName(Path.GetFullPath(options.ProjectFilePath))!;
 
-    // Returns the test run, or null if the caller should use the MSBuild path instead.
-    // Every return of null goes through Fallback, which logs the reason to the console.
+    /// <summary>
+    /// Compiles the solution and runs its tests without MSBuild. Before every return of null, it logs the reason
+    /// to the console.
+    /// </summary>
+    /// <returns>The test run, or null if the caller should use the MSBuild path instead.</returns>
     public TestRun? TryRun()
     {
         var shapeDirectory = FindShapeDirectory();
         if (shapeDirectory is null)
-            return Fallback("unknown project shape");
+        {
+            Console.WriteLine("Fast path not used: unknown project shape");
+            return null;
+        }
 
         var sourceFiles = CollectSourceFiles();
         if (sourceFiles is null)
-            return Fallback("unusual files in the solution folder");
+        {
+            Console.WriteLine("Fast path not used: unusual files in the solution folder");
+            return null;
+        }
 
         var compilation = CreateCompilation(shapeDirectory, sourceFiles);
         if (compilation is null)
-            return Fallback("could not prepare the compilation");
+        {
+            Console.WriteLine("Fast path not used: could not prepare the compilation");
+            return null;
+        }
 
         var errors = CompileErrors(compilation);
         if (errors.Length > 0)
@@ -85,17 +107,15 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
         if (!emitResult.Success)
         {
             var emitErrors = emitResult.Diagnostics.Where(IsError).ToArray();
-            return emitErrors.Length > 0 ? CompileErrorTestRun(emitErrors) : Fallback("emit failed without errors");
+            if (emitErrors.Length > 0)
+                return CompileErrorTestRun(emitErrors);
+
+            Console.WriteLine("Fast path not used: emit failed without errors");
+            return null;
         }
 
         Console.WriteLine("Fast path used: tests run");
         return RunTests(runDirectory);
-    }
-
-    private static TestRun? Fallback(string reason)
-    {
-        Console.WriteLine($"Fast path not used: {reason}");
-        return null;
     }
 
     private string? FindShapeDirectory()
@@ -114,9 +134,11 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
         return null;
     }
 
-    // Lists the C# files that MSBuild's default Compile glob would include (**/*.cs, apart from bin/, obj/
-    // and folders that start with a dot), in the order it would find them. Returns null if the folder holds
-    // anything that could make MSBuild compile differently.
+    /// <summary>
+    /// Lists the C# files that MSBuild's default Compile glob would include (**/*.cs, apart from bin/, obj/
+    /// and folders that start with a dot), in the order it would find them.
+    /// </summary>
+    /// <returns>The source files, or null if the folder holds anything that could make MSBuild compile differently.</returns>
     private List<string>? CollectSourceFiles()
     {
         var root = SolutionDirectory;
@@ -154,7 +176,11 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
         return true;
     }
 
-    // An .editorconfig can change the severity of compiler diagnostics, which the fast path does not apply.
+    /// <summary>
+    /// Checks whether an .editorconfig could change the severity of compiler diagnostics, which the fast path
+    /// does not apply.
+    /// </summary>
+    /// <returns>True if the file has any setting that could change diagnostics.</returns>
     private static bool EditorConfigChangesDiagnostics(string path)
     {
         var text = File.ReadAllText(path);
@@ -165,8 +191,10 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
                text.Contains("generated_code", StringComparison.OrdinalIgnoreCase);
     }
 
-    // Source generators and analyzers are not run by the fast path. Code that needs a generator, and
-    // test attributes outside the test file (which the xUnit analyzers check), take the MSBuild path.
+    /// <summary>
+    /// The fast path does not run source generators or analyzers. This matches code that needs a generator, and
+    /// test attributes outside the test file (which the xUnit analyzers check), so that they take the MSBuild path.
+    /// </summary>
     [GeneratedRegex(@"\b(GeneratedRegex|LibraryImport|JsonSerializable|GeneratedComInterface|GeneratedComClass|JSImport|JSExport|LoggerMessage|Fact|Theory)\b")]
     private static partial Regex NeedsGeneratorOrAnalyzer();
 
@@ -250,8 +278,11 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
         }
     }
 
-    // csc stops after the first stage that has errors: parsing, then declarations. Method body errors
-    // are found while emitting.
+    /// <summary>
+    /// Finds the errors that csc would report before emitting. csc stops after the first stage that has errors:
+    /// parsing, then declarations. Method body errors are found while emitting.
+    /// </summary>
+    /// <returns>The errors from the first stage that has any, or an empty array.</returns>
     private static Diagnostic[] CompileErrors(CSharpCompilation compilation)
     {
         var parseErrors = compilation.GetParseDiagnostics().Where(IsError).ToArray();
@@ -282,10 +313,13 @@ internal sealed partial class FastPath(Options options, SyntaxTree originalSynta
         return $"{span.Path}({span.StartLinePosition.Line + 1},{span.StartLinePosition.Character + 1}): error {diagnostic.Id}: {message}{projectSuffix}";
     }
 
-    // Builds a folder in /tmp that looks like the project's output folder: the shape's dependencies
-    // (as symbolic links), and its deps.json and runtimeconfig.json renamed for this project.
-    // Linking avoids copying the dependencies on every run. We leave the folder in place, because
-    // each production run gets a fresh, empty /tmp.
+    /// <summary>
+    /// Builds a folder in /tmp that looks like the project's output folder: the shape's dependencies
+    /// (as symbolic links), and its deps.json and runtimeconfig.json renamed for this project.
+    /// Linking avoids copying the dependencies on every run. We leave the folder in place, because
+    /// each production run gets a fresh, empty /tmp.
+    /// </summary>
+    /// <returns>The path of the new folder.</returns>
     private string PrepareRunDirectory(string shapeDirectory)
     {
         var runDirectory = Path.Combine(Path.GetTempPath(), $"exercism-{Guid.NewGuid():N}");

@@ -9,9 +9,12 @@ internal sealed class TestSuite(SyntaxTree originalSyntaxTree, string originalPr
 {
     public const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
 
-    // The fast path (see FastPath) compiles the solution with Roslyn inside this process and runs the
-    // tests, without MSBuild. If the solution has anything it doesn't handle, we build and run the tests
-    // with MSBuild instead. Setting EXERCISM_FAST_PATH=off turns the fast path off, to compare the results.
+    /// <summary>
+    /// Builds the solution and runs its tests. The fast path (see <see cref="FastPath"/>) compiles the solution
+    /// with Roslyn inside this process and runs the tests, without MSBuild. If the solution has anything it
+    /// doesn't handle, we build and run the tests with MSBuild instead. Setting EXERCISM_FAST_PATH=off turns
+    /// the fast path off, to compare the results.
+    /// </summary>
     public TestRun Run()
     {
         if (Environment.GetEnvironmentVariable("EXERCISM_FAST_PATH") != "off")
