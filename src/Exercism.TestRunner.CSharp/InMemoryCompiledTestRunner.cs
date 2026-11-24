@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -33,17 +32,14 @@ namespace Exercism.TestRunner.CSharp;
 /// The fast path never writes into the solution folder. It returns null whenever it meets something it
 /// does not fully understand, and the caller then runs the tests with <see cref="MSBuildTestrunner"/>.
 /// </summary>
-internal sealed partial class InMemoryCompiledTestRunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile) : ITestRunner
+internal sealed partial class InMemoryCompiledTestRunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile)
 {
-    public const string ShapesDirectory = "/opt/test-runner/shapes";
+    private const string ShapesDirectory = "/opt/test-runner/shapes";
+
     /// <summary>
     /// The template project's name. We replace it with the solution's project name wherever it appears.
     /// </summary>
     private const string Token = "ExercismShape";
-
-    /// <summary>
-    /// The template's ReadyToRun publish folder, which holds every dependency.
-    /// </summary>
     private const string OutputSubdirectory = "publish";
 
     private const string IntermediateSubdirectory = "obj/release/net10.0";
@@ -64,16 +60,13 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
     /// <summary>
     /// The project file as MSBuild would build it, after <see cref="MSBuildTestrunner"/> rewrites it.
     /// </summary>
-    private readonly string projectFileText = MSBuildTestrunner.RewriteProjectFileText(originalProjectFile);
+    private readonly string _projectFileText = MSBuildTestrunner.RewriteProjectFileText(originalProjectFile);
 
     private string ProjectName => Path.GetFileNameWithoutExtension(options.ProjectFilePath);
-
-    /// <summary>
-    /// The project's root namespace. MSBuild uses the project name when the project file sets no RootNamespace.
-    /// </summary>
-    private string RootNamespace => ProjectShape.RootNamespace(projectFileText) ?? ProjectName;
-
+    private string RootNamespace => ProjectShape.RootNamespace(_projectFileText) ?? ProjectName;
     private string SolutionDirectory => Path.GetDirectoryName(Path.GetFullPath(options.ProjectFilePath))!;
+
+    private static bool IsDisabled => Environment.GetEnvironmentVariable("EXERCISM_FAST_PATH") == "off";
 
     /// <summary>
     /// Compiles the solution and runs its tests without MSBuild. Before every return of null, it logs the reason
@@ -82,6 +75,11 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
     /// <returns>The test run, or null if the caller should use the MSBuild path instead.</returns>
     public TestRun? Run()
     {
+        if (IsDisabled)
+        {
+            return null;
+        }
+
         var shapeDirectory = FindShapeDirectory();
         if (shapeDirectory is null)
         {
@@ -125,7 +123,7 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
 
     private string? FindShapeDirectory()
     {
-        var key = ProjectShape.Key(projectFileText);
+        var key = ProjectShape.Key(_projectFileText);
         if (key is null || !Directory.Exists(ShapesDirectory))
             return null;
 

@@ -23,20 +23,12 @@ public static class Program
 
         var originalSyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText(options.TestsFilePath));
         var originalProjectFile = File.ReadAllText(options.ProjectFilePath);
-        var inMemoryCompiledTestRunner = new InMemoryCompiledTestRunner(options, originalSyntaxTree, originalProjectFile);
-        var msBuildTestRunner = new MSBuildTestrunner(options, originalSyntaxTree, originalProjectFile);
 
-        // We try the in-memory runner first, because it is much faster. It returns null if it can't handle
-        // the solution, and then MSBuild runs the tests.
-        var testRun = (InMemoryCompiledTestRunnerEnabled ? inMemoryCompiledTestRunner.Run() : null) ?? msBuildTestRunner.Run();
+        // Try the in-memory runner first and fallback to the MSBuild one if needed
+        var testRun = new InMemoryCompiledTestRunner(options, originalSyntaxTree, originalProjectFile).Run() ??
+                      new MSBuildTestrunner(options, originalSyntaxTree, originalProjectFile).Run();
         testRun.WriteToFile(options.ResultsJsonFilePath);
 
         Console.WriteLine($"[{DateTimeOffset.UtcNow:u}] Ran test runner for '{options.Slug}' solution");
     }
-
-    /// <summary>
-    /// Setting EXERCISM_FAST_PATH=off turns the in-memory runner off, to compare its results with MSBuild's.
-    /// </summary>
-    private static bool InMemoryCompiledTestRunnerEnabled =>
-        Environment.GetEnvironmentVariable("EXERCISM_FAST_PATH") != "off";
 }

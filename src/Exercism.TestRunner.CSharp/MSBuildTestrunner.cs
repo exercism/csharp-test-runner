@@ -8,7 +8,7 @@ namespace Exercism.TestRunner.CSharp;
 /// Builds the solution with MSBuild and runs its tests. This works for every solution, and is the runner
 /// used when <see cref="InMemoryCompiledTestRunner"/> can't handle the solution or is turned off.
 /// </summary>
-internal sealed class MSBuildTestrunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile) : ITestRunner
+internal sealed class MSBuildTestrunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile)
 {
     public const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
 
