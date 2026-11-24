@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Exercism.TestRunner.CSharp;
 
@@ -10,8 +8,6 @@ namespace Exercism.TestRunner.CSharp;
 /// </summary>
 internal sealed class MSBuildTestrunner(Options options, SyntaxTree originalSyntaxTree, string originalProjectFile)
 {
-    public const string AssemblyInfo = "[assembly: CaptureConsole]\n[assembly: CaptureTrace]\n";
-
     /// <summary>
     /// Builds the solution and runs its tests. It temporarily rewrites the solution's files for the build,
     /// and puts them back afterwards.
@@ -31,29 +27,10 @@ internal sealed class MSBuildTestrunner(Options options, SyntaxTree originalSynt
     private void RunTests()
     {
         var workingDirectory = Path.GetDirectoryName(options.TestsFilePath)!;
-        RunProcess("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
-        RunProcess("dotnet", "build -c release --no-restore --verbosity=quiet -nologo /flp:verbosity=quiet;errorsOnly=true", workingDirectory);
+        ProcessRunner.Run("dotnet", "restore --source /root/.nuget/packages/", workingDirectory);
+        ProcessRunner.Run("dotnet", "build -c release --no-restore --verbosity=quiet -nologo /flp:verbosity=quiet;errorsOnly=true", workingDirectory);
 
-        if (File.Exists(options.AssemblyFilePath))
-            RunProcess("dotnet", $"exec \"{options.AssemblyFilePath}\" -xml \"{options.TestResultsFilePath}\" -noLogo -noColor", Path.GetDirectoryName(options.AssemblyFilePath)!);
-    }
-
-    internal static void RunProcess(string command, string arguments, string workingDirectory)
-    {
-        var processStartInfo = new ProcessStartInfo(command, arguments)
-        {
-            WorkingDirectory = workingDirectory,
-            RedirectStandardInput = true,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true
-        };
-        using var process = Process.Start(processStartInfo)!;
-        // Read both streams, so that a process with a lot of output can't block on a full pipe.
-        process.OutputDataReceived += (_, _) => { };
-        process.ErrorDataReceived += (_, _) => { };
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-        process.WaitForExit();
+        if (File.Exists(options.AssemblyFilePath)) ProcessRunner.Run("dotnet", $"exec \"{options.AssemblyFilePath}\" -xml \"{options.TestResultsFilePath}\" -noLogo -noColor", Path.GetDirectoryName(options.AssemblyFilePath)!);
     }
 
     private void BeforeTests()
@@ -63,19 +40,14 @@ internal sealed class MSBuildTestrunner(Options options, SyntaxTree originalSynt
         AddCaptureOutputAssemblyAttributes();
     }
 
-    /// <summary>
-    /// Moves a project file onto the .NET version installed in the image.
-    /// </summary>
-    internal static string RewriteProjectFileText(string projectFileText) => projectFileText.Replace("net9.0", "net10.0");
-
     private void RewriteProjectFile() =>
-        File.WriteAllText(options.ProjectFilePath, RewriteProjectFileText(originalProjectFile));
+        File.WriteAllText(options.ProjectFilePath, Rewriter.RewriteProjectFileText(originalProjectFile));
 
     private void RewriteTestsFile() =>
-        File.WriteAllText(options.TestsFilePath, originalSyntaxTree.Rewrite().ToString());
+        File.WriteAllText(options.TestsFilePath, originalSyntaxTree.RewriteTests().ToString());
         
     private void AddCaptureOutputAssemblyAttributes() =>
-        File.WriteAllText(options.AssemblyInfoFilePath, AssemblyInfo);
+        File.WriteAllText(options.AssemblyInfoFilePath, Rewriter.AssemblyInfo);
 
     private void AfterTests()
     {

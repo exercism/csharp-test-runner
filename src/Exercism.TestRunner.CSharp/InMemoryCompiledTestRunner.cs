@@ -60,7 +60,7 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
     /// <summary>
     /// The project file as MSBuild would build it, after <see cref="MSBuildTestrunner"/> rewrites it.
     /// </summary>
-    private readonly string _projectFileText = MSBuildTestrunner.RewriteProjectFileText(originalProjectFile);
+    private readonly string _projectFileText = Rewriter.RewriteProjectFileText(originalProjectFile);
 
     private string ProjectName => Path.GetFileNameWithoutExtension(options.ProjectFilePath);
     private string RootNamespace => ProjectShape.RootNamespace(_projectFileText) ?? ProjectName;
@@ -220,7 +220,7 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
             var fullPath = Path.GetFullPath(file);
             if (fullPath == testsFilePath)
             {
-                trees.Add(CSharpSyntaxTree.ParseText(SourceText.From(originalSyntaxTree.Rewrite().ToString(), Encoding.UTF8), parseOptions, fullPath));
+                trees.Add(CSharpSyntaxTree.ParseText(SourceText.From(originalSyntaxTree.RewriteTests().ToString(), Encoding.UTF8), parseOptions, fullPath));
                 continue;
             }
 
@@ -233,7 +233,7 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
             trees.Add(CSharpSyntaxTree.ParseText(text, parseOptions, fullPath));
         }
 
-        trees.Add(CSharpSyntaxTree.ParseText(SourceText.From(MSBuildTestrunner.AssemblyInfo, Encoding.UTF8), parseOptions, Path.Combine(SolutionDirectory, "AssemblyInfo.cs")));
+        trees.Add(CSharpSyntaxTree.ParseText(SourceText.From(Rewriter.AssemblyInfo, Encoding.UTF8), parseOptions, Path.Combine(SolutionDirectory, "AssemblyInfo.cs")));
 
         // The template's two placeholder files (in the shapes folder itself) are on the command line too, and we
         // leave them out. The rest are generated files, which we move to where MSBuild would have put them for
@@ -359,7 +359,7 @@ internal sealed partial class InMemoryCompiledTestRunner(Options options, Syntax
     {
         var reportPath = Path.Combine(runDirectory, "tests.xml");
         var assemblyPath = Path.Combine(runDirectory, $"{ProjectName}.dll");
-        MSBuildTestrunner.RunProcess("dotnet", $"exec \"{assemblyPath}\" -xml \"{reportPath}\" -noLogo -noColor", runDirectory);
+        ProcessRunner.Run("dotnet", $"exec \"{assemblyPath}\" -xml \"{reportPath}\" -noLogo -noColor", runDirectory);
         return TestRunParser.TestRunWithoutError(reportPath, originalSyntaxTree);
     }
 
